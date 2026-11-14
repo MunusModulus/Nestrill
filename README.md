@@ -1,6 +1,6 @@
 # Nestrill
 
-**Nestrill（ネストリル）**は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
+**Nestrill(ネストリル)**は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
 
 **[Nestrillをダウンロード（GitHub Releases）](https://github.com/MunusModulus/Nestrill/releases/latest)**
 
@@ -31,7 +31,7 @@ Node.js：[公式ダウンロードページ](https://nodejs.org/en/download/)
 
 Nestrillが起動中なら、PCのブラウザで **`http://127.0.0.1:8767/`** を直接開くこともできます。ブックマークしておくと便利です。**ブラウザを閉じるだけではNestrillのサーバーは終了しません。**
 
-Windowsサインイン時の自動起動は、**設定 → 一般** からON/OFFできます（初期OFF）。なお、設定のON/OFFは確認済みですが、再サインイン後の自動起動については未検証です。
+Windowsサインイン時の自動起動は、**設定 → 一般** からON/OFFできます（初期OFF）。
 
 インストール不要の **`Nestrill-v0.2.0-Portable.zip`** も公開しています。展開後、`Start-Nestrill.cmd` で起動できます。
 
@@ -65,4 +65,3 @@ Nestrillは **[MIT License](LICENSE)** で公開しています。Copyright (c) 
 
 第三者のアイコン等については [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) をご覧ください。RSS記事や外部サイトのコンテンツには、それぞれの権利者の条件が適用されます。
 
-開発・ビルド方法は [開発者向けREADME](README_SOURCE.md) を参照してください。更新内容は [リリースページ](https://github.com/MunusModulus/Nestrill/releases) に掲載しています。
