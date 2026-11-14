@@ -1,6 +1,6 @@
 # Nestrill
 
-**Nestrill(ネストリル)**は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
+Nestrill(ネストリル)は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
 
 **[Nestrillをダウンロード（GitHub Releases）](https://github.com/MunusModulus/Nestrill/releases/latest)**
 
