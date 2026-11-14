@@ -1,25 +1,68 @@
-# Nestrill v0.2.0 — ソースコード
+# Nestrill
 
-Nestrill本体（JavaScript・HTML・CSS・PowerShell起動スクリプト）と、Windows用の起動ランチャー／セットアップEXEのソース一式です。Nestrill本体は[MIT License](LICENSE)です。通常の利用方法は [app/README.md](app/README.md) を参照してください。
+**Nestrill（ネストリル）**は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
 
-## 構成
+**[Nestrillをダウンロード（GitHub Releases）](https://github.com/MunusModulus/Nestrill/releases/latest)**
 
-- `app/`: ポータブル配布版のソースとドキュメント。ランチャーバイナリとSHA-256マニフェストは配布ビルド時に生成します。
-- `setup/launcher.go`: 起動用 `Nestrill.exe` のソース（Go標準ライブラリのみ）。
-- `setup/setup.go`: WindowsセットアップEXEのソース。内部にビルドしたポータブルZIPとPowerShellスクリプトを埋め込みます。
-- `setup/installer.ps1`: インストール／アンインストール処理。
-- `BUILD_FROM_SOURCE.py`: ソースから配布ZIPとセットアップEXEを生成するビルドスクリプト。
+## 主な機能
 
-## ビルド方法
+- **RSSリーダー**：フィード登録、カテゴリ分け、記事の更新・既読管理・お気に入り、OPMLのインポート／エクスポート
+- **YouTube新着チェック**：登録チャンネルの公開Atomフィードを利用。Googleアカウントでのログインは不要
+- **AIセレクト（任意）**：関心リストなどをもとに、ローカルのOllamaで読みたい記事を探索
+- **表示カスタマイズ**：フォント、色、文字装飾、背景画像・動画、外観プリセット、複数プロファイル
+- **スマートフォン閲覧（追加設定が必要）**：同じWi-Fi内での閲覧や、任意のTailscale利用による外出先からのアクセス
 
-Go 1.23以上、Python 3.9以上が必要です（Node.js 22.16以上はアプリ実行時に必要）。
+## 動作環境
 
-```text
-python BUILD_FROM_SOURCE.py
-```
+- **Windows 11 x64**（主な動作確認環境）
+- **Node.js 22.16以上**（別途インストールが必要）
+- Webブラウザと、RSS等を取得するためのインターネット接続
 
-Windows用のEXEを生成するため、ビルドスクリプトは `GOOS=windows GOARCH=amd64 CGO_ENABLED=0` でGoを起動します。生成物は `dist/` に保存します。
+Node.js：[公式ダウンロードページ](https://nodejs.org/en/download/)
 
-ビルドに含まれるGo標準ライブラリのライセンスは `app/GO_LICENSE.txt`、Lucideなど第三者素材の表記は `app/THIRD_PARTY_NOTICES.md` を参照してください。
+**AIセレクトを利用しない場合、Ollamaは不要です。** 利用する場合はOllamaと対応モデルを別途準備してください。初期選択モデルは `gemma4:e4b-it-qat` ですが、モデルの同梱・自動ダウンロードは行いません。
 
-設定・履歴・認証情報・ログなどの利用データはソースZIPには収録していません。内部のコードコメントに過去の開発名が残る場合がありますが、ユーザー向けの起動名称はNestrillです。
+## インストールと起動
+
+1. [Releases](https://github.com/MunusModulus/Nestrill/releases/latest) から **`Nestrill-Setup-v0.2.0.zip`** をダウンロードします。
+2. ZIPを展開し、中の `Nestrill-Setup-v0.2.0.exe` を実行します。
+3. インストール後、Windowsの **スタート → すべてのアプリ → N → Nestrill** から起動します。ブラウザが自動で開きます。
+4. 終了するときは、同じN欄の **「Nestrill を終了」** を選びます。
+
+Nestrillが起動中なら、PCのブラウザで **`http://127.0.0.1:8767/`** を直接開くこともできます。ブックマークしておくと便利です。**ブラウザを閉じるだけではNestrillのサーバーは終了しません。**
+
+Windowsサインイン時の自動起動は、**設定 → 一般** からON/OFFできます（初期OFF）。なお、設定のON/OFFは確認済みですが、再サインイン後の自動起動については未検証です。
+
+インストール不要の **`Nestrill-v0.2.0-Portable.zip`** も公開しています。展開後、`Start-Nestrill.cmd` で起動できます。
+
+詳しい手順：[Windows導入ガイド](app/SETUP_WINDOWS.md) ／ [ポータブル版の説明](app/README.md)
+
+## スマートフォンで使う
+
+同じWi-Fi内のスマートフォンから閲覧できます。外出先から使う場合は、利用者が別途設定したTailscaleを利用する方法もあります。
+
+**TailscaleはNestrillとは無関係の第三者サービスです。** 導入・アカウント管理・接続権限・セキュリティ設定は、利用者自身の判断と責任で行ってください。Tailscaleの利用は必須ではありません。
+
+接続方法や停止・解除手順は [スマートフォン接続ガイド](app/MOBILE_SETUP.md) をご確認ください。安易なルーターのポート開放は行わないでください。
+
+## データとアンインストールについて
+
+Windowsの「設定 → アプリ → インストールされているアプリ」からアンインストールできます。
+
+**インストール版をアンインストールすると、そのインストール先に保存されたRSS・YouTube登録、設定、閲覧履歴などの利用データも削除されます。** 必要なデータがある場合は、事前にバックアップしてください。
+
+ポータブル版の利用データは、展開先フォルダ内に保存されます。
+
+## ご利用上の注意
+
+- セットアップEXEにはコード署名がありません。ダウンロード元を確認し、必要に応じてリリース添付の `SHA256SUMS.txt` と照合してください。
+- RSS・YouTube・外部記事の取得やAIセレクトの候補探索ではインターネット通信が発生します。AIセレクトのモデル推論は利用者のローカルOllamaで行います。
+- すべてのWindows環境やネットワーク構成での動作を保証するものではありません。
+
+## ソースコード・ライセンス
+
+Nestrillは **[MIT License](LICENSE)** で公開しています。Copyright (c) 2026 Munus Modulus.
+
+第三者のアイコン等については [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) をご覧ください。RSS記事や外部サイトのコンテンツには、それぞれの権利者の条件が適用されます。
+
+開発・ビルド方法は [開発者向けREADME](README_SOURCE.md) を参照してください。更新内容は [リリースページ](https://github.com/MunusModulus/Nestrill/releases) に掲載しています。
