@@ -1,0 +1,755 @@
+:root{color-scheme:light;--line:#e6e9ed;--muted:#778395;--accent:#4c82c6;--sidebar-width:245px}*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:Meiryo,'Yu Gothic',system-ui,sans-serif;background:#f7f8fa;color:#253148;font-size:13px}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.hidden{display:none!important}.app-shell{height:100dvh;display:flex;flex-direction:column}.topbar{height:53px;min-height:53px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:6;position:relative}.brand{display:flex;align-items:center;gap:7px;font-size:19px;letter-spacing:-.7px;font-weight:750;color:#263c59}.brand-icon{color:var(--accent);font-size:24px}.brand-sub{font-size:9px;color:#a5acb8;font-weight:600;letter-spacing:1.1px;margin-left:8px}.top-actions{display:flex;gap:12px;align-items:center}.top-button,.icon-button{background:none;border:none;color:#677485;padding:7px 9px;border-radius:6px}.top-button:hover,.icon-button:hover{background:#f0f3f7}.update-indicator{font-size:11px;color:var(--muted)}.workspace{display:flex;min-height:0;flex:1;position:relative;background:#edf0f5;background-size:cover;background-position:center;isolation:isolate}.workspace::before,.workspace::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1}.workspace::before{background-image:var(--shared-image,none);background-position:var(--shared-position,center);background-size:cover;opacity:var(--shared-image-opacity,1)}.workspace::after{background:var(--shared-tint,#edf0f5)}.sidebar,.main-pane{position:relative;min-height:0;overflow:auto;isolation:isolate;background:transparent}.sidebar::before,.sidebar::after,.main-pane::before,.main-pane::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1}.sidebar::before,.main-pane::before{background-size:cover;background-position:var(--pane-image-position,center);background-image:var(--pane-image,none);opacity:var(--pane-image-opacity,1)}.sidebar::after,.main-pane::after{background:var(--pane-tint,rgba(255,255,255,.95))}.sidebar{width:var(--sidebar-width);min-width:175px;max-width:42vw;flex:none;font-size:var(--left-size,13px);font-family:var(--left-font,Meiryo,sans-serif);color:var(--left-color,#273349);-webkit-text-stroke:var(--left-stroke,0px) var(--left-stroke-color,#000);paint-order:stroke fill;text-shadow:var(--left-shadow,none)}.sidebar .pane-inner{padding:23px 12px 18px 17px;min-height:100%;display:flex;flex-direction:column}.sidebar-title{padding:0 11px 13px;font-weight:750;letter-spacing:.03em;font-size:14px}.nav-item{border-radius:5px;display:flex;align-items:center;gap:9px;min-height:35px;padding:6px 10px;cursor:pointer;user-select:none;line-height:1.4}.nav-item:hover,.feed-nav:hover{background:#7186a01a}.nav-item.active,.feed-nav.active{background:#4c82c61d;color:#276cae;font-weight:700}.nav-symbol{width:19px;text-align:center;opacity:.85;font-size:16px}.count{font-size:11px;margin-left:auto;background:#ffffff65;color:inherit;border-radius:10px;padding:1px 6px;font-weight:500}.sidebar-heading{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:750;color:inherit;opacity:.75;letter-spacing:.02em;padding:24px 10px 10px}.tiny-button{border:0;background:transparent;color:inherit;border-radius:4px;font-size:19px;line-height:18px}.tiny-button:hover{background:#80808027}.cat-head{display:flex;align-items:center;gap:5px}.cat-head .nav-item{flex:1;min-width:0}.cat-head .cat-more{background:none;border:0;opacity:.45;color:inherit;cursor:pointer;padding:4px 3px}.cat-head:hover .cat-more{opacity:1}.cat-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-nav{border-radius:4px;min-height:29px;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 9px 5px 32px;font-size:.92em;color:inherit;opacity:.9}.feed-nav .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.feed-nav .count{background:transparent}.feed-manage{background:transparent;border:0;color:inherit;opacity:0;padding:2px 3px}.feed-nav:hover .feed-manage,.feed-manage:focus{opacity:.85}.sidebar-bottom{margin-top:auto;padding:32px 8px 8px;display:flex;flex-direction:column;gap:8px}.sidebar-action{border:1px solid #d9e4f1;border-radius:7px;background:#eaf2fd;color:#326da9;padding:9px;font-weight:650;text-align:left}.sidebar-action.secondary{background:#ffffff7f;color:#60748b;border-color:#dde3eb}.sidebar-action:hover{filter:brightness(.97)}.splitter{width:5px;flex:none;cursor:col-resize;position:relative;background:#a3b2c528;z-index:2}.splitter:hover{background:#83a6da77}.main-pane{flex:1;min-width:0;font-family:var(--right-font,Meiryo,sans-serif);font-size:var(--right-size,14px);color:var(--right-color,#223148);-webkit-text-stroke:var(--right-stroke,0px) var(--right-stroke-color,#000);paint-order:stroke fill;text-shadow:var(--right-shadow,none)}.main-pane>.pane-inner{min-height:100%;padding:25px clamp(16px,2.5vw,40px) 55px}.feed-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid #8d9aab36}.toolbar-heading{display:flex;align-items:baseline;gap:13px;white-space:nowrap}.toolbar-heading h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.04em}.toolbar-heading span{font-size:11px;opacity:.65}.toolbar-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.search-box{display:flex;align-items:center;gap:5px;border:1px solid #a8b2c066;border-radius:6px;background:#ffffffb2;padding:6px 9px;width:min(200px,30vw)}.search-box span{font-size:19px;color:#8b96a7;line-height:15px}.search-box input{border:0;background:transparent;width:100%;outline:0;color:inherit;font-size:12px}.toolbar-controls select{background:#ffffffa8;border:1px solid #a8b2c066;color:#455469;border-radius:6px;padding:6px;font-size:11px}.view-toggle{display:flex;border:1px solid #a8b2c077;border-radius:6px;overflow:hidden}.view-toggle button{width:31px;height:29px;border:0;background:#ffffff88;color:#748196;font-size:15px}.view-toggle button.selected{background:#dce9f9;color:#3976ba}.toolbar-link{background:transparent;border:0;color:#738298;font-size:11px;white-space:nowrap}.toolbar-link:hover{color:#2f74bd}.article-row{border-bottom:1px solid #8192a51f;display:flex;align-items:center;gap:12px;position:relative}.article-row:hover{background:#7796c00e}.article-row.unread .article-title{font-weight:720}.article-row.read{opacity:.63}.article-row .article-main{flex:1;min-width:0;text-decoration:none;color:inherit;cursor:pointer}.article-row .article-main:focus-visible{outline:2px solid #4c82c6}.article-source{font-size:11px;min-width:110px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.72}.article-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.article-excerpt-inline{font-size:.88em;opacity:.48;font-weight:400}.article-time{flex:none;font-size:11px;opacity:.55;width:63px;text-align:right}.star-button{border:0;background:none;color:#b7bfca;font-size:19px;line-height:1;cursor:pointer;padding:3px 5px;flex:none}.star-button.active{color:#d9a72a}.star-button:hover{color:#ce9d22}.article-list.list .article-row{min-height:32px;padding:3px 8px}.article-list.list .article-main{display:flex;align-items:center;gap:14px}.article-list.list .article-title{font-size:.97em}.article-list.list .article-excerpt-inline{padding-left:8px}.article-list.magazine .article-row{align-items:flex-start;min-height:105px;padding:14px 8px;gap:13px}.article-list.magazine .article-main{display:flex;align-items:flex-start;gap:16px}.thumb{height:72px;width:120px;flex:none;object-fit:cover;border-radius:5px;background:#93a6b621}.no-thumb{display:flex;align-items:center;justify-content:center;color:#b2bfcb;font-size:22px}.magazine-copy{min-width:0;flex:1}.magazine-copy .article-title{white-space:normal;line-height:1.5;font-size:1.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.magazine-copy .article-source{display:inline-block;margin:5px 0 4px;max-width:100%;font-size:11px}.article-excerpt{font-size:.88em;opacity:.62;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.feed-summary{font-size:12px;opacity:.65;padding:13px 6px 5px}.empty-state{padding:65px 20px;text-align:center;color:#7e8b9b;line-height:2}.empty-state h2{font-size:17px;color:#526479;font-weight:650}.primary-button{border:0;border-radius:7px;background:#497fbf;color:#fff;padding:10px 16px;font-weight:650}.primary-button:hover{background:#346ea9}.secondary-button{border:1px solid #d5dde8;border-radius:7px;background:#fff;color:#617186;padding:9px 14px}.more-button{display:block;margin:22px auto;background:transparent;border:1px solid #c4cdd9;border-radius:7px;padding:10px 24px;color:#69829f}.status-message{text-align:center;padding:12px;color:#8897a8;font-size:11px;min-height:20px}.dialog-overlay{position:fixed;inset:0;background:#17253d83;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.dialog{background:#fff;border-radius:13px;box-shadow:0 20px 70px #11203855;width:min(620px,100%);max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;color:#243149}.dialog-header{display:flex;align-items:center;justify-content:space-between;padding:15px 21px;border-bottom:1px solid #e4e8ed}.dialog-header h2{margin:0;font-size:17px}.dialog-body{padding:20px 22px 24px;overflow:auto}.form-field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}.form-field label{font-size:12px;font-weight:700}.form-field input:not([type=color]):not([type=range]),.form-field select{border:1px solid #d3dce8;background:#fff;color:#243149;border-radius:6px;padding:10px;width:100%}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap}.help{font-size:11px;color:#778598;line-height:1.65}.settings-tabs{display:flex;gap:4px;border-bottom:1px solid #e7eaef;margin:-5px 0 18px}.settings-tabs button{border:none;background:transparent;padding:9px 13px;color:#7c8a9b;border-bottom:2px solid transparent}.settings-tabs button.active{border-bottom-color:#397cce;color:#326da9;font-weight:700}.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px}.color-field{display:flex;align-items:center;gap:10px}.color-field input[type=color]{height:32px;width:48px;border:1px solid #d4dfeb;padding:1px;background:white;border-radius:5px;cursor:pointer}.range-line{display:flex;align-items:center;gap:10px}.range-line input{flex:1;accent-color:#3f7fc9}.range-line output{font-size:11px;min-width:40px;color:#64728a;text-align:right}.settings-preview{margin:8px 0;padding:18px;border:1px solid #d0d9e3;border-radius:8px;background:linear-gradient(120deg,#a2b2c6,#d6dfe8);min-height:100px;overflow:hidden}.preview-text{padding:13px;border-radius:6px}.preview-text strong{display:block;margin-bottom:8px}.preview-text small{display:block}.small-button{padding:8px 12px;border-radius:6px;border:1px solid #d6dfeb;background:white;color:#56708c}.checkbox-label{display:flex;gap:7px;align-items:center;font-size:12px;margin:7px 0}.mobile-only{display:none}.mobile-scrim{display:none}
+@media(max-width:1100px){.toolbar-heading h1{font-size:18px}.toolbar-controls{width:100%}.feed-toolbar{align-items:start}.article-list.list .article-excerpt-inline{display:none}}
+@media(max-width:700px){.mobile-only{display:inline-flex}.desktop-only,.brand-sub{display:none}.topbar{height:48px;min-height:48px;padding:0 11px}.brand{font-size:17px}.sidebar{position:fixed;left:0;top:48px;bottom:0;width:min(82vw,300px)!important;max-width:none;z-index:10;transform:translateX(-103%);transition:transform .2s}.sidebar.open{transform:translateX(0)}.mobile-scrim{display:block;position:fixed;inset:48px 0 0;z-index:9;background:#10233a60}.splitter{display:none}.main-pane>.pane-inner{padding:19px 12px 45px}.toolbar-controls{gap:6px}.search-box{width:min(100%,175px)}.toolbar-link{font-size:10px}.article-list.list .article-row{gap:4px;padding:8px 3px;min-height:45px}.article-list.list .article-main{display:block}.article-list.list .article-source{display:block;margin-bottom:4px;max-width:none}.article-list.list .article-time{width:45px;font-size:10px}.article-list.magazine .article-row{gap:6px;padding:12px 2px;min-height:93px}.article-list.magazine .article-main{gap:10px}.thumb{width:92px;height:66px}.magazine-copy .article-title{font-size:12px}.article-list.magazine .article-time{width:40px;font-size:9px}.article-excerpt{-webkit-line-clamp:1}.article-list.magazine .star-button{font-size:16px;padding:2px}.settings-grid{grid-template-columns:1fr}.dialog-body{padding:18px}.update-indicator{display:none}}
+
+/* Nestrill brand: Lucide bird emblem */
+.brand-icon {display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; padding:3px; border-radius:7px; background:#233752; flex:none;}
+.brand-icon img {display:block; width:24px; height:24px;}
+
+/* Magazine thumbnail fallback: source favicons are contained rather than cropped. */
+.article-list.magazine .favicon-thumb{object-fit:contain;padding:13px;background:#e8edf3}
+.article-list.magazine .placeholder-thumb{object-fit:contain;background:#e8edf3}
+.placeholder-setting{border:1px solid #e0e6ee;border-radius:9px;padding:13px;margin:14px 0;display:grid;grid-template-columns:120px 1fr;gap:5px 15px;align-items:center}
+.placeholder-setting strong{grid-column:1/-1;font-size:12px}
+.placeholder-sample{grid-row:2/4;width:120px;height:72px;background:#e8edf3;border-radius:6px;object-fit:contain}
+.placeholder-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.placeholder-controls input[type=file]{font-size:11px;max-width:280px}
+@media(max-width:700px){.placeholder-setting{grid-template-columns:92px 1fr}.placeholder-sample{width:92px;height:66px}}
+
+/* Nestrill v0.2.0 — media backgrounds and article appearance. */
+.workspace::before,.workspace::after,.sidebar::before,.sidebar::after,.main-pane::before,.main-pane::after{display:none}
+.workspace{isolation:isolate;overflow:hidden}
+.workspace>.wallpaper-layer{z-index:0}
+.sidebar,.main-pane{z-index:1;isolation:isolate}
+.sidebar>.wallpaper-layer,.main-pane>.wallpaper-layer{z-index:-1}
+.wallpaper-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.wallpaper-media{position:absolute;inset:-48px;will-change:filter;}
+.wallpaper-tint{position:absolute;inset:0}
+.wallpaper-image,.wallpaper-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.wallpaper-image{background-position:center;background-repeat:no-repeat;background-size:cover}
+.wallpaper-video{display:none}
+.main-pane .article-row{border-bottom:0!important;isolation:isolate}
+.article-row::before{content:'';position:absolute;inset:0;background:var(--stripe-odd,transparent);z-index:-1;pointer-events:none}
+.article-row:nth-child(even)::before{background:var(--stripe-even,transparent)}
+.article-row:hover::before{background:var(--stripe-hover,rgba(214,230,250,.35))}
+.article-row::after{content:'';position:absolute;bottom:0;left:var(--sep-list-inset,0px);right:var(--sep-list-inset,0px);border-bottom:var(--sep-list-border,1px solid #8192a52e);pointer-events:none}
+.article-list.magazine .article-row::after{left:var(--sep-magazine-inset,0px);right:var(--sep-magazine-inset,0px);border-bottom:var(--sep-magazine-border,1px solid #8192a52e)}
+.article-list.list .article-row{padding-top:calc(3px + var(--sep-list-spacing,0px));padding-bottom:calc(3px + var(--sep-list-spacing,0px))}
+.article-list.magazine .article-row{padding-top:calc(14px + var(--sep-magazine-spacing,0px));padding-bottom:calc(14px + var(--sep-magazine-spacing,0px))}
+.main-pane .article-source{font-family:var(--article-source-font,Meiryo,sans-serif);font-weight:var(--article-source-weight,400);font-size:var(--article-source-size,11px);color:var(--article-source-color,#65758a);-webkit-text-stroke:var(--article-source-stroke,0px) var(--article-source-stroke-color,#000);paint-order:stroke fill;text-shadow:var(--article-source-shadow,none);opacity:1}
+.main-pane .article-title,.main-pane .magazine-copy .article-title{font-family:var(--article-title-font,Meiryo,sans-serif);font-weight:var(--article-title-weight,650);font-size:var(--article-title-size,14px);color:var(--article-title-color,#223148);-webkit-text-stroke:var(--article-title-stroke,0px) var(--article-title-stroke-color,#000);paint-order:stroke fill;text-shadow:var(--article-title-shadow,none)}
+.main-pane .article-excerpt,.main-pane .article-excerpt-inline{font-family:var(--article-excerpt-font,Meiryo,sans-serif);font-weight:var(--article-excerpt-weight,400);font-size:var(--article-excerpt-size,12px);color:var(--article-excerpt-color,#64748b);-webkit-text-stroke:var(--article-excerpt-stroke,0px) var(--article-excerpt-stroke-color,#000);paint-order:stroke fill;text-shadow:var(--article-excerpt-shadow,none);opacity:1}
+.article-row.read{opacity:1}
+.article-row.read .article-main,.article-row.read .article-time{opacity:.67}
+.article-row.unread .article-title{font-weight:var(--article-title-weight,650)}
+.settings-tabs{flex-wrap:wrap;row-gap:3px}
+.font-card{border:1px solid #dce5ed;border-radius:8px;margin:8px 0;padding:8px 12px;background:#fcfdff}
+.font-card summary{font-size:13px;font-weight:700;cursor:pointer;padding:5px 0}
+.font-card[open] summary{margin-bottom:12px}
+.dialog h3{font-size:14px;margin:17px 0 10px}
+.dialog .settings-grid input[type=text]{max-width:100%}
+@media(max-width:700px){.article-list.magazine .article-row{padding-top:calc(12px + var(--sep-magazine-spacing,0px));padding-bottom:calc(12px + var(--sep-magazine-spacing,0px))}}
+.main-pane .article-list.list .article-title{font-size:var(--article-title-size,14px)}
+
+/* v0.2.0a: folder picker and visible save errors */
+.folder-input-row{display:flex;align-items:stretch;gap:8px;min-width:0}.folder-input-row input{min-width:0;flex:1}.folder-input-row button{flex:none;white-space:nowrap}.settings-error:not([hidden]){background:#fff1f1;border:1px solid #e8a3a3;border-radius:7px;color:#8e2727;padding:10px 12px;margin-top:14px;font-size:12px;line-height:1.6}.form-actions button:disabled{opacity:.62;cursor:wait}@media(max-width:500px){.folder-input-row{gap:5px}.folder-input-row button{padding:8px}}
+
+/* v0.2.0b — font selection and shared-background link */
+.font-picker{display:flex;flex-direction:column;gap:7px;min-width:0}
+.font-picker .font-search{width:100%}
+.font-picker .font-chooser{max-width:100%;min-width:0}
+.font-sample{min-height:40px;padding:9px 10px;border:1px solid #dce5ed;border-radius:6px;background:#f5f8fb;color:#253449;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.linked-background-note{background:#eaf3ff;border:1px solid #c4d9f4;border-radius:7px;padding:11px 13px;color:#35577e;font-size:12px;line-height:1.6;margin:12px 0}
+
+
+/* Nestrill v0.2.0c — one continuous shared media layer behind the header. */
+:root{--header-height:53px}
+.app-shell{position:relative;isolation:isolate;background:#edf0f5;overflow:hidden}
+.app-shell>.wallpaper-layer{z-index:0;top:var(--shared-wallpaper-top,var(--header-height));bottom:0}
+.workspace{z-index:1;background:transparent}
+.topbar{z-index:6;flex:none;color:var(--header-text-color,#263c59)}
+.topbar .brand{color:var(--header-text-color,#263c59)}
+.topbar .brand-sub,.topbar .top-button,.topbar .icon-button,.topbar .update-indicator{color:var(--header-text-color,#263c59)}
+.topbar .top-button:hover,.topbar .icon-button:hover{background:rgba(128,144,166,.16)}
+.header-settings{border:1px solid #dce5ed;border-radius:8px;background:#f8fafc;padding:10px 12px;margin:12px 0 18px}
+.header-settings h3{margin:0 0 10px}
+.header-settings .help{margin:6px 0 12px}
+@media(max-width:700px){:root{--header-height:48px}}
+
+/* v0.2.0d - independent appearance presets and source profiles */
+.profile-bar{border:1px solid #99a9bd55;border-radius:7px;padding:8px 9px;margin:0 1px 15px;background:#fff7;position:relative;z-index:1}
+.profile-bar label{font-size:10px;display:block;margin-bottom:5px;opacity:.75;font-weight:700}.profile-line{display:flex;gap:5px;align-items:center}
+.profile-line select{min-width:0;flex:1;width:100%;padding:6px 4px;background:#fff9;border:1px solid #a1b4c277;border-radius:5px;color:#263c59;font-size:12px}
+.profile-line button{font-size:15px;padding:4px 7px;border:1px solid #a1b4c277;border-radius:5px;background:#fffb;color:#375778}
+.management-list{display:flex;flex-direction:column;gap:7px;margin:14px 0;max-height:48vh;overflow:auto}.management-row{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid #e0e6ee;border-radius:8px;padding:10px;flex-wrap:wrap;background:#f8fafe}.management-name{display:flex;flex-direction:column;gap:3px;min-width:120px;flex:1}.management-name small{color:#6c7d91;font-size:11px}.management-actions{display:flex;gap:5px;flex-wrap:wrap}.management-actions button{padding:5px 9px;font-size:11px}.management-list+.form-field{margin-top:18px}
+@media(max-width:700px){.top-actions{gap:2px}.top-button{padding:6px}.management-row{align-items:flex-start}.management-actions{width:100%}}
+
+/* v0.2.0e — feed autodiscovery and editable subscription metadata */
+.feed-discovery{margin:-5px 0 15px}
+.discovery-line{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.discovery-line .help{flex:1}
+.discovery-message{font-size:12px;line-height:1.6;color:#345e81;margin:10px 0;background:#eaf4ff;border:1px solid #c5dbf2;border-radius:6px;padding:9px 11px}
+.discovery-message[hidden]{display:none}
+.discovery-message.inline-error{color:#8d2929;background:#fff1f1;border-color:#eab6b6}
+.discovery-results{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.discovered-item{display:flex;gap:11px;align-items:flex-start;cursor:pointer;border:1px solid #d8e3ee;border-radius:7px;padding:10px;background:#f9fbfd;min-width:0}
+.discovered-item:has(input:checked){border-color:#6f9dce;background:#eaf3fc}
+.discovered-item input{margin:4px 0 0;flex:none;accent-color:#467ebc}
+.discovered-item span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.discovered-item strong{font-size:12px;font-weight:650;overflow-wrap:anywhere}
+.discovered-item small{font-size:11px;color:#647790;overflow-wrap:anywhere}
+
+/* v0.2.0f — filled RSS display name + source-name reset */
+.feed-display-helpers{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;flex-wrap:wrap}
+.feed-display-status{font-size:11px;color:#6c7d91}
+.feed-name-reset{font-size:11px!important;padding:5px 8px!important}
+.feed-name-reset:disabled{opacity:.48;cursor:default}
+
+/* Stealth entry: the 's' must look and behave visually like ordinary logo text.
+   No hover color, title tooltip, focus outline or active badge; pointer cursor only. */
+.brand-word{display:inline-flex;align-items:center;letter-spacing:inherit;gap:0;user-select:none;-webkit-user-select:none}
+#brand-s{display:inline;font:inherit;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* Secret-mode navigation is intentionally not advertised in the profile selector. */
+.secret-active .profile-bar{display:none!important}
+.secret-preset-default{margin-top:13px;border-top:1px solid #e8eaf0;padding-top:12px}
+
+/* Category-management errors are displayed INSIDE the dialog, not behind its overlay. */
+.category-delete-feedback:not([hidden]){display:block;margin:12px 0 4px;padding:11px 13px;border-radius:7px;border:1px solid #d99494;background:#fff0f0;color:#8b2431;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+
+/* v0.2.0r — compact sidebar rail. The user's custom expanded width is retained. */
+.sidebar-title{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.sidebar-fold-button{border:0;background:transparent;color:#536b86;font-size:25px;font-weight:800;line-height:24px;min-width:28px;height:29px;cursor:pointer;border-radius:5px;opacity:.98}
+.sidebar-fold-button:hover,.sidebar-fold-button:focus-visible{background:#708eaa28;opacity:1}
+.sidebar-rail{display:none;min-height:100%;padding:18px 5px 14px;flex-direction:column;align-items:stretch;gap:9px}
+.rail-button{height:38px;min-width:0;width:100%;display:flex;align-items:center;justify-content:center;flex:none;border:0;border-radius:7px;background:transparent;color:inherit;font-family:inherit;font-size:20px;cursor:pointer;opacity:.84}
+.rail-button:hover,.rail-button:focus-visible{background:#7186a029;opacity:1}
+.rail-button.active{background:#4c82c627;color:#276cae;font-weight:700;opacity:1}
+.rail-expand{font-size:27px;margin-bottom:17px}
+.rail-button#rail-feeds{margin-top:8px}
+@media(min-width:701px){
+  .nestrill-sidebar-collapsed .sidebar{width:52px!important;min-width:52px!important;max-width:52px!important}
+  .nestrill-sidebar-collapsed .sidebar>.pane-inner{display:none!important}
+  .nestrill-sidebar-collapsed .sidebar>.sidebar-rail{display:flex}
+  .nestrill-sidebar-collapsed .splitter{cursor:default}
+}
+@media(max-width:700px){
+  .sidebar-fold-button,.sidebar-rail{display:none!important}
+  .sidebar>.pane-inner{display:flex!important}
+}
+
+
+/* v0.2.0s — low-profile source/account UI. RSS is unchanged. */
+.source-nav{margin:9px 0 11px;border-top:1px solid #aebdce70;padding-top:7px}
+.source-heading{margin:2px 0 3px!important}
+.source-nav-group{display:flex;align-items:center;gap:3px;min-width:0;margin:4px 0 2px}
+.source-nav-heading{flex:1;min-width:0;display:flex;align-items:center;gap:7px;border:0;background:transparent;border-radius:6px;text-align:left;padding:7px 9px;font-size:12px;font-weight:650;color:inherit;cursor:pointer}
+.source-nav-heading span{font-size:13px;opacity:.8}.source-nav-heading small{margin-left:auto;opacity:.6;font-size:10px}
+.source-nav-heading:hover,.source-nav-heading.active,.source-account-item.active{background:#8caed038}
+.source-add{width:26px;height:26px;flex:none;border:1px solid #a4b5c677;background:#fff8;border-radius:6px;color:inherit;cursor:pointer}
+.source-account-list{margin:0 0 5px 15px}
+.source-account-item{display:flex;align-items:center;border-radius:5px;margin:1px 0;min-width:0}
+.source-account-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:transparent;border:0;text-align:left;color:inherit;padding:6px 5px;font-size:11px;cursor:pointer}
+.source-account-more{border:0;background:transparent;color:inherit;opacity:.65;padding:5px 7px;cursor:pointer}
+.source-nav button:focus-visible,.source-account-tabs button:focus-visible{outline:2px solid #679ddd;outline-offset:1px}
+.source-panel{padding:10px 2px;min-width:0}
+.source-panel-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px}
+.source-pending{font-size:10px;letter-spacing:.01em;color:#687c92;border:1px solid #a8b8c7;border-radius:999px;padding:3px 9px;background:#eef2f7}
+.source-panel-note{font-size:12px;line-height:1.65;color:var(--article-excerpt-color,#61748d);margin:10px 0 14px}
+.source-account-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 15px}
+.source-account-tab{border:1px solid #b9c6d4;border-radius:6px;background:#fff9;color:#2f4b66;padding:6px 10px;cursor:pointer;font-size:11px}
+.source-account-tab.active{border-color:#6795c0;background:#d6e8fa}
+.source-account-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 13px;border:1px solid #b4c2d099;border-radius:8px;background:#ffffffba;margin:7px 0;font-size:12px}
+.source-account-card strong{overflow-wrap:anywhere}.source-account-card .source-panel-note{flex-basis:100%;margin:0}.source-account-card button{font-size:11px;padding:6px 9px;margin-left:auto}
+.source-panel-empty{font-size:12px;line-height:1.65;color:#61748d;padding:14px;border:1px dashed #b0bfce;border-radius:8px}
+.nestrill-sidebar-collapsed .source-nav{display:none}
+
+/* v0.2.0t — YouTube account and video view */
+.youtube-toolbar,.youtube-account-actions{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.youtube-toolbar{margin:9px 0 4px}.youtube-toolbar button,.youtube-account-actions button{font-size:11px;padding:7px 9px;min-height:30px}
+.youtube-account-status{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.youtube-account-status .source-panel-note,.youtube-account-status .youtube-sync-error{width:100%;flex-basis:100%;margin:0}
+.youtube-sync-error{font-size:11px;color:#a43737;overflow-wrap:anywhere}
+.youtube-list-header{font-size:12px;font-weight:700;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #9caec266}
+.youtube-video-list{display:flex;flex-direction:column;gap:7px}
+.youtube-video-row{border-bottom:1px solid #a7b5c344;padding:6px 0 9px}
+.youtube-video-link{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit}
+.youtube-video-link:hover strong{text-decoration:underline}
+.youtube-video-thumb{width:128px;height:72px;object-fit:cover;flex:none;border-radius:5px;background:#dae1e7}
+.youtube-video-text{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px;font-size:12px}
+.youtube-video-text strong{font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.youtube-video-text span,.youtube-video-text small{color:var(--article-excerpt-color,#687c92);font-size:11px}
+@media(max-width:600px){.youtube-video-thumb{width:96px;height:54px}.youtube-video-link{gap:8px}.youtube-video-text strong{font-size:12px}}
+
+/* v0.2.0u — Takeout CSV preview and manual subscription management */
+.youtube-diff-list{max-height:230px;overflow:auto;margin:9px 0 13px;padding:6px 10px;border:1px solid #b4c2d088;border-radius:7px;background:#f9fbfceb;font-size:11px;line-height:1.55}
+.youtube-diff-list>div{padding:5px 0;border-bottom:1px solid #c9d5e042;overflow-wrap:anywhere}
+.youtube-diff-list>div:last-child{border-bottom:0}
+.youtube-diff-checkbox{display:flex;align-items:flex-start;gap:9px;padding:5px 2px;cursor:pointer;overflow-wrap:anywhere}
+.youtube-diff-checkbox input{flex:none;margin-top:3px;accent-color:#437eb7}
+.youtube-channel-row{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
+.youtube-channel-row>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.youtube-channel-row button{flex:none;font-size:11px;padding:5px 8px}
+
+
+/* v0.2.0u2 — grouped YouTube account controls (UI only; no data changes). */
+.source-panel{container-type:inline-size}
+.youtube-account-card{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:13px 15px}
+.youtube-account-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;min-width:0}
+.youtube-account-heading{display:flex;align-items:center;flex-wrap:wrap;gap:9px;min-width:0}
+.youtube-account-title{font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.youtube-account-card .source-panel-note.youtube-account-meta{width:100%;flex-basis:auto;margin:0;line-height:1.5}
+.youtube-account-card .youtube-sync-error{width:100%;flex-basis:auto;margin:0}
+.youtube-account-card button{margin-left:0}
+.youtube-account-card .youtube-account-settings{flex:none;margin-left:0;padding:5px 10px;font-size:11px;color:#60748b;background:#ffffffa8;border-color:#cfd9e5}
+.youtube-account-card .youtube-account-settings:hover{background:#edf3f9;color:#355f87}
+.youtube-account-card .youtube-account-actions{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:8px 12px;width:100%;padding-top:11px;border-top:1px solid #b6c7d654}
+.youtube-account-card .youtube-action-group{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.youtube-account-card .youtube-account-actions button{flex:none;margin:0;min-height:31px;padding:6px 11px;white-space:normal;text-align:center}
+.youtube-account-card .youtube-account-actions .youtube-action-primary{background:#e9f2fd;border-color:#afc9e5;color:#2b659f;font-weight:650}
+.youtube-account-card .youtube-account-actions .youtube-action-primary:hover{background:#dcecfb}
+.youtube-account-card .youtube-account-actions .youtube-action-sync{margin-left:auto}
+.youtube-toolbar{justify-content:flex-start;align-items:center}
+.youtube-toolbar button{margin-left:0}
+@container (max-width:630px){
+ .youtube-account-card .youtube-account-actions .youtube-action-sync{margin-left:0}
+}
+@container (max-width:410px){
+ .youtube-account-card{padding:11px}
+ .youtube-account-card .youtube-account-actions{gap:7px}
+ .youtube-account-card .youtube-action-group{gap:7px}
+}
+
+/* v0.2.0u3 — YouTube channel drill-down, contained within existing sidebar */
+.youtube-account-nav{min-width:0}
+.youtube-account-nav .source-account-item{gap:1px}
+.source-account-toggle{border:0;background:transparent;color:inherit;cursor:pointer;font-size:16px;line-height:1;width:17px;min-width:17px;height:26px;padding:0;text-align:center;opacity:.85}
+.source-account-toggle:hover{background:#91b3d43b;border-radius:4px}
+.source-account-total{font-size:10px;color:var(--article-excerpt-color,#61748d);opacity:.7;flex:none}
+.youtube-channel-nav-list{margin:0 1px 7px 16px;padding-left:5px;border-left:1px solid #9cacc160;max-height:min(32vh,290px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.youtube-channel-nav{display:block;width:100%;min-width:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;text-align:left;border:0;background:transparent;border-radius:5px;color:inherit;padding:5px 5px 5px 9px;font-size:11px;cursor:pointer;line-height:1.45}
+.youtube-channel-nav:hover,.youtube-channel-nav.active{background:#8caed038}
+.youtube-channel-nav.active{font-weight:700}
+.youtube-channel-filter{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:9px 11px;border-radius:7px;background:#d9e7f05e;border:1px solid #abc2d577;margin:12px 0 3px;font-size:12px}
+.youtube-channel-filter span{font-weight:650;overflow-wrap:anywhere;min-width:0}
+.youtube-channel-filter button{margin-left:0;font-size:11px;padding:6px 10px}
+.source-nav button:focus-visible,.youtube-channel-nav:focus-visible,.source-account-toggle:focus-visible{outline:2px solid #679ddd;outline-offset:1px}
+.nestrill-sidebar-collapsed .youtube-channel-nav-list{display:none}
+
+
+/* v0.2.0u4: reading-first YouTube panel. Management stays available, but never occupies the video viewport by default. */
+.source-panel.youtube-compact-panel{padding:0 2px 8px}
+.youtube-compact-bar{display:flex;align-items:center;justify-content:space-between;gap:7px 12px;flex-wrap:wrap;min-width:0;padding:4px 0 7px;margin:0 0 5px;border-bottom:1px solid #9cacc154}
+.youtube-compact-context{display:flex;align-items:center;min-width:0;flex:1}
+.youtube-inline-tabs{display:flex;flex-wrap:nowrap;align-items:center;gap:5px;min-width:0;max-width:100%;overflow-x:auto;margin:0;padding:2px 0;scrollbar-width:thin}
+.youtube-inline-tabs .source-account-tab{flex:none;padding:5px 8px;min-height:28px;font-size:11px}
+.youtube-compact-actions{display:flex;align-items:center;gap:6px;flex:none;margin-left:auto}
+.youtube-compact-actions>.secondary-button,.youtube-compact-back{font-size:11px;padding:5px 9px;min-height:28px;margin:0}
+.youtube-compact-back{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.youtube-management-menu{position:relative;display:block;flex:none;min-width:0}
+.youtube-management-trigger{list-style:none;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;padding:5px 10px;min-height:28px;box-sizing:border-box;border:1px solid #b9c6d4;background:#fff9;border-radius:6px;color:#2f4b66;user-select:none;white-space:nowrap}
+.youtube-management-trigger::-webkit-details-marker{display:none}
+.youtube-management-menu[open] .youtube-management-trigger,.youtube-management-trigger:hover{background:#d6e8fa;border-color:#6795c0}
+.youtube-management-trigger:focus-visible,.youtube-management-popover button:focus-visible{outline:2px solid #679ddd;outline-offset:2px}
+.youtube-menu-warning{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:none;border-radius:50%;background:#f6e9c9;color:#7a4f16;font-size:10px;font-weight:800}
+.youtube-management-popover{position:absolute;top:calc(100% + 5px);right:0;z-index:60;width:min(350px,calc(100vw - 40px));max-height:min(65vh,510px);overflow:auto;overscroll-behavior:contain;box-sizing:border-box;padding:12px;border:1px solid #aebed0;border-radius:9px;background:var(--dialog-bg,#f8fafc);color:var(--text-color,#283d59);box-shadow:0 10px 30px #172a473b}
+.youtube-management-action{margin:0!important;padding:7px 9px!important;min-height:31px;font-size:11px!important;text-align:left;white-space:normal;border-radius:5px}
+.youtube-management-popover>.youtube-management-action{width:100%;text-align:center;font-weight:650;background:#e9f2fd}
+.youtube-management-account{margin-top:10px;padding-top:10px;border-top:1px solid #9cacc15e}
+.youtube-management-heading{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:12px}
+.youtube-management-heading span{font-size:10px;color:var(--article-excerpt-color,#61748d)}
+.youtube-management-meta,.youtube-management-hint{font-size:11px;line-height:1.5;color:var(--article-excerpt-color,#61748d);margin:5px 0 8px}
+.youtube-management-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.youtube-management-grid .youtube-management-action{max-width:100%;overflow-wrap:anywhere}
+.youtube-management-error{margin-top:9px;padding:5px 7px;border:1px solid #b7c4d280;border-radius:6px;color:#6c4e30;font-size:11px}
+.youtube-management-error summary{cursor:pointer}
+.youtube-management-error p{margin:5px 0 2px;line-height:1.5;overflow-wrap:anywhere;color:#8c4a3e}
+.youtube-loading-status{font-size:11px;color:var(--article-excerpt-color,#61748d);margin:7px 0}
+.youtube-setup-empty{margin-top:10px}
+.youtube-setup-empty p{margin:0 0 10px}
+.youtube-compact-panel .youtube-video-list{margin-top:0}
+@container (max-width:500px){
+ .youtube-compact-bar{align-items:flex-start}
+ .youtube-compact-actions{order:1;justify-content:flex-end;width:100%;margin-left:0}
+ .youtube-compact-context{order:2;flex:1 1 100%;width:100%}
+ .youtube-management-popover{width:min(350px,calc(100vw - 40px))}
+}
+
+/* v0.2.0u5 - selected channel in management and narrow group actions */
+.youtube-channel-row.youtube-channel-focus{background:#ffdd8845;outline:1px solid #d4a14a66;border-radius:5px}
+.youtube-channel-row{flex-wrap:wrap}
+.youtube-channel-row button{white-space:nowrap}
+.youtube-management-error .youtube-management-action{display:block;width:100%;margin-top:6px!important;text-align:left}
+@container (max-width:460px){.youtube-channel-row>span{flex-basis:100%}}
+
+/* v0.2.0u8 - visible scrollbar for YouTube channel lists (Chrome / Helium).
+   Scoped to this list only; no effect on page, RSS lists or scroll retention. */
+.youtube-channel-nav-list {
+  scrollbar-width: auto;
+  scrollbar-gutter: stable;
+}
+.youtube-channel-nav-list::-webkit-scrollbar {
+  width: 9px;
+}
+.youtube-channel-nav-list::-webkit-scrollbar-track {
+  background: rgba(113, 139, 169, 0.18);
+  border-radius: 8px;
+}
+.youtube-channel-nav-list::-webkit-scrollbar-thumb {
+  background: rgba(100, 126, 156, 0.80);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 8px;
+  min-height: 26px;
+}
+.youtube-channel-nav-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(72, 101, 135, 0.95);
+}
+
+/* v0.2.0u9 — a persistent, scoped position bar independent of OS overlay scrollbar fade-out. */
+.youtube-account-nav{position:relative}
+.youtube-channel-nav-list{
+  padding-right:12px;
+  scrollbar-width:none;
+  scrollbar-gutter:auto;
+}
+.youtube-channel-nav-list::-webkit-scrollbar{display:none;width:0}
+.youtube-persistent-scrollbar{
+  position:absolute;
+  right:2px;
+  width:8px;
+  box-sizing:border-box;
+  border-radius:7px;
+  background:rgba(93,120,153,.21);
+  z-index:1;
+  cursor:pointer;
+  touch-action:none;
+}
+.youtube-persistent-scrollbar[hidden]{display:none!important}
+.youtube-persistent-scrollbar-thumb{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  min-height:25px;
+  background:rgba(85,114,148,.78);
+  border-radius:7px;
+  box-shadow:inset 0 0 0 1px #ffffff55;
+  pointer-events:auto;
+}
+.youtube-persistent-scrollbar:hover .youtube-persistent-scrollbar-thumb,
+.youtube-persistent-scrollbar:focus-visible .youtube-persistent-scrollbar-thumb{
+  background:rgba(57,94,136,.94);
+}
+.youtube-persistent-scrollbar:focus-visible{outline:2px solid #679ddd;outline-offset:1px}
+.nestrill-sidebar-collapsed .youtube-persistent-scrollbar{display:none}
+
+/* Phase 5g: per-feed favicon; preserve old indentation when icons are OFF. */
+.feed-nav.has-feed-icon{padding-left:11px}
+.feed-nav .feed-icon{display:block;width:16px;height:16px;min-width:16px;flex:none;object-fit:contain;border-radius:3px;background:url('/bird.svg') center / contain no-repeat}
+
+/* Phase 5h: tint ONLY missing feed favicons; the Nestrill bird logo is unchanged. */
+.feed-nav .feed-icon-fallback{background:#718ba3;-webkit-mask:url('/bird.svg') center/contain no-repeat;mask:url('/bird.svg') center/contain no-repeat;border-radius:0}
+
+/* Phase 5i: mail placeholder temporarily hidden (data and handlers preserved). */
+#mail-source-nav, #mail-account-list, #rail-mail { display: none !important; }
+
+/* Phase 5j: compact navigation alignment, channel editing and small YouTube mark. */
+#nav-all,#nav-unread,#nav-starred,.cat-head .nav-item{gap:5px}
+.youtube-channel-nav-row{display:flex;align-items:center;gap:2px;min-width:0;border-radius:5px}
+.youtube-channel-nav-row .youtube-channel-nav{flex:1;width:auto;min-width:0}
+.youtube-channel-more{flex:none;border:0;background:transparent;color:inherit;opacity:.55;width:21px;height:25px;padding:0;border-radius:4px;font-size:16px;cursor:pointer}
+.youtube-channel-nav-row:hover .youtube-channel-more,.youtube-channel-more:focus-visible{opacity:1;background:#8caed038}
+.youtube-channel-more:focus-visible{outline:2px solid #679ddd;outline-offset:1px}
+.source-youtube-mark{display:inline-block;vertical-align:middle;position:relative;flex:none;width:16px;height:12px;border-radius:4px;background:#df4141;opacity:1!important}
+.source-youtube-mark::after{content:'';position:absolute;left:6px;top:3px;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:5px solid #fff}
+#rail-youtube .source-youtube-mark{width:17px;height:13px}
+#rail-youtube .source-youtube-mark::after{left:7px;top:3.5px}
+
+/* Phase 5l: YouTube group and channel indentation only. */
+#youtube-account-list{margin-left:11px}
+
+/* Next UI02: RSS category lists behave like YouTube channel groups.
+   The persistent rail is mounted only if content actually overflows. */
+.category-block{position:relative}
+.rss-feed-list{
+  max-height:min(35vh,300px);
+  overflow-y:auto;
+  overscroll-behavior:auto;
+  padding-right:12px;
+  scrollbar-width:none;
+}
+.rss-feed-list::-webkit-scrollbar{display:none;width:0}
+.rss-persistent-scrollbar{right:2px}
+
+/* Nestrill-Next AI D1: preview only */
+.ai-nav {border-top:1px solid #aebdce70;margin-top:12px;padding-top:3px}
+.ai-nav .sidebar-heading {padding-top:10px}
+.ai-nav-button {display:block;width:100%;border:0;background:transparent;text-align:left;color:inherit;border-radius:6px;padding:9px 12px;font-size:12px;cursor:pointer}
+.ai-nav-button:hover,.ai-nav-button.active{background:#4c82c61d;color:#276cae}
+.ai-preview-note{padding:13px 15px;margin:14px 0;background:#ffffffa0;border:1px solid #bac9d989;border-radius:8px;font-size:12px;line-height:1.8}
+.ai-preview-row{padding:14px 6px;border-bottom:1px solid #91a2b336}
+.ai-preview-row a{display:block;color:inherit;text-decoration:none;font-weight:650;line-height:1.6}
+.ai-preview-row a:hover{text-decoration:underline}
+.ai-preview-meta{font-size:11px;opacity:.7;margin-top:5px}
+.ai-preview-excerpt{font-size:12px;opacity:.78;line-height:1.6;margin-top:5px}
+.ai-preview-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.ai-interests-textarea{width:100%;min-height:138px;resize:vertical;padding:11px;border:1px solid #cdd8e6;border-radius:7px;background:#fff;color:#243149;font:inherit;line-height:1.6}
+.nestrill-sidebar-collapsed .ai-nav{display:none}
+
+/* AI D1 UI01: source thumbnail or favicon with the existing fallback artwork. */
+.ai-preview-row{display:flex;align-items:flex-start;gap:13px;min-width:0}
+.ai-preview-row .ai-preview-image{display:block;flex:0 0 104px;width:104px;height:64px;object-fit:cover;border-radius:5px;background:#93a6b621}
+.ai-preview-row .ai-preview-image.favicon-thumb{object-fit:contain;padding:13px;background:#e8edf3}
+.ai-preview-row .ai-preview-image.placeholder-thumb{object-fit:contain;background:#e8edf3}
+.ai-preview-text{min-width:0;flex:1}
+.ai-preview-text>a{overflow-wrap:anywhere}
+@media(max-width:700px){.ai-preview-row{gap:10px}.ai-preview-row .ai-preview-image{flex-basis:86px;width:86px;height:57px}}
+
+/* AI D2: feedback controls only; no model claim or 7:2:1 quota yet. */
+.ai-feedback-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px}
+.ai-feedback-actions button{font-size:10.5px;min-height:25px;padding:4px 8px;line-height:1.2;border-radius:6px}
+.ai-feedback-actions .ai-feedback-selected{border-color:#4773ba;background:#dce8fb;color:#1b437e;font-weight:700}
+.ai-comment-textarea{display:block;width:100%;min-height:125px;resize:vertical;padding:11px;border:1px solid #cdd8e6;border-radius:7px;background:#fff;color:#243149;font:inherit;line-height:1.6}
+
+/* D3 Fix02: lightweight progress with the existing compact Nestrill visual language. */
+.ai-progress-panel{margin:12px 0 8px;padding:10px 12px;border:1px solid #aebfd593;border-radius:7px;background:#ffffff75;color:inherit}
+.ai-progress-message{font-size:11px;line-height:1.55;color:#63748c}
+.ai-progress-track{height:5px;border-radius:6px;overflow:hidden;margin-top:7px;background:#bdcddd70}
+.ai-progress-fill{height:100%;width:0;background:#4c82c6;transition:width .2s ease}
+@media (prefers-reduced-motion:reduce){.ai-progress-fill{transition:none}}
+
+
+/* D3 Fix04: wider settings-only dialog; keep all seven settings tabs in one row.
+   On smaller viewports the tab strip scrolls horizontally instead of wrapping.
+   Unrelated dialogs retain their original compact dimensions. */
+#dialog:has(.settings-tabs){
+  width:min(840px,100%);
+}
+#dialog .settings-tabs{
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  min-width:0;
+}
+#dialog .settings-tabs button{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+/* Phase E1: 7:2:1 source-mix settings, within the established 840px settings dialog. */
+.ai-exclusions-section{margin-top:18px;padding-top:14px;border-top:1px solid #e2e8f1}
+.ai-exclusions-section h3{margin:0 0 5px}
+.ai-exclusions-textarea{min-height:90px;margin-bottom:10px}
+.ai-exclusions-section button{margin-bottom:4px}
+.ai-source-mix-section{margin-top:20px;padding-top:14px;border-top:1px solid #e2e8f1}
+.ai-source-mix-section h3{margin:0 0 5px}
+.ai-mix-row{padding:12px 0 9px;border-bottom:1px solid #e7edf4}
+.ai-mix-heading{font-size:12px;font-weight:700}
+.ai-mix-description{margin:3px 0 7px}
+.ai-mix-labels{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#586a80}
+.ai-mix-slider{display:block;width:100%;accent-color:#497fbf;margin:10px 0 0;cursor:pointer}
+.ai-mix-actions{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;margin-top:13px}
+.ai-mix-actions button{font-size:11px}
+
+/* E2: unranked external candidates are separate from D3 recommendations. */
+.ai-external-section { margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color, #cbd5e1); }
+.ai-external-section h3 { margin:0 0 8px; font-size:15px; }
+.ai-external-section .ai-preview-row { margin-top:10px; }
+
+/* E4 Fix05: explicit settings dialog class (no :has dependency).
+   Keep 7 tabs in one row; only small viewports need horizontal tab scrolling. */
+#dialog.settings-dialog{width:min(840px,calc(100vw - 32px));max-width:none;flex-shrink:1}
+#dialog.settings-dialog .settings-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;min-width:0;scrollbar-width:thin}
+#dialog.settings-dialog .settings-tabs button{flex:0 0 auto;white-space:nowrap}
+
+
+/* E4 Fix06: identify semantic 7:2:1 assignment on every article.
+   Readable headings also cover buckets without selected articles. */
+.ai-blend-group-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:20px 0 3px;padding:9px 11px;border:1px solid #b8c7d9a8;border-radius:7px;background:#ffffff88;color:#263c59}
+.ai-blend-group-heading strong{font-size:13px;letter-spacing:.01em}
+.ai-blend-group-count{font-size:11px;color:#65768e;font-weight:500}
+.ai-blend-group-explicit{border-left:3px solid #5284bd}
+.ai-blend-group-inferred{border-left:3px solid #8370b4}
+.ai-blend-group-discovery{border-left:3px solid #bd8b40}
+.ai-blend-group-empty{padding:12px 13px;font-size:12px;color:#66768b;border-bottom:1px solid #91a2b336}
+.ai-blend-item-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 9px;min-width:0}
+.ai-preview-text .ai-blend-item-head a{flex:1 1 280px;min-width:0;overflow-wrap:anywhere}
+.ai-bucket-tag{display:inline-block;flex:0 0 auto;align-self:flex-start;margin-top:2px;padding:2px 6px;border-radius:5px;border:1px solid;font-size:10px;line-height:1.45;font-weight:700;white-space:nowrap}
+.ai-bucket-explicit{color:#25557d;background:#e5f0fc;border-color:#b4d0ed}
+.ai-bucket-inferred{color:#574381;background:#f0eafd;border-color:#cdbce9}
+.ai-bucket-discovery{color:#785119;background:#fff1d8;border-color:#ebc790}
+
+/* AI article/source quality actions; independent from preference buttons */
+.ai-source-feedback-button{margin-top:4px;display:inline-block;font-size:10.5px;padding:3px 8px;min-height:25px}
+.ai-source-feedback-dialog{display:flex;flex-direction:column;gap:10px;min-width:0}
+/* Slightly larger introductory guidance in the source-quality dialog only. */
+.ai-source-feedback-dialog > p.help:first-child{font-size:12.5px;line-height:1.75;color:#64748b}
+.ai-source-info{overflow-wrap:anywhere;font-weight:600}
+/* Multi-select report reasons, submitted explicitly in one transaction. */
+.ai-source-reason-group{border:1px solid #d7e0ed;border-radius:8px;padding:10px 12px;min-width:0}
+.ai-source-reason-group legend{font-size:12px;font-weight:700;padding:0 5px;color:#40506b}
+.ai-source-reason-option{display:flex;align-items:center;gap:10px;margin:7px 0;min-height:27px;font-size:13px;line-height:1.5;color:#273349;cursor:pointer}
+.ai-source-reason-option input[type=checkbox]{width:16px;height:16px;flex:0 0 auto;accent-color:#507ac1}
+.ai-source-feedback-controls{display:flex;flex-wrap:wrap;gap:8px}
+.ai-source-feedback-controls button{white-space:normal;text-align:left}
+.ai-source-blocked-list{display:flex;flex-direction:column;gap:6px}
+.ai-source-blocked-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid var(--pane-border,#dce4ef);overflow-wrap:anywhere}
+
+/* E4 Fix14: bounded independent lists for source and article exclusions.
+   Both the Settings panel and the article-level quick manager use this class. */
+.ai-source-blocked-list{
+  min-width:0;
+  max-height:250px;
+  max-height:min(250px,34dvh);
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:5px 11px;
+  gap:0;
+  border:1px solid #d6e0ed;
+  border-radius:8px;
+  background:#fbfcfe;
+  scrollbar-width:thin;
+  scrollbar-color:#a7b6ca transparent;
+}
+.ai-source-blocked-row{
+  flex:0 0 auto;
+  min-width:0;
+  min-height:42px;
+  padding:8px 0;
+  align-items:center;
+}
+.ai-source-blocked-row:last-child{border-bottom:0}
+.ai-source-blocked-row > span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;line-height:1.5}
+.ai-source-blocked-row > button{flex:0 0 auto;max-width:45%;white-space:normal}
+.ai-source-blocked-list > .help{margin:9px 2px}
+
+/* Fix15: add/edit publisher domain directly, outside the bounded list. */
+.ai-source-domain-add{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:9px 0}
+.ai-source-domain-input{flex:1 1 220px;min-width:0;width:auto;max-width:100%;font:inherit}
+.ai-source-domain-add button{flex:0 0 auto;white-space:normal}
+.ai-source-blocked-row.ai-source-editing{justify-content:flex-start;gap:7px;flex-wrap:wrap}
+.ai-source-editing .ai-source-domain-input{flex:1 1 180px}
+.ai-source-editing button{flex:0 0 auto;max-width:none}
+@media(max-width:520px){.ai-source-domain-add button{width:100%}}
+
+/* E4 Fix16: persistent, always-painted exclusion scrollbar when contents overflow.
+   Native Chromium scrollbars can disappear depending on OS/browser settings. */
+.ai-source-scroll-shell{position:relative;min-width:0;max-width:100%}
+.ai-source-scroll-shell > .ai-source-blocked-list{
+  padding-right:21px;scrollbar-width:none;scrollbar-gutter:auto;
+}
+.ai-source-scroll-shell > .ai-source-blocked-list::-webkit-scrollbar{display:none;width:0}
+.ai-source-scroll-shell > .ai-source-persistent-scrollbar{
+  right:5px;width:9px;background:rgba(90,115,151,.23);border-radius:8px;z-index:2;
+}
+.ai-source-scroll-shell > .ai-source-persistent-scrollbar .youtube-persistent-scrollbar-thumb{
+  background:rgba(78,110,151,.85);border-radius:8px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+}
+.ai-source-scroll-shell > .ai-source-persistent-scrollbar:hover .youtube-persistent-scrollbar-thumb,
+.ai-source-scroll-shell > .ai-source-persistent-scrollbar:focus-visible .youtube-persistent-scrollbar-thumb{
+  background:rgba(48,85,131,.97);
+}
+
+/* E4 Fix17: filtered source/report management with inline multi-reason edits. */
+.ai-source-search-input{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;margin:8px 0 2px;padding:8px 11px;border:1px solid #cbd6e5;border-radius:7px;background:#fff;color:#26384e;font:inherit;font-size:12.5px}
+.ai-source-search-input:focus-visible{outline:2px solid #6684bd;outline-offset:1px}
+.ai-source-filter-count{margin:3px 1px 6px!important;font-size:11px;color:#5e718b}
+.ai-source-report-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;min-width:0}
+.ai-source-report-actions button{font-size:11.5px;max-width:100%;white-space:normal}
+.ai-source-report-row{min-width:0;align-items:center;flex-wrap:wrap}
+.ai-source-report-row > span{flex:1 1 235px;min-width:0}
+.ai-source-report-row > .ai-source-report-actions{flex:0 1 auto;max-width:100%}
+.ai-source-report-row.ai-source-report-editing{align-items:stretch}
+.ai-source-report-editor{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 100%;background:#f4f7fb;border-radius:7px;padding:10px}
+.ai-source-report-editor .ai-source-reason-group{background:#fff}
+@media(max-width:540px){.ai-source-report-row > .ai-source-report-actions{justify-content:flex-start}}
+
+
+/* Fix19 - on-demand explicit feedback history in the existing AI settings tab. */
+.ai-feedback-history{margin-top:18px}
+.ai-feedback-history > summary{font-weight:700;font-size:14px;color:#34465e;cursor:pointer;list-style:revert;padding:7px 0}
+.ai-feedback-history-body{padding:6px 0 12px;min-width:0}
+.ai-feedback-history-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0}
+.ai-feedback-history-controls .ai-source-search-input{flex:1 1 220px;margin:0}
+.ai-feedback-history-controls select{flex:0 1 auto;min-width:145px;max-width:100%;padding:8px;border:1px solid #cbd6e5;border-radius:7px;background:#fff;color:#26384e;font:inherit;font-size:12.5px}
+.ai-feedback-history-list{min-width:0;border:1px solid #d6e0ed;border-radius:8px;background:#fbfcfe;overflow:hidden}
+.ai-feedback-history-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:11px 12px;border-bottom:1px solid #d6e0ed}
+.ai-feedback-history-row:last-child{border-bottom:0}
+.ai-feedback-history-info{flex:1 1 240px;min-width:0}
+.ai-feedback-history-title{font-weight:600;font-size:12.5px;overflow-wrap:anywhere;line-height:1.6;color:#2c3a52}
+.ai-feedback-history-info .help{margin:3px 0;font-size:11px}
+.ai-feedback-history-note{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:6px;color:#516178}
+.ai-feedback-history-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ai-feedback-history-actions button{white-space:normal;font-size:12px}
+.ai-feedback-history-editor{flex:1 1 100%;display:flex;flex-direction:column;gap:8px;min-width:0;background:#f2f6fb;padding:10px;border-radius:8px}
+.ai-feedback-history-editor select{align-self:flex-start;max-width:100%;padding:7px;border:1px solid #cbd6e5;border-radius:6px;background:#fff;color:#26384e}
+.ai-feedback-history-editor textarea{width:100%;min-height:72px;resize:vertical}
+.ai-feedback-history-paging{display:flex;gap:8px;justify-content:flex-end;margin:10px 0}
+@media(max-width:560px){.ai-feedback-history-controls select{flex:1 1 135px;min-width:0}.ai-feedback-history-row{align-items:flex-start}}
+
+/* Fix21: clearly separate in-memory incremental previews from confirmed recommendations. */
+.ai-live-preview{border:1px solid #c9d8ed;background:#f7faff;border-radius:9px;padding:10px 12px;margin:12px 0 18px;min-width:0}
+.ai-live-preview > h3{margin:3px 0 7px;font-size:14px;color:#254875}
+.ai-live-preview > .help{margin:3px 0 10px}
+.ai-live-bucket-title{font-weight:700;font-size:12px;color:#485e85;margin:12px 0 4px}
+.ai-live-preview-item{padding:8px 4px;border-bottom:1px solid #dce5f2;overflow-wrap:anywhere;font-size:12.5px}
+.ai-live-preview-item:last-child{border-bottom:0}
+.ai-live-preview-item > a{font-weight:600;color:#26466e;word-break:break-word}
+.ai-live-preview-item .help{margin:4px 0 0;line-height:1.45}
+
+
+/* E4 Fix22: one persistent right-pane scroll rail shared by ordinary RSS and AI views.
+   Hide the browser overlay scrollbar ONLY after JS installs the position rail. */
+@media(min-width:701px){
+ #main.nestrill-main-scroll-equipped{scrollbar-width:none;scrollbar-gutter:auto}
+ #main.nestrill-main-scroll-equipped::-webkit-scrollbar{display:none;width:0}
+ .main-persistent-scrollbar{position:absolute;right:3px;width:9px;z-index:4;}
+ .main-persistent-scrollbar .youtube-persistent-scrollbar-thumb{background:rgba(85,114,148,.80)}
+}
+@media(max-width:700px){
+ .main-persistent-scrollbar{display:none!important}
+ #main.nestrill-main-scroll-equipped{scrollbar-width:auto}
+}
+/* Text labels remain the default. Icons affect ONLY AI recommendation / discovery actions. */
+.ai-compact-action{position:relative;vertical-align:middle}
+.ai-compact-action .ai-action-icon{display:none}
+:root.ai-actions-icons .ai-compact-action{
+ display:inline-flex;align-items:center;justify-content:center;
+ vertical-align:middle;width:30px;min-width:30px;height:29px;min-height:29px;
+ padding:5px;margin-right:3px;font-size:12px;line-height:1;
+}
+:root.ai-actions-icons .ai-compact-action .ai-action-label{display:none}
+:root.ai-actions-icons .ai-compact-action .ai-action-icon{display:block;flex:none}
+:root.ai-actions-icons .ai-compact-action:hover::after,
+:root.ai-actions-icons .ai-compact-action:focus-visible::after{
+ content:attr(data-tooltip);position:absolute;z-index:15;
+ left:50%;bottom:calc(100% + 5px);transform:translateX(-50%);
+ border-radius:5px;padding:5px 7px;white-space:nowrap;
+ background:#253c56;color:white;font:11px/1.4 Meiryo,'Yu Gothic',sans-serif;
+ box-shadow:0 2px 8px #0003;pointer-events:none;
+}
+:root.ai-actions-icons .ai-compact-action:focus-visible{outline:2px solid #4c82c6;outline-offset:1px}
+:root.ai-actions-icons .ai-source-feedback-button{margin-top:4px}
+
+:root.ai-actions-icons .ai-preview-text > .ai-feedback-actions{display:inline-flex;gap:3px;margin-top:8px;margin-right:1px;vertical-align:middle}
+:root.ai-actions-icons .ai-preview-text > .ai-source-feedback-button{margin-top:8px;vertical-align:middle}
+
+
+/* E4 Fix23: stable top anchor for settings only; confirmation dialogs keep centering. */
+.dialog-overlay.settings-overlay{align-items:flex-start;padding-top:clamp(12px,5vh,48px);padding-bottom:12px}
+.dialog-overlay.settings-overlay > .dialog{max-height:calc(100dvh - clamp(12px,5vh,48px) - 12px)}
+/* AI topic lists: no draggable corner; scroll within a large, consistently-sized box. */
+#dialog.settings-dialog .ai-fixed-scroll-area{
+ display:block;box-sizing:border-box;min-height:0;max-height:none;
+ resize:none;overflow-y:scroll;overflow-x:hidden;
+ scrollbar-width:auto;scrollbar-color:#7994b6 #eaf0f7;
+}
+#dialog.settings-dialog .ai-interests-entry{height:200px}
+#dialog.settings-dialog .ai-exclusions-entry{height:160px}
+#dialog.settings-dialog .ai-fixed-scroll-area::-webkit-scrollbar{width:11px;background:#eaf0f7}
+#dialog.settings-dialog .ai-fixed-scroll-area::-webkit-scrollbar-thumb{border:2px solid #eaf0f7;border-radius:9px;background:#7994b6}
+#dialog.settings-dialog .ai-fixed-scroll-area::-webkit-scrollbar-track{background:#eaf0f7}
+/* Same disclosure affordance and hit-area as other foldable appearance groups. */
+#dialog.settings-dialog .ai-managed-details{border:1px solid #dce5ed;border-radius:8px;padding:0;margin:13px 0;background:#f8fafc}
+#dialog.settings-dialog .ai-managed-details > summary{cursor:pointer;font-weight:700;font-size:13px;padding:13px 14px;list-style:revert}
+#dialog.settings-dialog .ai-managed-details[open] > summary{border-bottom:1px solid #e2e9f2;margin-bottom:10px}
+#dialog.settings-dialog .ai-managed-details[open] > :not(summary){margin-left:13px;margin-right:13px}
+#dialog.settings-dialog .ai-managed-details > .ai-source-scroll-shell{margin-bottom:14px}
+#dialog.settings-dialog .ai-managed-details > input.ai-source-search-input{box-sizing:border-box;width:calc(100% - 26px)}
+@media(max-width:700px){.dialog-overlay.settings-overlay{padding-top:12px}.dialog-overlay.settings-overlay > .dialog{max-height:calc(100dvh - 24px)}#dialog.settings-dialog .ai-interests-entry{height:165px}#dialog.settings-dialog .ai-exclusions-entry{height:130px}}
+
+/* Fix24: compact, optional evidence for low 70% fill; does not affect article layout. */
+.ai-explicit-audit{border:1px solid #d8e1ed;border-radius:8px;padding:9px 12px;margin:8px 0 12px;background:rgba(248,250,255,.72);font-size:12px;color:#43556d}
+.ai-explicit-audit summary{cursor:pointer;font-weight:600;line-height:1.55}
+.ai-explicit-audit summary:focus-visible{outline:2px solid #5578bf;outline-offset:3px}
+.ai-explicit-audit-lines{white-space:pre-line;line-height:1.85;margin-top:8px;overflow-wrap:anywhere}
+
+
+/* E4 Fix31: persistent, always-painted rails for the two AI topic textareas.
+   These use the existing sidebar scrollbar logic; unlike native overlay bars,
+   their visibility is independent of Chromium/Windows OS scrollbar settings. */
+/* Fix86B: account for the 13px left/right margins on open details children. */
+#dialog.settings-dialog .ai-topic-scroll-shell{position:relative;min-width:0;width:calc(100% - 26px);max-width:calc(100% - 26px)}
+#dialog.settings-dialog .ai-topic-scroll-shell > .ai-fixed-scroll-area{
+  padding-right:30px;scrollbar-width:none;scrollbar-gutter:auto;
+}
+#dialog.settings-dialog .ai-topic-scroll-shell > .ai-fixed-scroll-area::-webkit-scrollbar{
+  display:none;width:0;
+}
+#dialog.settings-dialog .ai-topic-scroll-shell > .ai-topic-persistent-scrollbar{
+  right:6px;width:10px;z-index:2;border-radius:8px;background:rgba(90,115,151,.19);
+}
+#dialog.settings-dialog .ai-topic-persistent-scrollbar .youtube-persistent-scrollbar-thumb{
+  background:rgba(78,110,151,.87);border-radius:8px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+}
+#dialog.settings-dialog .ai-topic-persistent-scrollbar[aria-disabled="true"]{
+  cursor:default;opacity:.43;
+}
+#dialog.settings-dialog .ai-topic-persistent-scrollbar:hover .youtube-persistent-scrollbar-thumb,
+#dialog.settings-dialog .ai-topic-persistent-scrollbar:focus-visible .youtube-persistent-scrollbar-thumb{
+  background:rgba(48,85,131,.97);
+}
+
+/* Fix32: read-only recommendation quality export, visually separate from recommendation controls. */
+.ai-quality-audit{border:1px solid #ced9e9;border-radius:8px;background:rgba(248,251,255,.78);padding:12px;margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.ai-quality-audit strong,.ai-quality-audit p{flex:1 0 100%;margin:0}
+.ai-quality-audit .help{font-size:12px;line-height:1.5}
+
+/* UI06: right-click evaluation is invisible during normal RSS reading. */
+.rss-rating-context-menu{position:fixed;z-index:40;min-width:218px;max-width:min(320px,95vw);padding:7px;border:1px solid #c4d2e3;border-radius:9px;background:#fff;color:#26384e;box-shadow:0 10px 28px #142a4555;font:12px Meiryo,'Yu Gothic',sans-serif;outline:none}
+.rss-rating-context-heading{padding:6px 9px 9px;color:#64758a;border-bottom:1px solid #e8eef6;margin-bottom:4px;font-weight:700}
+.rss-rating-context-action{display:block;width:100%;padding:9px 11px;border:0;border-radius:5px;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.rss-rating-context-action:hover,.rss-rating-context-action:focus-visible{background:#eaf2fc;outline:none}
+.rss-rating-context-action:disabled{opacity:.55;cursor:wait}
+.ai-feedback-delete-button{color:#9a3b3b;border-color:#dec7c7}
+.ai-feedback-delete-button:hover{background:#fff0f0}
+
+/* Fix86A: compact three-scope interest tabs, no extra vertical list. */
+#dialog.settings-dialog .ai-interest-tabs{display:flex;gap:3px;min-width:0;margin-bottom:10px;background:#eaf0f7;padding:3px;border-radius:8px}
+#dialog.settings-dialog .ai-interest-tab{min-width:0;flex:1 1 0;border:1px solid transparent;border-radius:6px;padding:7px 3px;font:inherit;font-size:12px;font-weight:650;cursor:pointer;color:#4b6077;background:transparent}
+#dialog.settings-dialog .ai-interest-tab.active{background:#fff;border-color:#cbd8e6;color:#22364c;box-shadow:0 1px 2px #192b3a12}
+#dialog.settings-dialog .ai-interest-tab:focus-visible{outline:2px solid #386fa2;outline-offset:1px}
+#dialog.settings-dialog .ai-interest-tab:disabled{opacity:.5;cursor:wait}
+
+/* Fix91A: compact, one-column rule management and feedback selection. */
+.rss-hide-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0;align-items:end}
+.rss-hide-inputs .field,.rss-hide-inputs input,.rss-hide-inputs select{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+.rss-hide-rule-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line,#e6e9ed);padding:7px 0;min-width:0}
+.rss-hide-rule-row span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px}
+.rss-hide-rule-row button{flex:none}
+.rss-history-bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line,#e6e9ed)}
+.rss-history-bulk input,.rss-history-select{accent-color:var(--accent,#4c82c6);flex:none}
+.ai-feedback-history-row{min-width:0}
+@media(max-width:550px){.rss-hide-inputs{grid-template-columns:1fr}}
+
+/* Fix91B: move the add-rule button onto its own aligned action row. */
+#dialog.settings-dialog .rss-hide-inputs{align-items:start;row-gap:10px}
+#dialog.settings-dialog .rss-hide-inputs > .form-field{min-width:0;margin-bottom:0}
+#dialog.settings-dialog .rss-hide-inputs > .form-field:nth-child(3){grid-column:1/-1}
+#dialog.settings-dialog .rss-hide-inputs > .secondary-button{grid-column:1/-1;justify-self:end;align-self:center;width:min(240px,100%);max-width:100%;margin:0}
+@media(max-width:550px){#dialog.settings-dialog .rss-hide-inputs > .secondary-button{width:100%}}
+
+
+/* RC01-R10: settings dialog width and tab visibility only.
+   Keep non-settings confirmation dialogs unchanged. */
+#dialog.settings-dialog {
+  width: min(1040px, calc(100vw - 24px));
+  max-width: none;
+}
+#dialog.settings-dialog .settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  row-gap: 4px;
+  overflow-x: visible;
+  overflow-y: visible;
+}
+#dialog.settings-dialog .settings-tabs button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 9px 8px;
+}

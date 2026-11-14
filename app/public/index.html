@@ -1,0 +1,35 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f8fa"><title>Nestrill</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/style.css?v=ui06three"></head><body>
+<div id="app" class="app-shell">
+  <header class="topbar"><button id="mobile-menu" class="icon-button mobile-only" aria-label="メニューを開く">☰</button><div class="brand"><span class="brand-icon" aria-hidden="true"><img src="/bird.svg" alt="" width="24" height="24"></span> <span class="brand-word">Ne<span id="brand-s">s</span>trill</span></div><div class="top-actions"><button id="presets-btn" class="top-button" title="外観プリセット">▤ <span class="desktop-only">プリセット</span></button><span id="update-indicator" class="update-indicator"></span><button id="refresh-btn" class="top-button" title="RSSを更新">↻ <span class="desktop-only">更新</span></button><button id="settings-btn" class="top-button" title="外観設定">⚙ <span class="desktop-only">設定</span></button></div></header>
+  <div id="workspace" class="workspace"><aside id="sidebar" class="sidebar"><div class="pane-inner">
+    <div class="sidebar-title"><span>フィード</span><button id="sidebar-collapse-btn" type="button" class="sidebar-fold-button" aria-label="フィード一覧を折りたたむ" title="フィード一覧を折りたたむ" aria-controls="sidebar" aria-expanded="true">«</button></div><div class="profile-bar"><label for="profile-select">プロファイル</label><div class="profile-line"><select id="profile-select" aria-label="表示するプロファイル"></select><span id="secret-profile-label" hidden>シークレット</span><button id="profile-manager-btn" class="tiny-button" title="プロファイルを管理">⚙</button></div></div><div id="nav-all" class="nav-item active" data-group="all"><span class="nav-symbol">▤</span><span>すべての記事</span><b id="all-count" class="count"></b></div>
+    <div id="nav-unread" class="nav-item" data-group="unread"><span class="nav-symbol">◉</span><span>未読の記事</span><b id="unread-count" class="count"></b></div>
+    <div id="nav-starred" class="nav-item" data-group="starred"><span class="nav-symbol">☆</span><span>お気に入り</span></div>
+    <div class="sidebar-heading"><span>カテゴリ</span><button id="add-category-btn" class="tiny-button" title="カテゴリ追加">＋</button></div>
+    <div id="category-list"></div>
+    <section id="ai-nav" class="ai-nav" aria-label="AIおすすめ"><div class="sidebar-heading"><span>AIおすすめ</span></div><button type="button" id="ai-rss" class="ai-nav-button">▤ RSSのおすすめ</button></section>
+    <div class="source-nav" id="source-nav" aria-label="追加情報源">
+      <div class="sidebar-heading source-heading"><span>追加情報源</span></div>
+      <div class="source-nav-group"><button id="source-youtube" type="button" class="source-nav-heading"><span class="source-youtube-mark" aria-hidden="true"></span> YouTube <small id="youtube-source-count">0</small></button><button id="add-youtube-account" type="button" class="source-add" title="YouTubeの表示枠を追加" aria-label="YouTubeの表示枠を追加">＋</button></div>
+      <div id="youtube-account-list" class="source-account-list"></div>
+      <div class="source-nav-group" id="mail-source-nav"><button id="source-mail" type="button" class="source-nav-heading"><span aria-hidden="true">✉</span> メール <small id="mail-source-count">0</small></button><button id="add-mail-account" type="button" class="source-add" title="メールの表示枠を追加" aria-label="メールの表示枠を追加">＋</button></div>
+      <div id="mail-account-list" class="source-account-list"></div>
+    </div>
+    <div class="sidebar-bottom"><button id="add-feed-btn" class="sidebar-action">＋ RSSを登録</button><button id="import-btn" class="sidebar-action secondary">⇧ OPMLを取り込む</button><button id="export-btn" class="sidebar-action secondary">⇩ OPMLを書き出す</button><button id="config-backup-btn" class="sidebar-action secondary">▣ Nestrill構成バックアップ</button></div>
+  </div><nav id="sidebar-rail" class="sidebar-rail" aria-label="折りたたんだフィード一覧">
+      <button id="sidebar-expand-btn" type="button" class="rail-button rail-expand" aria-label="フィード一覧を展開する" title="フィード一覧を展開する" aria-controls="sidebar" aria-expanded="false">»</button>
+      <button id="rail-all" type="button" class="rail-button active" aria-label="すべての記事" title="すべての記事">▤</button>
+      <button id="rail-unread" type="button" class="rail-button" aria-label="未読の記事" title="未読の記事">◉</button>
+      <button id="rail-starred" type="button" class="rail-button" aria-label="お気に入り" title="お気に入り">☆</button>
+      <button id="rail-feeds" type="button" class="rail-button" aria-label="カテゴリとRSS一覧を開く" title="カテゴリとRSS一覧を開く">☷</button>
+      <button id="rail-youtube" type="button" class="rail-button" aria-label="YouTubeの表示枠を開く" title="YouTubeの表示枠を開く"><span class="source-youtube-mark" aria-hidden="true"></span></button>
+      <button id="rail-mail" type="button" class="rail-button" aria-label="メールの表示枠を開く" title="メールの表示枠を開く">✉</button>
+    </nav></aside><div id="splitter" class="splitter" title="ドラッグして左ペインの幅を変更"></div>
+  <main id="main" class="main-pane"><div class="pane-inner"><div class="feed-toolbar"><div class="toolbar-heading"><h1 id="view-title">すべての記事</h1><span id="article-count">0 件</span></div><div class="toolbar-controls"><label class="search-box"><span>⌕</span><input id="search" placeholder="記事を検索" aria-label="記事を検索" maxlength="100"></label><select id="filter-select" aria-label="表示条件"><option value="all">すべて</option><option value="unread">未読のみ</option><option value="starred">お気に入り</option></select><div class="view-toggle" role="group" aria-label="表示形式"><button id="list-view" title="一覧表示" class="selected">☰</button><button id="magazine-view" title="マガジン表示">▦</button></div><button id="mark-read" class="toolbar-link" title="表示対象をすべて既読にする">✓ 全件既読</button></div></div>
+    <div id="source-panel" class="source-panel hidden" aria-live="polite"></div><div id="feed-summary" class="feed-summary hidden"></div><div id="empty-state" class="empty-state hidden"></div><div id="article-list" class="article-list"></div><button id="more-btn" class="more-button hidden">さらに読み込む ↓</button><div id="status-message" class="status-message" role="status"></div>
+  </div></main></div>
+</div>
+<div id="mobile-scrim" class="mobile-scrim hidden"></div>
+<div id="dialog-overlay" class="dialog-overlay hidden"><section id="dialog" class="dialog" role="dialog" aria-modal="true"><div class="dialog-header"><h2 id="dialog-title"></h2><button id="dialog-close" class="icon-button" aria-label="閉じる">✕</button></div><div id="dialog-body" class="dialog-body"></div></section></div>
+<input id="opml-input" type="file" accept=".opml,.xml,text/xml,application/xml" hidden>
+<script src="/app.js?v=ui06three" defer></script><script src="/uxclean-motion.js?v=1" defer></script></body></html>

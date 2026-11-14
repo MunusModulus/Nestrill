@@ -1,0 +1,88 @@
+:root{font-family:system-ui,-apple-system,"Yu Gothic UI","Meiryo",sans-serif;color-scheme:light;--bg:#f4f7fb;--paper:#fff;--text:#172339;--muted:#61738c;--line:#dce5ef;--accent:#2563eb;--chip:#edf2fa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}.shell{max-width:900px;margin:auto;min-height:100vh;display:flex;flex-direction:column}.top{padding:18px 18px 13px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);border-bottom:1px solid var(--line)}.brand{font-size:21px;display:flex;gap:9px;align-items:center;font-weight:750;letter-spacing:-.4px}.brand-icon{color:var(--accent);font-size:28px;line-height:1}.brand small{font-size:11px;color:var(--muted);font-weight:550;margin-left:4px}.quiet{background:transparent;border:0;color:var(--muted);font-size:12px;cursor:pointer}.hide{display:none!important}.login{padding:38px 18px;flex:1}.login-card{background:var(--paper);border-radius:20px;border:1px solid var(--line);max-width:410px;margin:auto;padding:32px 25px;box-shadow:0 14px 40px #25385c0d}.login-card h1{font-size:22px;margin:0}.login-card p{color:var(--muted)}.login-icon{color:var(--accent);font-size:43px}.login-card form{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;max-width:100%;gap:10px;margin-top:20px}.login-card form>input,.login-card form>button{min-width:0;max-width:100%;width:100%}.login-card input{font-variant-numeric:tabular-nums;text-align:center;letter-spacing:4px;font-size:24px}.primary{background:var(--accent);color:white;border:0;font-weight:700;padding:12px}.error{color:#b91c1c;min-height:1em}.small{font-size:12px}button,select,input{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--paper);color:var(--text)}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #5b9cff;outline-offset:2px}button:disabled{cursor:default;opacity:.4}main{padding:0 13px 24px;flex:1}.statusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 2px}.statusbar select{min-width:125px;max-width:54%;font-weight:650}.counts{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px}.counts strong{color:var(--text);font-size:15px;font-variant-numeric:tabular-nums}.dot{padding:0 3px}.tabs{display:flex;gap:5px;background:#e8eef7;padding:5px;border-radius:12px;margin:0 0 14px}.tab{flex:1;border:0;background:transparent;color:var(--muted);font-weight:650;padding:11px 5px}.tab.active{background:white;color:var(--accent);box-shadow:0 2px 8px #2348791b}.mini{font-size:10px;white-space:nowrap}.filters{display:flex;gap:8px;margin:0 0 9px}.filters select{width:50%;min-width:0;text-overflow:ellipsis}.searchbar{display:flex;gap:7px;margin-bottom:12px}.searchbar input{flex:1;min-width:0}.searchbar button{border-color:#b9cbe6;color:var(--accent)}.chips{display:flex;gap:8px;align-items:center;margin-bottom:14px}.chip{background:var(--chip);border:1px solid transparent;color:var(--muted);font-size:12px;padding:8px 11px}.chip.active{background:#e1ecff;color:#1d56c2;border-color:#b1cdf9;font-weight:700}.reload{margin-left:auto;border:0;background:none;color:var(--muted);font-size:12px;padding:6px}.article-list{display:grid;gap:9px}.item{background:var(--paper);padding:14px 15px;border:1px solid var(--line);border-radius:13px;box-shadow:0 1px 3px #233b6108;min-width:0}.item.unread{border-left:3px solid var(--accent)}.meta{color:var(--muted);font-size:11px;display:flex;gap:7px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.item a.title{color:var(--text);font-size:15px;font-weight:710;line-height:1.55;text-decoration:none;overflow-wrap:anywhere;display:block}.item a.title:active{color:var(--accent)}.item.read a.title{font-weight:530;color:#526176}.excerpt{color:var(--muted);font-size:12px;margin:7px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}.item-bottom{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}.item-bottom button{font-size:12px;border-color:transparent;background:var(--chip);padding:5px 9px;color:var(--muted)}.item-bottom button.selected{color:#a46104;background:#fff0cb}.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:#eaf1ff;color:#2955aa}.badge.inferred{background:#ecf8f4;color:#13745d}.badge.discovery{background:#f8f0ff;color:#7940ac}.pager{display:flex;align-items:center;justify-content:center;gap:12px;padding:20px 0}.pager span{color:var(--muted);font-size:12px}.note{color:var(--muted);background:#eaf0f8;padding:9px 12px;border-radius:9px;font-size:12px}.muted{color:var(--muted)}.notice{color:#a13b2f;font-size:12px;margin:10px 5px}.empty{text-align:center;color:var(--muted);padding:34px 10px;border:1px dashed var(--line);border-radius:11px;background:var(--paper)}.bucket-header{font-size:14px;font-weight:750;margin:18px 4px 10px;display:flex;justify-content:space-between}.bucket-header:first-child{margin-top:8px}footer{font-size:10px;text-align:center;color:var(--muted);padding:16px 12px 23px}.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0e1623;--paper:#182436;--text:#e9eff8;--muted:#9aabc2;--line:#34435a;--chip:#29384c;--accent:#7ba8ff}.top{background:var(--paper)}.tabs{background:#243145}.tab.active{background:#354661;color:#d5e4ff}.chip.active{background:#263c61;color:#bbd3ff;border-color:#526d98}.item.read a.title{color:#a4b4cc}.badge{background:#243b6c;color:#c6dbff}.badge.inferred{background:#1d5044;color:#9ee1ce}.badge.discovery{background:#4a3160;color:#e4bcff}.note{background:#202d3f}.item-bottom button.selected{background:#57491b;color:#f9d27b}}
+
+/* Fix84C: モバイル一覧表示の省スペース化。PC版には影響しない。 */
+@media(max-width:600px){
+ .filters select{font-size:12px;line-height:1.4;height:40px;padding:8px 8px;min-width:0;max-width:100%}
+ .article-list{gap:7px}
+ .item{padding:10px 12px}
+ .item .meta{font-size:11px;margin-bottom:4px}
+ .item a.title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;line-height:1.45}
+ .item-bottom{margin-top:6px;gap:6px}
+ .item-bottom button{font-size:11px;padding:5px 8px}
+}
+
+/* Fix84D: custom Android-friendly category/feed panel and icon-only article controls. */
+.filters .compact-select{width:50%;min-width:0}
+.filters select[hidden]{display:none!important}
+.compact-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;height:40px;padding:7px 9px;text-align:left;font-size:12px;line-height:1.25}
+.compact-select-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.compact-select-arrow{font-size:18px;line-height:1;opacity:.8;flex:none}
+.picker-open{overflow:hidden}
+.picker-backdrop{position:fixed;inset:0;z-index:1000;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px}
+.picker-panel{background:var(--paper);color:var(--text);border:1px solid var(--line);border-radius:15px;box-shadow:0 14px 50px #0006;width:min(430px,100%);max-height:min(76dvh,620px);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.picker-heading{margin:0;font-size:15px;font-weight:700}
+.picker-close{border:0;background:transparent;color:var(--muted);font-size:25px;padding:0;width:32px;height:32px;line-height:1}
+.picker-search{margin:10px 12px 8px;font-size:13px;width:calc(100% - 24px);height:38px}
+.picker-options{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 8px 10px}
+.picker-option{display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:left;width:100%;min-height:40px;padding:8px 10px;font-size:13px;line-height:1.35;border:0;border-radius:8px;background:transparent;color:var(--text)}
+.picker-option+.picker-option{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
+.picker-option.selected{color:var(--accent);font-weight:700;background:var(--chip)}
+.picker-option-label{min-width:0;overflow-wrap:anywhere}
+.picker-option-tick{flex:none;color:var(--muted);font-size:16px}
+.picker-option.selected .picker-option-tick{color:var(--accent)}
+.picker-empty{text-align:center;color:var(--muted);font-size:13px;padding:18px 0}
+.item-bottom{gap:5px;margin-top:5px}
+.item-bottom button.mini-action{width:33px;height:31px;min-width:33px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid transparent;border-radius:8px;font-size:18px;line-height:1;background:var(--chip);color:var(--muted)}
+.item-bottom button.mini-action:disabled{opacity:.5}
+.item-bottom button.mini-action.selected{background:var(--chip);color:#c9952c}
+@media(max-width:600px){.item-bottom button.mini-action{font-size:18px;padding:0}}
+
+
+/* Fix84E: compact read/favorite actions in the site/date header; full-width title below. */
+.meta.has-actions{flex-wrap:nowrap;align-items:center;gap:6px;min-width:0;margin-bottom:4px}
+.meta.has-actions .meta-info{display:flex;align-items:center;gap:7px;flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+.meta.has-actions .meta-source{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta.has-actions .meta-date{flex:none;white-space:nowrap}
+.meta.has-actions .meta-actions{display:flex;gap:1px;align-items:center;flex:none;margin-left:auto}
+.meta.has-actions .meta-actions button.mini-action{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:16px;line-height:1}
+.meta.has-actions .meta-actions button.mini-action:active{background:var(--chip)}
+.meta.has-actions .meta-actions button.mini-action:disabled{opacity:.5}
+.meta.has-actions .meta-actions button.mini-action.selected{color:#c9952c;background:transparent}
+@media(max-width:600px){
+ .item .meta.has-actions{margin-bottom:3px}
+ .meta.has-actions .meta-info{gap:6px}
+ .meta.has-actions .meta-actions button.mini-action{font-size:15px;width:30px;height:30px;min-width:30px}
+}
+
+/* Fix99A: fixed, independently configured static wallpaper; works on long mobile article lists. */
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:auto;height:100vh;height:100lvh;z-index:0;pointer-events:none;background-color:var(--mobile-bg-color,var(--bg));background-image:var(--mobile-bg-image,none);background-repeat:no-repeat;background-position:center center;background-size:cover}
+.shell{position:relative;z-index:1}
+
+
+/* Fix100A: an explicit palette replaces the phone OS color preference (system keeps legacy CSS). */
+:root[data-mobile-palette="light"]{color-scheme:light}
+:root[data-mobile-palette="dark"]{color-scheme:dark}
+:root[data-mobile-palette="custom"]{color-scheme:light}
+:root[data-mobile-palette] .top{background:var(--mobile-header)}
+:root[data-mobile-palette] .tabs{background:var(--mobile-control)}
+:root[data-mobile-palette] .tab.active{background:var(--paper);color:var(--accent)}
+:root[data-mobile-palette] .chip.active{background:var(--mobile-control);color:var(--accent);border-color:var(--line)}
+:root[data-mobile-palette] .item.read a.title{color:var(--muted)}
+:root[data-mobile-palette] .note{background:var(--mobile-control)}
+:root[data-mobile-palette] .badge{background:var(--mobile-control);color:var(--accent)}
+:root[data-mobile-palette] .badge.inferred{color:var(--text)}
+:root[data-mobile-palette] .badge.discovery{color:var(--text)}
+:root[data-mobile-palette] .item-bottom button.selected{background:var(--mobile-control)}
+:root[data-mobile-palette] select,
+:root[data-mobile-palette] input,
+:root[data-mobile-palette] .compact-select-trigger,
+:root[data-mobile-palette] .searchbar button{background:var(--mobile-control);color:var(--text);border-color:var(--line)}
+.item a.title{font-size:var(--mobile-title-size,15px)}
+
+/* Fix103I: keep the E2 action compact on phones; unread/article totals are omitted. */
+.ai-controls{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.ai-controls button{padding:9px 12px;font-size:13px;border-color:var(--line);background:var(--chip);color:var(--text)}
+#ai-status{margin:4px 2px 12px;min-height:1.2em;overflow-wrap:anywhere}
+.statusbar{justify-content:flex-start}
+.statusbar select{max-width:100%}
