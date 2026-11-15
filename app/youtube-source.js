@@ -262,12 +262,26 @@ function create({db,fetchFeed}) {
   db.prepare("INSERT INTO youtube_refresh_local(account_id,refresh_mode) VALUES(?,?) ON CONFLICT(account_id) DO UPDATE SET refresh_mode=excluded.refresh_mode").run(id,mode);
   return {ok:true,refreshMode:mode};
  }
+ // YouTube sometimes replies with transient 404/5xx to valid public Atom URLs.
+ // Retry only these specific HTTP failures, once; preserve every other error.
+ async function fetchYoutubeAtom(channelId){
+  const url=`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+  let firstError;
+  try{return await fetchFeed(url)}catch(e){
+   firstError=e;
+   if(!/^HTTP (?:404|500|502|503|504)$/.test(say(e)))throw e;
+  }
+  await new Promise(resolve=>setTimeout(resolve,1200));
+  try{return await fetchFeed(url)}catch(e){
+   throw Error(`初回 ${say(firstError)}、再試行 ${say(e)}`);
+  }
+ }
  async function fetchVideos(channels){const put=db.prepare(`INSERT INTO youtube_videos_local(channel_id,video_id,title,url,excerpt,thumbnail,published,checked)
   VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(channel_id,video_id) DO UPDATE SET
   title=excluded.title,excerpt=excluded.excerpt,thumbnail=excluded.thumbnail,checked=excluded.checked`);
   let position=0,good=0,bad=0;const errors=[];
   async function worker(){while(position<channels.length){const c=channels[position++];try{
-   const result=await fetchFeed(`https://www.youtube.com/feeds/videos.xml?channel_id=${c}`);
+   const result=await fetchYoutubeAtom(c);
    if(!result?.feed?.items)throw Error('RSS形式が不正です');
    const stamp=now();for(const a of result.feed.items){
     let vid='';try{const u=new URL(a.url);if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname))vid=u.searchParams.get('v')||''}catch{}
@@ -289,10 +303,10 @@ function create({db,fetchFeed}) {
    if(!channels.length)return {ok:true,channels:0,good:0,bad:0,skipped:true};
    if(!force&&now()-last<20*60*1000)return {ok:true,channels:channels.length,good:0,bad:0,skipped:true};
    const result=await fetchVideos(channels);
-   if(result.good===0){const msg='YouTube RSSが取得できませんでした（'+result.bad+'件失敗）';
-    db.prepare(`INSERT INTO youtube_refresh_local(account_id,sync_error) VALUES(?,?) ON CONFLICT(account_id) DO UPDATE SET sync_error=excluded.sync_error`).run(id,msg);throw Error(msg)}
    const labels=new Map(subList.map(x=>[x.channelId,x.title]));
    const friendlyErrors=result.errors.map(line=>line.replace(/^(UC[A-Za-z0-9_-]{22}): /,(whole,cid)=>`${labels.get(cid)||cid} (${cid}): `));
+   if(result.good===0){const msg='YouTube RSSが取得できませんでした（'+result.bad+'件失敗）'+(friendlyErrors.length?': '+friendlyErrors.join('; '):'');
+    db.prepare(`INSERT INTO youtube_refresh_local(account_id,sync_error) VALUES(?,?) ON CONFLICT(account_id) DO UPDATE SET sync_error=excluded.sync_error`).run(id,msg);throw Error(msg)}
    const err=result.bad?`${result.bad}チャンネルのRSS取得に失敗しました: ${friendlyErrors.join('; ')}`:'';
    db.prepare(`INSERT INTO youtube_refresh_local(account_id,last_refresh,sync_error) VALUES(?,?,?)
     ON CONFLICT(account_id) DO UPDATE SET last_refresh=excluded.last_refresh,sync_error=excluded.sync_error`).run(id,now(),err);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Nestrill v0.2.0 distribution from this source archive (Python 3.9+, Go 1.23+)."""
+"""Build Nestrill v0.2.0 refreshed public distribution from this source archive (Python 3.9+, Go 1.23+)."""
 from pathlib import Path
 import os, shutil, tempfile, json, hashlib, zipfile, subprocess
 ROOT=Path(__file__).resolve().parent
@@ -32,9 +32,9 @@ with tempfile.TemporaryDirectory(prefix='nestrill-build-') as tmp:
     shutil.copy2(setup/'installer.ps1',app/'scripts'/'Nestrill-Installer.ps1')
     manifest_path=app/'RELEASE_FILE_HASHES.json'
     files=sorted(p for p in app.rglob('*') if p.is_file() and p!=manifest_path)
-    manifest={'release':'Nestrill v0.2.0','kind':'initial-public-release',
+    manifest={'release':'Nestrill v0.2.0','kind':'public-release-refresh',
       'releasedAt':'2026-11-15',
-      'builtFrom':'verified pre-release runtime; public-release metadata/document updates only',
+      'builtFrom':'verified release-candidate code rebased to v0.2.0 release metadata',
       'defaultArticleFonts':'source=Noto Sans JP Medium/400, title=Noto Sans JP Medium/500, excerpt=Noto Sans JP/400',
       'defaultAiModel':'gemma4:e4b-it-qat (only if no stored model configuration)',
       'exclusionPlaceholder':'none',

@@ -13,7 +13,7 @@ const quality=require('./ai-source-quality');
 // Overlap bounded Google RSS I/O only; leave local Ollama calls sequential.
 const RSS_FETCH_CONCURRENCY=3;
 const MAX_PER_TERM=20;
-const E2_DEFAULT={topicCount:4,maxItems:96,directWeight:28,inferenceWeight:28,discoveryWeight:40};
+const E2_DEFAULT={topicCount:4,maxItems:40,directWeight:25,inferenceWeight:25,discoveryWeight:50};
 const E2_MAX_DIRECT_TOPICS=40,E2_MAX_ITEMS=200;
 const MAX_SEMANTIC_PER_TOPIC=16;
 const MAX_BYTES=1_500_000;
@@ -184,10 +184,10 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
  db.exec(`CREATE TABLE IF NOT EXISTS ai_e2_settings (
   profile_id INTEGER PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
   topic_count INTEGER NOT NULL DEFAULT 4,
-  max_items INTEGER NOT NULL DEFAULT 96,
-  direct_weight INTEGER NOT NULL DEFAULT 28,
-  inference_weight INTEGER NOT NULL DEFAULT 28,
-  discovery_weight INTEGER NOT NULL DEFAULT 40,
+  max_items INTEGER NOT NULL DEFAULT 40,
+  direct_weight INTEGER NOT NULL DEFAULT 25,
+  inference_weight INTEGER NOT NULL DEFAULT 25,
+  discovery_weight INTEGER NOT NULL DEFAULT 50,
   updated_at INTEGER NOT NULL
  );
  CREATE TABLE IF NOT EXISTS ai_e2_topic_rotation (
@@ -371,11 +371,17 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
     AND (f.rating<>0 OR TRIM(COALESCE(f.comment,''))<>''))
    ORDER BY o.last_opened_at DESC LIMIT 6`).all(pid,Date.now()-90*86400000);
  }
+ // Keep E2's effective model identical to AI model settings: an absent row
+ // means the default E4B QAT; an explicitly saved empty value means disabled.
+ function effectiveModel(pid){
+  const saved=db.prepare('SELECT model FROM ai_model_config WHERE profile_id=?').get(pid);
+  return saved?saved.model:'gemma4:e4b-it-qat';
+ }
  function start(pid){
   const cfg=db.prepare('SELECT terms_json,updated_at FROM ai_interest_lists WHERE profile_id=?').get(pid);
   if(!cfg)throw Error('関心リストがありません');
   const terms=JSON.parse(cfg.terms_json),denied=getExclusions(pid);
-  const model=db.prepare('SELECT model FROM ai_model_config WHERE profile_id=?').get(pid)?.model||'';
+  const model=effectiveModel(pid);
   const feedbackStamp=Number(db.prepare('SELECT MAX(updated_at) AS t FROM ai_item_feedback WHERE profile_id=?').get(pid)?.t)||0;
   if(!Array.isArray(terms)||!terms.length)throw Error('関心リストを登録してください');
   if(jobs.get(pid)?.state==='running')return {started:false,running:true};
@@ -704,7 +710,7 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
      // Interest/exclusion edits midway must never publish stale results.
      if(Number(db.prepare('SELECT updated_at FROM ai_interest_lists WHERE profile_id=?').get(pid)?.updated_at)!==Number(cfg.updated_at)
       ||getExclusions(pid).updatedAt!==denied.updatedAt
-      ||(db.prepare('SELECT model FROM ai_model_config WHERE profile_id=?').get(pid)?.model||'')!==model
+      ||(effectiveModel(pid))!==model
       ||settings(pid).updatedAt!==opts.updatedAt)throw Error('探索中に設定が変更されたため先行公開を中止しました');
      db.exec('BEGIN');
      try{
@@ -1039,7 +1045,7 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
     // is a new signal for the next search, not a change to this search's plan.
     if(Number(db.prepare('SELECT updated_at FROM ai_interest_lists WHERE profile_id=?').get(pid)?.updated_at)!==Number(cfg.updated_at)
       ||getExclusions(pid).updatedAt!==denied.updatedAt
-      ||(db.prepare('SELECT model FROM ai_model_config WHERE profile_id=?').get(pid)?.model||'')!==model
+      ||(effectiveModel(pid))!==model
       ||settings(pid).updatedAt!==opts.updatedAt){
      throw Error('探索中に関心・除外・モデル設定が変更されたため結果を破棄しました');
     }

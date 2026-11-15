@@ -2408,7 +2408,7 @@ function renderE2ExplorationSettings(root){
  function toPercentWeights(raw){
   const values=raw.map(v=>Math.max(0,Number(v)||0));
   const total=values.reduce((a,b)=>a+b,0);
-  if(!total)return [29,29,42];
+  if(!total)return [25,25,50];
   const exact=values.map(v=>v*100/total),out=exact.map(Math.floor);
   let remaining=100-out.reduce((a,b)=>a+b,0);
   const order=[0,1,2].sort((a,b)=>(exact[b]-out[b])-(exact[a]-out[a])||a-b);

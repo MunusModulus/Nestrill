@@ -26,7 +26,7 @@ function Confirm([string]$message, [string]$title='Nestrill') {
 function ShowInstallComplete([string]$root) {
   $done = New-Object System.Windows.Forms.Form
   $done.Text = 'Nestrill セットアップ完了'
-  $done.Size = New-Object System.Drawing.Size(640,342)
+  $done.Size = New-Object System.Drawing.Size(640,376)
   $done.StartPosition = 'CenterScreen'
   $done.FormBorderStyle = 'FixedDialog'
   $done.MaximizeBox = $false
@@ -68,14 +68,19 @@ function ShowInstallComplete([string]$root) {
   $hint.AutoSize = $true
   $hint.Location = New-Object System.Drawing.Point(24,161)
   $done.Controls.Add($hint)
+  $aiHint = New-Object System.Windows.Forms.Label
+  $aiHint.Text = 'AIセレクトを使う方は「設定 → AIセレクト」でモデルを確認してください。'
+  $aiHint.AutoSize = $true
+  $aiHint.Location = New-Object System.Drawing.Point(24,190)
+  $done.Controls.Add($aiHint)
   $mobile = New-Object System.Windows.Forms.Label
   $mobile.Text = 'スマホ閲覧は任意です。外出先接続には第三者サービスの設定が必要です。'
   $mobile.AutoSize = $true
-  $mobile.Location = New-Object System.Drawing.Point(24,197)
+  $mobile.Location = New-Object System.Drawing.Point(24,222)
   $done.Controls.Add($mobile)
   $openGuide = New-Object System.Windows.Forms.Button
   $openGuide.Text = 'スマホ接続ガイドを開く'
-  $openGuide.Location = New-Object System.Drawing.Point(24,246)
+  $openGuide.Location = New-Object System.Drawing.Point(24,272)
   $openGuide.Size = New-Object System.Drawing.Size(226,35)
   $guidePath = Join-Path $root 'MOBILE_SETUP.md'
   $openGuide.Add_Click({
@@ -87,7 +92,7 @@ function ShowInstallComplete([string]$root) {
   $done.Controls.Add($openGuide)
   $closeButton = New-Object System.Windows.Forms.Button
   $closeButton.Text = '閉じる'
-  $closeButton.Location = New-Object System.Drawing.Point(509,246)
+  $closeButton.Location = New-Object System.Drawing.Point(509,272)
   $closeButton.Size = New-Object System.Drawing.Size(95,35)
   $closeButton.Add_Click({ $done.Close() })
   $done.Controls.Add($closeButton)
