@@ -2,13 +2,13 @@
 
 Windows向けのローカルRSS・YouTube新着リーダー。RSSフィードを購読し、任意でローカルAIによる記事探索「AIセレクト」を利用できます。
 
-**バージョン:** v0.2.0（初回公開版）  
+**バージョン:** v0.2.1  
 **対応環境:** Windows 11 x64（主な実機検証環境）  
 **必要なもの:** Node.js 22.16以上、Webブラウザ、RSS取得用のインターネット接続
 
 ## インストールして使う（推奨）
 
-1. 配布ファイル `Nestrill-Setup-v0.2.0.exe` をダウンロードして実行します。
+1. 配布ファイル `Nestrill-Setup-v0.2.1.exe` をダウンロードして実行します。
 2. インストール先を確認し、「インストール」をクリックします。標準の導入先は `%LOCALAPPDATA%\Programs\Nestrill` です。管理者権限は不要です。
 3. **スタート → すべてのアプリ → N → Nestrill** で起動します。ブラウザが自動で開きます。
 4. 終了時は、同じN欄の **「Nestrill を終了」** を選びます。ブラウザを閉じただけではサーバーは終了しません。
@@ -21,7 +21,7 @@ Windowsの「設定 → アプリ → インストールされているアプリ
 
 ## ポータブルZIPで使う
 
-`Nestrill-v0.2.0-Portable.zip` を空フォルダに展開し、`Start-Nestrill.cmd` で起動できます。最初に `Create-Nestrill-Shortcuts.cmd` を実行すれば、デスクトップ／スタートメニューから起動・終了できます（この版はWindowsのアプリ一覧にインストール登録されません）。終了は `Stop-Nestrill.cmd` です。
+`Nestrill-v0.2.1-Portable.zip` を空フォルダに展開し、`Start-Nestrill.cmd` で起動できます。最初に `Create-Nestrill-Shortcuts.cmd` を実行すれば、デスクトップ／スタートメニューから起動・終了できます（この版はWindowsのアプリ一覧にインストール登録されません）。終了は `Stop-Nestrill.cmd` です。
 
 ポータブル版では、RSS登録などのデータは**展開先の `data/` などに保存**されます。移動・削除する前に保存データ、ショートカット、自動起動設定をご確認ください。詳しくは [Windows導入手順](SETUP_WINDOWS.md) をご覧ください。
 

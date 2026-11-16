@@ -753,3 +753,6 @@
   white-space: nowrap;
   padding: 9px 8px;
 }
+/* RC08: optional second title term, AND-matched with the first one. */
+#dialog.settings-dialog .rss-hide-inputs > .form-field[hidden]{display:none!important}
+#dialog.settings-dialog .rss-hide-inputs > .form-field:nth-child(4){grid-column:1/-1}

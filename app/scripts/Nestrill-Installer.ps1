@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $script:AppId = 'MunusModulus.Nestrill.Setup.v1'
-$script:Release = '0.2.0'
+$script:Release = '0.2.1'
 $script:ManifestName = '.nestrill-install-manifest.json'
 $script:RegPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\MunusModulus.Nestrill'
 $script:PsExe = Join-Path $PSHOME 'powershell.exe'
@@ -312,11 +312,23 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
       $dst = CheckedRelative $rel $root
       if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "配布ファイルの欠落: $rel" }
       $hash = (Get-FileHash -LiteralPath $src -Algorithm SHA256).Hash.ToLowerInvariant()
-      # Existing code is only overwritten when it still matches the previous install manifest.
+      # Existing code is overwritten only when it matches the previous install manifest.
+      # Exception: the exact, previously verified comment-hide UI patch can
+      # be promoted to the packaged v0.2.1. No other modified file is accepted.
       if (Test-Path -LiteralPath $dst) {
         $previous = @($existing.files | Where-Object { $_.path -eq $rel } | Select-Object -First 1)
-        if ($previous.Count -ne 1 -or -not (Test-Path -LiteralPath $dst -PathType Leaf) -or
-            ((Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$previous[0].sha256)) {
+        if ($previous.Count -ne 1 -or -not (Test-Path -LiteralPath $dst -PathType Leaf)) {
+          throw "変更済みまたは管理外のファイルを保護するため中止しました: $rel"
+        }
+        $actualSha = (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash.ToLowerInvariant()
+        $manifestSha = ([string]$previous[0].sha256).ToLowerInvariant()
+        $knownCommentHidePatch = (
+          $rel -eq 'public/app.js' -and
+          $null -ne $existing -and ([string]$existing.version -in @('0.2.0','0.2.1')) -and
+          $manifestSha -eq '8aef9cd27688b9a46dbdb531372df352b762c18c3e6e82e719e83f70dc4d787c' -and
+          $actualSha -eq '13f66f91f74885dc6b72da55b5c337911b71612a2fede31d1cf0e1557b669e33'
+        )
+        if ($actualSha -ne $manifestSha -and -not $knownCommentHidePatch) {
           throw "変更済みまたは管理外のファイルを保護するため中止しました: $rel"
         }
       }
@@ -553,7 +565,7 @@ function DoUninstall {
 try {
   if ($Mode -eq 'Uninstall') { DoUninstall; exit 0 }
   $form = New-Object System.Windows.Forms.Form
-  $form.Text = 'Nestrill セットアップ — v0.2.0'
+  $form.Text = 'Nestrill セットアップ — v0.2.1'
   $form.Size = New-Object System.Drawing.Size(640,360)
   $form.StartPosition = 'CenterScreen'
   $form.FormBorderStyle = 'FixedDialog'

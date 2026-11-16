@@ -2295,7 +2295,8 @@ function makeAiFeedbackBar(item,kind,isActive){
    });buttons.append(save);content.append(buttons);
    openDialog('AIセレクト / 感想',content);
   }
-  updateButtons();feedbackBar.append(positive,negative,commentButton);
+  // Temporarily hide free-text comments in the article UI; preserve existing records and rating behavior.
+  updateButtons();feedbackBar.append(positive,negative);
   return feedbackBar;
 }
 
@@ -2797,7 +2798,8 @@ async function renderAiInterestSettings(root){
     }catch(e){if(historyActive()){warning.textContent='保存エラー：'+e.message;warning.hidden=false}}
     finally{save.disabled=false;cancel.disabled=false}
    },false);
-   controls.append(cancel,save);editor.append(rating,comment,warning,controls);
+   // Existing comments remain stored and are preserved when changing the rating; text entry is temporarily hidden.
+   controls.append(cancel,save);editor.append(rating,warning,controls);
    line.append(editor);actions.hidden=true;
   },false);
   const remove=action('この評価を削除',async()=>{
@@ -3139,13 +3141,14 @@ function settingFont(root,target,title){const wrap=persistentSettingsAccordion('
 // Fix98A: RSS hide rules belong to ordinary article display, not AI configuration.
 function renderRssHideRulesSettings(root){
  const pid=state.profileId,token=state.secretToken;
- // Fix91A: RSS list + AI hidden-article rules (each rule: domain AND title; multiple OR).
- const hideSection=persistentSettingsAccordion('rss-hide-rules-section','RSS記事の非表示ルール',false,'ai-managed-details ai-exclusions-section');
- hideSection.append(elt('p','help','通常のRSS一覧とAIセレクトの両方に適用します。記事や既読・お気に入りは削除されません。ドメインを空欄にすると全RSSサイトが対象です。追加・削除はその場で保存され、下の「設定を保存」や「キャンセル」では取り消されません。'));
- const hideDomain=elt('input');hideDomain.placeholder='example.com（空欄＝全サイト）';hideDomain.maxLength=253;
+ // Shared list + AI E2 hidden-article rules (domain AND title terms; multiple rules OR).
+ const hideSection=persistentSettingsAccordion('rss-hide-rules-section','記事の非表示ルール（RSS・AIセレクト共通）',false,'ai-managed-details ai-exclusions-section');
+ hideSection.append(elt('p','help','RSS一覧とAIセレクトに共通適用します。対象はドメイン全体（example.com）またはその下位ディレクトリ（https://example.com/sub1/）で指定できます。空欄ならすべての掲載元が対象です。AIセレクトのGoogleニュース経由記事は、掲載元ドメインは照合できますが、元記事のURLパスが不明な場合はディレクトリ指定を適用できません。記事や履歴は削除されません。追加・削除はその場で保存されます。「タイトルに含む」で2語を指定する場合は、半角ダブルクォートで囲んで "A"+"B"（両方含む）、または "A"or"B"（どちらか含む）と入力してください。複数のルール同士は従来どおりOR条件です。'));
+ const hideDomain=elt('input');hideDomain.placeholder='example.com または https://example.com/sub1/';hideDomain.maxLength=480;
  const hideMode=elt('select');[['contains','タイトルに含む'],['exact','タイトルと完全一致'],['all','このドメインの全記事']].forEach(([v,t])=>hideMode.append(new Option(t,v)));
- const hideTitle=elt('input');hideTitle.placeholder='非表示にしたい語句・タイトル';hideTitle.maxLength=120;
- hideMode.addEventListener('change',()=>{hideTitle.disabled=hideMode.value==='all';if(hideTitle.disabled)hideTitle.value=''});
+ const hideTitle=elt('input');hideTitle.maxLength=255;
+ const syncHideMode=()=>{hideTitle.disabled=hideMode.value==='all';if(hideTitle.disabled)hideTitle.value=''};
+ hideMode.addEventListener('change',syncHideMode);syncHideMode();
  const hideStatus=elt('p','help','非表示ルールを読み込み中…');hideStatus.setAttribute('role','status');
  const hideList=elt('div','rss-hide-rules-list');
  const hideAlive=()=>pid===state.profileId&&token===state.secretToken&&state.settingsSlot==='articles'&&hideSection.isConnected;
@@ -3153,7 +3156,8 @@ function renderRssHideRulesSettings(root){
   hideList.replaceChildren();if(!rules.length){hideList.append(elt('p','help','登録されたルールはありません。'));return}
   for(const r of rules){
    const line=elt('div','rss-hide-rule-row');
-   const label=(r.domain||'すべてのRSSサイト')+' ／ '+(r.titleMode==='all'?'全記事':r.titleMode==='exact'?'完全一致：「'+r.titleText+'」':'含む：「'+r.titleText+'」');
+   const titleLabel=r.titleMode==='all'?'全記事':r.titleMode==='exact'?'完全一致：「'+r.titleText+'」':r.titleText2?'含む：'+JSON.stringify(r.titleText)+(r.titleOperator==='or'?'or':'+')+JSON.stringify(r.titleText2):'含む：「'+r.titleText+'」';
+   const label=(r.domain||'すべての掲載元')+' ／ '+titleLabel;
    const desc=elt('span','',label);desc.title=label;
    const remove=action('削除',async()=>{
     if(!hideAlive()||!confirm('この非表示ルールを解除しますか？\n'+label))return;
@@ -3161,7 +3165,7 @@ function renderRssHideRulesSettings(root){
     try{
      const data=await api('/api/rss/hide-rules',{method:'DELETE',body:JSON.stringify({id:r.id})});
      if(!hideAlive())return;
-     paintHideRules(data.rules);hideStatus.textContent='解除しました。RSS記事を再表示すると反映されます。';
+     paintHideRules(data.rules);hideStatus.textContent='解除しました。記事一覧の再表示で反映されます。';
      await loadOverview();if(!state.sourceKind&&!state.aiKind)await loadArticles(false);
      if(state.aiKind==='rss')selectAiKind('rss').catch(err);
     }catch(e){if(hideAlive())hideStatus.textContent='解除に失敗しました：'+e.message}
@@ -3173,7 +3177,7 @@ function renderRssHideRulesSettings(root){
   if(!hideAlive())return;
   addHide.disabled=true;
   try{
-   const data=await post('/api/rss/hide-rules',{domain:hideDomain.value.trim(),titleMode:hideMode.value,titleText:hideMode.value==='all'?'':hideTitle.value});
+   const data=await post('/api/rss/hide-rules',{domain:hideDomain.value.trim(),titleMode:hideMode.value,titleExpression:hideMode.value==='all'?'':hideTitle.value});
    if(!hideAlive())return;
    paintHideRules(data.rules);hideTitle.value='';hideStatus.textContent='保存しました。記事一覧とAIセレクトの表示に反映されます。';
    await loadOverview();if(!state.sourceKind&&!state.aiKind)await loadArticles(false);
@@ -3181,7 +3185,7 @@ function renderRssHideRulesSettings(root){
   }catch(e){if(hideAlive())hideStatus.textContent='保存に失敗しました：'+e.message}
   finally{addHide.disabled=false}
  },false);
- const hideInputs=elt('div','rss-hide-inputs');hideInputs.append(field('対象ドメイン（任意）',hideDomain),field('タイトル条件',hideMode),field('語句・タイトル',hideTitle),addHide);
+ const hideInputs=elt('div','rss-hide-inputs');hideInputs.append(field('対象ドメイン・URLパス（任意）',hideDomain),field('タイトル条件',hideMode),field('語句・タイトル（2語は半角ダブルクォートで指定："A"+"B" ／ "A"or"B"）',hideTitle),addHide);
  hideSection.append(hideInputs,hideStatus,hideList);root.append(hideSection);
  api('/api/rss/hide-rules').then(data=>{if(hideAlive()){paintHideRules(data.rules);hideStatus.textContent='登録済み：'+data.rules.length+'件';}}).catch(e=>{if(hideAlive())hideStatus.textContent='読み込みエラー：'+e.message});
 
@@ -3196,7 +3200,7 @@ function renderArticleSettings(root){
  actionMode.value=state.aiActionModeDraft;actionMode.setAttribute('aria-label','AI記事の操作ボタン表示');
  actionMode.onchange=()=>{state.aiActionModeDraft=actionMode.value};
  const actionSetting=elt('section','header-settings');
- actionSetting.append(elt('h3','','AI記事の操作ボタン'),field('興味・感想・出典／除外設定の表示',actionMode),elt('p','help','「アイコンのみ」ではボタンにポインターを合わせると機能名を表示します。Tabキーで選択した際にも確認できます。AIセレクトの候補に適用され、評価・記事データは変更しません。'));
+ actionSetting.append(elt('h3','','AI記事の操作ボタン'),field('興味評価・出典／除外設定の表示',actionMode),elt('p','help','「アイコンのみ」ではボタンにポインターを合わせると機能名を表示します。Tabキーで選択した際にも確認できます。AIセレクトの候補に適用され、評価・記事データは変更しません。'));
  root.append(actionSetting);
 
  for(const [k,label] of [['source','サイト名'],['title','記事タイトル'],['excerpt','リード文']])settingFont(root,theme.articleStyle[k],label);

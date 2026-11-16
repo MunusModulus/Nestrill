@@ -1,0 +1,18 @@
+# Local build output and user data (never commit)
+/dist/
+**/data/
+**/run/
+**/logs/
+**/node_modules/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.wal
+*.shm
+*.tmp
+.env
+.env.*
+*.log
+__pycache__/
+*.pyc
