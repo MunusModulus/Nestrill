@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $script:AppId = 'MunusModulus.Nestrill.Setup.v1'
-$script:Release = '0.2.1'
+$script:Release = '0.2.2'
 $script:ManifestName = '.nestrill-install-manifest.json'
 $script:RegPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\MunusModulus.Nestrill'
 $script:PsExe = Join-Path $PSHOME 'powershell.exe'
@@ -268,118 +268,258 @@ function RemoveUninstallRegistration([string]$root) {
     }
   }
 }
+# Refuse reparse points in the install root or any managed path ancestor.
+# The paths below never point to data/, run/ or logs/.
+function AssertSafeInstallPath([string]$root,[string]$target) {
+  $root = [IO.Path]::GetFullPath($root).TrimEnd('\')
+  $target = [IO.Path]::GetFullPath($target)
+  if (-not ((SamePath $root $target) -or
+    $target.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase))) {
+    throw "インストール対象外のパスです: $target"
+  }
+  $cursor = $target
+  while ($true) {
+    if (Test-Path -LiteralPath $cursor) {
+      $obj=Get-Item -LiteralPath $cursor -Force -ErrorAction Stop
+      if (($obj.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "リンク／ジャンクションを検出しました。更新しません: $cursor"
+      }
+    }
+    if (SamePath $cursor $root) { break }
+    $parent=Split-Path -Parent $cursor
+    if ([string]::IsNullOrEmpty($parent) -or (SamePath $parent $cursor)) { throw '検証対象パスが不正です。' }
+    $cursor=$parent
+  }
+}
+function ShaIfFile([string]$path) {
+  if (-not (Test-Path -LiteralPath $path)) { return '' }
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "ファイル以外の項目を検出しました: $path" }
+  return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+function PreviousHash($existing,[string]$rel) {
+  $found=@($existing.files | Where-Object { [string]$_.path -ceq $rel })
+  if ($found.Count -ne 1) { return '' }
+  return ([string]$found[0].sha256).ToLowerInvariant()
+}
+# Only a fully matched, named patch state qualifies. No approximate matches.
+function GetV021KnownPatchHashes([string]$root,$existing) {
+  $allow=@{}
+  if ($null -eq $existing -or ([string]$existing.version -ne '0.2.1')) { return $allow }
+  $base=@{
+    'public/app.js'='526a41e54714b9c6a22b855e78897d839adae959d6b56428866d46e3729b0e77'
+    'public/style.css'='895efce71dfcd42cc8be3083cbf40211f7995ef114a54e733d8e750a976d97cf'
+    'ai-external.js'='260becac0f99569b21d3780e235a7511ea457c36d263731641a4e85071762279'
+    'ai-semantic.js'='f5e4f8750f39a086b4e833b50dc8ccb866d7f9cfad77e3236d5bf5e0edb49f21'
+  }
+  foreach ($rel in $base.Keys) {
+    if ((PreviousHash $existing $rel) -ne $base[$rel]) {
+      throw "v0.2.1の配布記録が既知の公開版と異なります。更新しません: $rel"
+    }
+  }
+  $ui=@(
+    [PSCustomObject]@{App='526a41e54714b9c6a22b855e78897d839adae959d6b56428866d46e3729b0e77';Css='895efce71dfcd42cc8be3083cbf40211f7995ef114a54e733d8e750a976d97cf'}
+    [PSCustomObject]@{App='d6a9148afdf36f8207e1b7fac44f49e58bf4e52270e8fae2f34e3033b83c4360';Css='3bfeca8210104c96c09d61f55b1b336a39b3d15c36c893e690c3a588b9135de5'}
+    [PSCustomObject]@{App='44c8a72dae7feb642e55a7ef8c157fb6a4a278650ba1849d62648b9154c0c21d';Css='a07d2b96b33d9b29ae26d4106335c16ecd7e746ae073106846f117801c84c3f3'}
+    [PSCustomObject]@{App='43b2fdf47295c7c16f6c242eab0006ef817244c9daeb4131ceb75b896c439ff7';Css='a07d2b96b33d9b29ae26d4106335c16ecd7e746ae073106846f117801c84c3f3'}
+  )
+  $currentApp=ShaIfFile (CheckedRelative 'public/app.js' $root)
+  $currentCss=ShaIfFile (CheckedRelative 'public/style.css' $root)
+  $matchedUI=$false
+  foreach ($pair in $ui) { if ($currentApp -eq $pair.App -and $currentCss -eq $pair.Css) { $matchedUI=$true;break } }
+  if (-not $matchedUI) { throw '表示設定ファイルの版が未知または混在しています。更新しません。' }
+  $allow['public/app.js']=$currentApp
+  $allow['public/style.css']=$currentCss
+  $currentExternal=ShaIfFile (CheckedRelative 'ai-external.js' $root)
+  $currentSemantic=ShaIfFile (CheckedRelative 'ai-semantic.js' $root)
+  $helperPath=CheckedRelative 'ai-e2-history-repeat.js' $root
+  $helper=ShaIfFile $helperPath
+  $patched=(
+    $currentExternal -eq '353d6587e71ce7fd3463eb09dbce53d7d7710b0bf86556c8f1b5cae4dfb85558' -and
+    $currentSemantic -eq 'ebe91d88891d8c59f4ae10a6242390e1214db8ba15be53db8ee1e0d07a0cae98' -and
+    $helper -eq '4eae28d5e3fc65df2e3ae9dba540a9e5088ce8481d940b2e4d615a5e4ab9682d'
+  )
+  $original=($currentExternal -eq $base['ai-external.js'] -and
+    $currentSemantic -eq $base['ai-semantic.js'] -and $helper -eq '')
+  if (-not ($patched -or $original)) {
+    throw 'E2ファイルの版が未知または混在しています。更新しません。'
+  }
+  $allow['ai-external.js']=$currentExternal
+  $allow['ai-semantic.js']=$currentSemantic
+  if ($patched) { $allow['ai-e2-history-repeat.js']=$helper }
+  return $allow
+}
+function AssertUpgradeFileState([string]$root,$existing,$files,$allow) {
+  foreach ($entry in $files) {
+    $rel=[string]$entry.path
+    $dst=CheckedRelative $rel $root
+    AssertSafeInstallPath $root $dst
+    $actual=ShaIfFile $dst
+    if ($actual -eq '') { continue }
+    if ($null -eq $existing) { throw "管理外のファイルを検出しました: $rel" }
+    $previous=PreviousHash $existing $rel
+    if ($previous -eq '') {
+      if (-not ($allow.ContainsKey($rel) -and $allow[$rel] -eq $actual)) {
+        throw "管理外のファイルを保護するため中止しました: $rel"
+      }
+    } elseif ($actual -ne $previous) {
+      # Preserve the single previously supported 0.2.0 comment-hide upgrade.
+      $legacyCommentPatch=($rel -eq 'public/app.js' -and
+        [string]$existing.version -eq '0.2.0' -and
+        $previous -eq '8aef9cd27688b9a46dbdb531372df352b762c18c3e6e82e719e83f70dc4d787c' -and
+        $actual -eq '13f66f91f74885dc6b72da55b5c337911b71612a2fede31d1cf0e1557b669e33')
+      if (-not $legacyCommentPatch -and
+        -not ($allow.ContainsKey($rel) -and $allow[$rel] -eq $actual)) {
+        throw "変更済みファイルを保護するため中止しました: $rel"
+      }
+    }
+  }
+  if ($null -ne $existing) {
+    $oldPath=Join-Path $root $script:ManifestName
+    AssertSafeInstallPath $root $oldPath
+  }
+}
 function DoInstall([string]$root, [bool]$desktopEnabled) {
   if (-not (Test-Path -LiteralPath $PayloadPath -PathType Leaf)) { throw '組み込みの配布ファイルがありません。' }
-  $root = [IO.Path]::GetFullPath($root).TrimEnd('\')
-  $base = [IO.Path]::GetPathRoot($root).TrimEnd('\')
+  $root=[IO.Path]::GetFullPath($root).TrimEnd('\')
+  $base=[IO.Path]::GetPathRoot($root).TrimEnd('\')
   if (-not $root -or (SamePath $root $base) -or (SamePath $root $env:USERPROFILE) -or
       $root.StartsWith($env:SystemRoot.TrimEnd('\')+'\',[StringComparison]::OrdinalIgnoreCase) -or
       $root.StartsWith($env:TEMP.TrimEnd('\')+'\',[StringComparison]::OrdinalIgnoreCase)) {
     throw 'このフォルダにはインストールできません。専用の空フォルダを選んでください。'
   }
-  $existing = $null
+  $existing=$null
   if (Test-Path -LiteralPath $root) {
-    $existing = LoadManifest $root
+    AssertSafeInstallPath $root $root
+    $existing=LoadManifest $root
     if (-not $existing -and @(Get-ChildItem -LiteralPath $root -Force).Count -gt 0) {
       throw '導入先が空ではなく、Nestrillインストーラーによる管理対象でもありません。別の空フォルダを指定してください。'
     }
-  }
-  $shell = New-Object -ComObject WScript.Shell
-  $links = GetLinks $root $desktopEnabled
-  PreflightShortcuts $links $shell $root
-  if (PortIsBusy) {
-    if ($existing -and $existing.state -eq 'installed') {
-      # Upgrading this exact installation: stop only its verified server.
-      StopOwnedServer $root
-    } else {
-      throw 'ポート8767が使用中です。別のNestrill／アプリは停止しません。起動している環境を終了してから導入してください。'
+    if ($existing -and ($existing.state -ne 'installed' -or
+        ([string]$existing.version -notin @('0.2.0','0.2.1','0.2.2')))) {
+      throw 'インストール記録の状態または版が想定外です。更新しません。'
     }
   }
-  $stage = Join-Path $env:TEMP ('Nestrill-stage-' + [Guid]::NewGuid().ToString('N'))
+  $shell=New-Object -ComObject WScript.Shell
+  $links=GetLinks $root $desktopEnabled
+  PreflightShortcuts $links $shell $root
+  $stage=Join-Path $env:TEMP ('Nestrill-stage-'+[Guid]::NewGuid().ToString('N'))
   New-Item -ItemType Directory -Path $stage -ErrorAction Stop | Out-Null
+  $backupDir=''
+  $keepBackup=$false
   try {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $archive = [IO.Compression.ZipFile]::OpenRead($PayloadPath)
+    $archive=[IO.Compression.ZipFile]::OpenRead($PayloadPath)
     try {
-      $entries = @($archive.Entries | Where-Object { $_.Name -ne '' })
-      foreach ($entry in $entries) { $null = CheckedRelative $entry.FullName $root }
+      $entries=@($archive.Entries | Where-Object { $_.Name -ne '' })
+      $seen=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+      foreach ($entry in $entries) {
+        $null=CheckedRelative $entry.FullName $root
+        if (-not $seen.Add($entry.FullName.Replace('\','/'))) {
+          throw "配布ZIPに重複パスがあります: $($entry.FullName)"
+        }
+      }
     } finally { $archive.Dispose() }
     [IO.Compression.ZipFile]::ExtractToDirectory($PayloadPath,$stage)
-    $files = @()
+    $files=@()
     foreach ($entry in $entries) {
-      $rel = $entry.FullName.Replace('\','/')
-      $src = CheckedRelative $rel $stage
-      $dst = CheckedRelative $rel $root
+      $rel=$entry.FullName.Replace('\','/')
+      $src=CheckedRelative $rel $stage
       if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "配布ファイルの欠落: $rel" }
-      $hash = (Get-FileHash -LiteralPath $src -Algorithm SHA256).Hash.ToLowerInvariant()
-      # Existing code is overwritten only when it matches the previous install manifest.
-      # Exception: the exact, previously verified comment-hide UI patch can
-      # be promoted to the packaged v0.2.1. No other modified file is accepted.
-      if (Test-Path -LiteralPath $dst) {
-        $previous = @($existing.files | Where-Object { $_.path -eq $rel } | Select-Object -First 1)
-        if ($previous.Count -ne 1 -or -not (Test-Path -LiteralPath $dst -PathType Leaf)) {
-          throw "変更済みまたは管理外のファイルを保護するため中止しました: $rel"
-        }
-        $actualSha = (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash.ToLowerInvariant()
-        $manifestSha = ([string]$previous[0].sha256).ToLowerInvariant()
-        $knownCommentHidePatch = (
-          $rel -eq 'public/app.js' -and
-          $null -ne $existing -and ([string]$existing.version -in @('0.2.0','0.2.1')) -and
-          $manifestSha -eq '8aef9cd27688b9a46dbdb531372df352b762c18c3e6e82e719e83f70dc4d787c' -and
-          $actualSha -eq '13f66f91f74885dc6b72da55b5c337911b71612a2fede31d1cf0e1557b669e33'
-        )
-        if ($actualSha -ne $manifestSha -and -not $knownCommentHidePatch) {
-          throw "変更済みまたは管理外のファイルを保護するため中止しました: $rel"
-        }
-      }
-      $files += [PSCustomObject]@{path=$rel;sha256=$hash}
+      $sha=ShaIfFile $src
+      $files += [PSCustomObject]@{path=$rel;sha256=$sha}
     }
-    if (-not (Test-Path -LiteralPath $root)) { New-Item -ItemType Directory -Path $root -Force | Out-Null }
-    foreach ($entry in $files) {
-      $src = CheckedRelative $entry.path $stage
-      $dst = CheckedRelative $entry.path $root
-      $parent = Split-Path -Parent $dst
-      if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-      Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop
-    }
-    # The earlier Release Candidate bundled a temporary first-read notice.
-    # If upgrading, remove only the unchanged, manifest-owned obsolete file.
-    # Modified / unrecognized files always remain untouched.
+    # First validation occurs while the app may still be running. No service stopped.
+    $known=GetV021KnownPatchHashes $root $existing
+    AssertUpgradeFileState $root $existing $files $known
+    # Only the authenticated server owned by this exact installation may stop.
     if ($existing) {
-      $obsoleteRel = 'README_RC01_FIRST.txt'
-      $previousNotice = @($existing.files | Where-Object { $_.path -eq $obsoleteRel })
-      if ($previousNotice.Count -eq 1) {
-        $obsoleteFile = CheckedRelative $obsoleteRel $root
-        if (Test-Path -LiteralPath $obsoleteFile -PathType Leaf) {
-          $noticeInfo = Get-Item -LiteralPath $obsoleteFile -Force -ErrorAction Stop
-          if (($noticeInfo.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0 -and
-              (Get-FileHash -LiteralPath $obsoleteFile -Algorithm SHA256).Hash.ToLowerInvariant() -eq
-              [string]$previousNotice[0].sha256) {
-            Remove-Item -LiteralPath $obsoleteFile -Force -ErrorAction Stop
+      StopOwnedServer $root
+    } elseif (PortIsBusy) {
+      throw 'ポート8767が使用中です。別のアプリは停止しません。'
+    }
+    # Revalidate after stopping to protect against changed files/races.
+    $known=GetV021KnownPatchHashes $root $existing
+    AssertUpgradeFileState $root $existing $files $known
+    # Prepare byte-for-byte recovery copies BEFORE the first destination write.
+    $backupDir=Join-Path $env:TEMP ('Nestrill-upgrade-restore-'+[Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $backupDir -ErrorAction Stop | Out-Null
+    $preExisting=@{}
+    foreach ($entry in $files) {
+      $rel=[string]$entry.path
+      $dst=CheckedRelative $rel $root
+      $prior=ShaIfFile $dst
+      $preExisting[$rel]=$prior
+      if ($prior -ne '') {
+        $bak=CheckedRelative $rel $backupDir
+        $parent=Split-Path -Parent $bak
+        if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        Copy-Item -LiteralPath $dst -Destination $bak -ErrorAction Stop
+        if ((ShaIfFile $bak) -ne $prior) { throw "更新前バックアップに失敗: $rel" }
+      }
+    }
+    $oldInstallManifest=Join-Path $root $script:ManifestName
+    if ($existing) {
+      Copy-Item -LiteralPath $oldInstallManifest -Destination (Join-Path $backupDir 'old-install-manifest.json') -ErrorAction Stop
+    }
+    $written=New-Object 'System.Collections.Generic.List[string]'
+    try {
+      if (-not (Test-Path -LiteralPath $root)) { New-Item -ItemType Directory -Path $root -Force | Out-Null }
+      foreach ($entry in $files) {
+        $src=CheckedRelative $entry.path $stage
+        $dst=CheckedRelative $entry.path $root
+        $parent=Split-Path -Parent $dst
+        if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        $written.Add($entry.path)
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop
+        if ((ShaIfFile $dst) -ne $entry.sha256) { throw "更新後のSHA-256が不一致: $($entry.path)" }
+      }
+      $manifest=[ordered]@{appId=$script:AppId;version=$script:Release;state='installed';files=@($files)}
+      $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $oldInstallManifest -Encoding UTF8
+      WriteShortcuts $links $root $shell
+      $primary=(GetLinks $root $false)[0]
+      if (-not (LinkOwned $primary $shell)) { throw '起動ショートカットを検証できませんでした。' }
+      CleanupLegacyLinks $root $shell
+      if (-not $desktopEnabled) {
+        $oldDesktop=[PSCustomObject]@{File=(Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'Nestrill.lnk');Target=(Join-Path $root 'Nestrill.exe');Args=''}
+        if (LinkOwned $oldDesktop $shell) { Remove-Item -LiteralPath $oldDesktop.File -ErrorAction Stop }
+      }
+      SetUninstallRegistration $root
+    } catch {
+      $reason=$_.Exception.Message
+      $errors=@()
+      # Restore all managed files touched. Never delete unknown user files.
+      for ($i=$written.Count-1; $i -ge 0; $i--) {
+        $rel=$written[$i]
+        $dst=CheckedRelative $rel $root
+        try {
+          if ($preExisting[$rel] -ne '') {
+            $bak=CheckedRelative $rel $backupDir
+            Copy-Item -LiteralPath $bak -Destination $dst -Force -ErrorAction Stop
+            if ((ShaIfFile $dst) -ne $preExisting[$rel]) { throw "復旧ハッシュ不一致: $rel" }
+          } elseif (Test-Path -LiteralPath $dst) {
+            Remove-Item -LiteralPath $dst -Force -ErrorAction Stop
           }
+        } catch { $errors += $_.Exception.Message }
+      }
+      try {
+        if ($existing) {
+          Copy-Item -LiteralPath (Join-Path $backupDir 'old-install-manifest.json') -Destination $oldInstallManifest -Force -ErrorAction Stop
+        } elseif (Test-Path -LiteralPath $oldInstallManifest) {
+          Remove-Item -LiteralPath $oldInstallManifest -Force -ErrorAction Stop
         }
+      } catch { $errors += $_.Exception.Message }
+      if ($errors.Count -gt 0) {
+        $keepBackup=$true
+        throw "重要: 更新失敗と復旧失敗がありました。手動確認が必要です。復旧データ: $backupDir`n理由: $reason`n$($errors -join '; ')"
       }
+      throw "更新に失敗したため配布ファイルとインストール記録を復旧しました。`n理由: $reason`nショートカット／レジストリの更新に失敗した場合は別途確認してください。"
     }
-    $manifest = [ordered]@{appId=$script:AppId;version=$script:Release;state='installed'; files=@($files)}
-    $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $root $script:ManifestName) -Encoding UTF8
-    WriteShortcuts $links $root $shell
-    # Verify the critical launcher link was actually created; Start Menu indexing
-    # itself is Windows-controlled and needs to be confirmed on a real PC.
-    $primary = (GetLinks $root $false)[0]
-    if (-not (LinkOwned $primary $shell)) { throw 'スタートメニューのNestrill起動リンクを作成できませんでした。' }
-    CleanupLegacyLinks $root $shell
-    if (-not $desktopEnabled) {
-      $oldDesktop = [PSCustomObject]@{
-        File=(Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'Nestrill.lnk')
-        Target=(Join-Path $root 'Nestrill.exe'); Args=''
-      }
-      if (LinkOwned $oldDesktop $shell) { Remove-Item -LiteralPath $oldDesktop.File -ErrorAction Stop }
-    }
-    SetUninstallRegistration $root
     return $root
   } finally {
-    # Only a unique, installer-created staging folder is removed.
     if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue }
+    if (-not $keepBackup -and $backupDir -and (Test-Path -LiteralPath $backupDir)) {
+      Remove-Item -LiteralPath $backupDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
   }
 }
 # Removing the application's own data is intentional on uninstall.  Never follow
@@ -565,7 +705,7 @@ function DoUninstall {
 try {
   if ($Mode -eq 'Uninstall') { DoUninstall; exit 0 }
   $form = New-Object System.Windows.Forms.Form
-  $form.Text = 'Nestrill セットアップ — v0.2.1'
+  $form.Text = 'Nestrill セットアップ — v0.2.2 RC01'
   $form.Size = New-Object System.Drawing.Size(640,360)
   $form.StartPosition = 'CenterScreen'
   $form.FormBorderStyle = 'FixedDialog'

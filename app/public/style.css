@@ -756,3 +756,22 @@
 /* RC08: optional second title term, AND-matched with the first one. */
 #dialog.settings-dialog .rss-hide-inputs > .form-field[hidden]{display:none!important}
 #dialog.settings-dialog .rss-hide-inputs > .form-field:nth-child(4){grid-column:1/-1}
+
+
+/* DisplayPrefs01: presentation-only controls. Existing fetches, storage and AI inputs are untouched. */
+.nestrill-hide-lead-text .main-pane .article-excerpt-inline,
+.nestrill-hide-lead-text .main-pane .article-excerpt,
+.nestrill-hide-lead-text .main-pane .ai-preview-excerpt,
+.nestrill-hide-lead-text .main-pane .e2-compact-excerpt,
+.nestrill-hide-lead-text .main-pane .e2-excerpt-detail,
+.nestrill-hide-lead-text .main-pane .e2-excerpt-only-details{display:none!important}
+.nestrill-hide-sidebar-counts #sidebar .count,
+.nestrill-hide-sidebar-counts #sidebar #youtube-source-count,
+.nestrill-hide-sidebar-counts #sidebar #mail-source-count,
+.nestrill-hide-sidebar-counts #sidebar .source-account-total{display:none!important}
+
+
+/* DisplayPrefs02: descriptive background folder paths; keep the existing browser file picker. */
+.nestrill-bg-path-hint { margin-top:6px; line-height:1.55; }
+.nestrill-bg-path-hint code { display:block; font:inherit; font-family:Consolas,'Courier New',monospace; white-space:normal; overflow-wrap:anywhere; user-select:text; }
+.nestrill-bg-path-hint > div:last-child { margin-top:3px; }

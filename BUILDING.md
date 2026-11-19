@@ -1,4 +1,4 @@
-# Nestrill v0.2.1 — ソースコード
+# Nestrill v0.2.2 — ソースコード
 
 Nestrill本体（JavaScript・HTML・CSS・PowerShell起動スクリプト）と、Windows用の起動ランチャー／セットアップEXEのソース一式です。Nestrill本体は[MIT License](LICENSE)です。通常の利用方法は [app/README.md](app/README.md) を参照してください。
 

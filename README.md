@@ -2,9 +2,7 @@
 
 Nestrill（ネストリル）は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
 
-**最新版：v0.2.1**
-
-**[Nestrillをダウンロード（GitHub Releases）](https://github.com/MunusModulus/Nestrill/releases/latest)**
+**最新版：v0.2.2（Windows 11 x64で上書き更新・起動・既存データ保持を実機確認）**
 
 ## 主な機能
 
@@ -29,8 +27,8 @@ Node.js：[公式ダウンロードページ](https://nodejs.org/en/download/)
 
 ## インストールと起動
 
-1. [Releases](https://github.com/MunusModulus/Nestrill/releases/latest) から **`Nestrill-Setup-v0.2.1.zip`** をダウンロードします。
-2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.1.exe`** を実行します。
+1. [Releases](https://github.com/MunusModulus/Nestrill/releases/latest) から **`Nestrill-Setup-v0.2.2.zip`** を取得します。
+2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.2.exe`** を実行します。
 3. インストール後、Windowsの **スタート → すべてのアプリ → N → Nestrill** から起動します。ブラウザが自動で開きます。
 4. 終了するときは、同じN欄の **「Nestrill を終了」** を選びます。
 
@@ -38,7 +36,7 @@ Nestrillが起動中なら、PCのブラウザで **`http://127.0.0.1:8767/`** �
 
 Windowsサインイン時の自動起動は、**設定 → 一般** からON/OFFできます（初期OFF）。
 
-インストール不要の **`Nestrill-v0.2.1-Portable.zip`** も公開しています。展開後、`Start-Nestrill.cmd` で起動できます。
+インストール不要の **`Nestrill-v0.2.2-Portable.zip`** も公開しています。展開後、`Start-Nestrill.cmd` で起動できます。
 
 **旧版から更新するときは先にアンインストールしないでください。** Nestrillを終了し、同じインストール先を選んで上書き更新します。保護機能が想定外のファイル変更を検出すると更新を中断します。その場合、古いファイルやデータを強制削除しないでください。
 
@@ -64,7 +62,7 @@ Windowsの「設定 → アプリ → インストールされているアプリ
 
 - セットアップEXEには**コード署名がありません**。ダウンロード元を確認し、必要に応じてリリース添付の `SHA256SUMS.txt` と照合してください。
 - RSS・YouTube・外部記事の取得やAIセレクトの候補探索ではインターネット通信が発生します。AIセレクトのモデル推論は利用者のローカルOllamaで行います。
-- 今回のv0.2.1では記事表示ルールの対象動作がユーザー環境で実機確認されていますが、全Windows環境・全機能・全ネットワーク構成での動作を保証するものではありません。
+- 記事表示ルールの対象動作がユーザー環境で実機確認されていますが、全Windows環境・全機能・全ネットワーク構成での動作を保証するものではありません。
 
 ## ソースコード・ライセンス
 
@@ -72,4 +70,4 @@ Nestrillは [MIT License](LICENSE) で公開しています。Copyright (c) 2026
 
 第三者のアイコン等については [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) をご覧ください。RSS記事や外部サイトのコンテンツには、それぞれの権利者の条件が適用されます。
 
-開発者向けビルド手順：[BUILDING.md](BUILDING.md) ／ 更新内容：[v0.2.1リリースノート](app/RELEASE_NOTES.md)
+開発者向けビルド手順：[BUILDING.md](BUILDING.md) ／ 更新内容：[v0.2.2リリースノート](app/RELEASE_NOTES.md)

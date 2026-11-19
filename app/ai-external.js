@@ -5,6 +5,7 @@ const {parseFeed,xmlTree}=require('./feed');
 const {createHash,randomInt}=require('node:crypto');
 const {titleMatchesExclusion}=require('./ai-exclusion');
 const quality=require('./ai-source-quality');
+const ratedRepeat=require('./ai-e2-history-repeat');
 // Fix82: no secondary news lookup; use original Google RSS metadata only.
 // Fix102F: widen independent E2 search *candidate* collection for the quality trial.
 // No recommendation quota or per-article score changes.
@@ -396,6 +397,14 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
    try{
     const known=db.prepare(`SELECT a.url,a.title FROM articles a JOIN profile_feeds pf
      ON pf.feed_id=a.feed_id AND pf.profile_id=? ORDER BY a.published DESC LIMIT 5000`).all(pid);
+    // Profile-scoped explicit ratings retained for E2/E4. Do not alter the
+    // feedback used by the 20% search-topic planner. This is display dedup only.
+    const ratedHistory=db.prepare(`SELECT m.title,m.url,COALESCE(m.excerpt,'') AS excerpt
+      FROM ai_item_feedback f JOIN ai_external_feedback_meta m
+       ON m.profile_id=f.profile_id AND m.item_id=f.item_id
+      WHERE f.profile_id=? AND f.kind='rss' AND f.rating<>0
+      ORDER BY f.updated_at DESC LIMIT 300`).all(pid);
+
     const knownUrls=new Set(known.map(x=>keyOf(x.url))),knownTitles=new Set(known.map(x=>cleanTitle(x.title)));
     const registered=db.prepare(`SELECT f.url,f.site_url FROM feeds f JOIN profile_feeds pf
      ON pf.feed_id=f.id AND pf.profile_id=?`).all(pid);
@@ -620,6 +629,10 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
     // beyond the old global limit before semantic review.
     const qualityStarted=Date.now();
     const gated=quality.qualityGate(collected,{knownTitles:known.map(r=>r.title),limit:Math.max(opts.maxItems+64,collected.length)});
+    const repeated=await ratedRepeat.removeRatedRepeats({candidates:gated.items,history:ratedHistory,
+     judge:semantic.compareRatedE2Reports,model});
+    gated.items=repeated.items;
+    gated.stats.ratedHistoryRepeats={...repeated.stats,mode:'one_bounded_local_ai_batch_uncertain_kept'};
     // Collapse clear same-event cross-publisher headlines BEFORE semantic
     // screening and first publication, never delete anything already visible.
     const reportCollapse=collapseRepeatedReports(gated.items);
@@ -873,6 +886,13 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
       const rescueGated=quality.qualityGate(rescueCollected,{
        knownTitles:[...known.map(r=>r.title),...gated.items.map(x=>x.title)],
        limit:Math.max(opts.maxItems+64,rescueCollected.length)});
+      // The optional rescue must not reintroduce an exact rated article.
+      // Do not add a second model request during rescue.
+      const rescueRepeats=await ratedRepeat.removeRatedRepeats({candidates:rescueGated.items,
+       history:ratedHistory,model:'',maxPairs:0});
+      rescueGated.items=rescueRepeats.items;
+      gated.stats.ratedHistoryRepeats.rescueExactUrl=rescueRepeats.stats.exactUrl;
+      gated.stats.ratedHistoryRepeats.rescueExactTitle=rescueRepeats.stats.exactTitle;
       gated.stats.rescueQualityInspected=Number(rescueGated.stats.inspected)||rescueCollected.length;
       gated.stats.inspected=(Number(gated.stats.inspected)||0)+(Number(rescueGated.stats.inspected)||rescueCollected.length);
       // The initial and rescue quality gates run separately to preserve

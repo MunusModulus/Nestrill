@@ -53,7 +53,7 @@ function aiFilterShownItems(items,kind){
 function renderAiVisibilitySettings(root){
  const section=persistentSettingsAccordion('ai-visibility','AIセレクトの表示・非表示',false,'ai-managed-details ai-exclusions-section');
  const cfg=readAiVisibility();
- section.append(elt('p','help','ここでの指定はE2記事一覧の表示だけに適用します。収集済み記事や評価履歴は変更しません。サイトやパスを候補から除外する場合は「除外サイト・URLパス一覧」をご利用ください。'));
+ section.append(elt('p','help','ここでの指定はAIセレクトの記事一覧の表示だけに適用します。収集済み記事や評価履歴は変更しません。サイトやパスを候補から除外する場合は「除外サイト・URLパス一覧」をご利用ください。'));
  const toggle=elt('label','checkbox-label'),box=elt('input');box.type='checkbox';box.checked=cfg.hideYoutube;
  toggle.append(box,elt('span','','AIセレクトに含まれるYouTube動画を非表示にする（Googleニュース経由も含む）'));section.append(toggle);
  const titles=elt('textarea','ai-interests-textarea');titles.rows=3;titles.maxLength=9600;titles.placeholder='表示したくないタイトルの一部';titles.value=cfg.titleTerms.join('\n');
@@ -106,6 +106,18 @@ state.feedIconsDraft=null;
 const AI_ACTION_MODE_KEY='nestrill-ai-action-display';
 state.aiActionMode=localStorage.getItem(AI_ACTION_MODE_KEY)==='icons'?'icons':'text';
 state.aiActionModeDraft=null;
+// Display-only preferences, deliberately kept in this browser (not the profile DB).
+// A missing key means the previous Nestrill appearance stays unchanged.
+const LEAD_TEXT_PREF_KEY='nestrill-show-lead-text';
+const SIDEBAR_COUNTS_PREF_KEY='nestrill-show-sidebar-counts';
+state.showLeadText=localStorage.getItem(LEAD_TEXT_PREF_KEY)!=='0';
+state.showSidebarCounts=localStorage.getItem(SIDEBAR_COUNTS_PREF_KEY)!=='0';
+state.showLeadTextDraft=null;
+state.showSidebarCountsDraft=null;
+function applyDisplayPreferences(){
+ document.documentElement.classList.toggle('nestrill-hide-lead-text',!state.showLeadText);
+ document.documentElement.classList.toggle('nestrill-hide-sidebar-counts',!state.showSidebarCounts);
+}
 function applyAiActionMode(){document.documentElement.classList.toggle('ai-actions-icons',state.aiActionMode==='icons')}
 // Decode only presentation remnants from previously saved feed names.
 function displayFeedTitle(value){return String(value??'').replace(/&(?:raquo|#0*187|#x0*bb);/gi,'»').replace(/&(?:laquo|#0*171|#x0*ab);/gi,'«')}
@@ -1074,7 +1086,7 @@ function renderArticles(){if(state.sourceKind||state.aiKind)return;setSourcePane
 async function setView(mode){state.view=mode;renderArticles();const c=currentCategory();try{if(c){await patch('/api/categories/'+c.id,{mode});c.mode=mode}else localStorage.setItem('nestrill-default-view',mode)}catch(e){err(e)}}
 function openDialog(title,node){cleanupAiSourceScrollBoxes();cleanupAiTopicScrollBoxes();$('dialog-title').textContent=title;$('dialog-body').replaceChildren(node);const settings=!!node.querySelector('.settings-tabs');$('dialog').classList.toggle('settings-dialog',settings);$('dialog-overlay').classList.toggle('settings-overlay',settings);$('dialog-body').scrollTop=0;$('dialog-overlay').classList.remove('hidden');const first=node.querySelector('input:not([type=file]),select');if(first)first.focus()}
 let pendingOpmlDecision=null;
-function closeDialog(){cleanupAiSourceScrollBoxes();cleanupAiTopicScrollBoxes();state.feedIconsDraft=null;state.aiActionModeDraft=null;if(pendingOpmlDecision){const finish=pendingOpmlDecision;pendingOpmlDecision=null;finish(false)}if(state.settingsSnapshot){state.theme=state.settingsSnapshot;state.settingsSnapshot=null;applyTheme()}if(state.placeholderSnapshot){state.placeholders=state.placeholderSnapshot;state.placeholderSnapshot=null;renderArticles()}$('dialog-overlay').classList.add('hidden')}
+function closeDialog(){cleanupAiSourceScrollBoxes();cleanupAiTopicScrollBoxes();state.feedIconsDraft=null;state.aiActionModeDraft=null;state.showLeadTextDraft=null;state.showSidebarCountsDraft=null;if(pendingOpmlDecision){const finish=pendingOpmlDecision;pendingOpmlDecision=null;finish(false)}if(state.settingsSnapshot){state.theme=state.settingsSnapshot;state.settingsSnapshot=null;applyTheme()}if(state.placeholderSnapshot){state.placeholders=state.placeholderSnapshot;state.placeholderSnapshot=null;renderArticles()}$('dialog-overlay').classList.add('hidden')}
 function field(label,control,hint){const wrap=elt('div','form-field');wrap.append(elt('label','',label),control);if(hint)wrap.append(elt('div','help',hint));return wrap}
 function input(placeholder='',value=''){const el=elt('input');el.placeholder=placeholder;el.value=value;return el}
 function action(label,callback,primary=true){const b=elt('button',primary?'primary-button':'secondary-button',label);b.type='button';b.onclick=callback;return b}
@@ -2598,8 +2610,10 @@ function mountAiExternalSection(root){
     if(detailLines.length){
      const details=elt('details','e2-compact-details'),summary=elt('summary','','おすすめ理由・詳細');
      const detailBody=elt('div','e2-compact-detail-body');
-     for(const line of detailLines)detailBody.append(elt('div','',line));
-     details.append(summary,detailBody);content.append(details);
+     for(const line of detailLines)detailBody.append(elt('div',line.startsWith('記事の抜粋：')?'e2-excerpt-detail':'',line));
+     details.append(summary,detailBody);
+     if(detailLines.every(line=>line.startsWith('記事の抜粋：')))details.classList.add('e2-excerpt-only-details');
+     content.append(details);
     }
     const actions=elt('div','e2-compact-actions');
     // E2 IDs are the raw URL hash; prefix them exactly as E4 recommendations.
@@ -2939,7 +2953,7 @@ async function renderAiInterestSettings(root){
  // Diagnostic only: open events never trigger automatic inference.
  const openSection=elt('section','ai-source-mix-section');
  openSection.append(elt('h3','','閲覧シグナル（微弱）'),elt('p','help',
-  '記事を実際に開いた操作だけを記録します。通常クリック・ホイールクリック・リンクURLを開くスーパードラッグは同じ扱いです。1記事につき24時間に1回まで。好評・感想より大幅に弱い情報として、次回のE2探索時にのみ参考にします。'));
+  '記事を実際に開いた操作だけを記録します。通常クリック・ホイールクリック・リンクURLを開くスーパードラッグは同じ扱いです。1記事につき24時間に1回まで。好評・感想より大幅に弱い情報として、次回のAIセレクトの探索時にのみ参考にします。'));
  const openStatus=elt('p','help','閲覧シグナルを確認中…');openStatus.setAttribute('role','status');
  const openAlive=()=>pid===state.profileId&&token===state.secretToken&&root.isConnected;
  const paintOpenStatus=data=>{openStatus.textContent='記録済み '+data.total+'記事'+(data.lastOpenedAt?' ・ 最終検知：'+new Date(data.lastOpenedAt).toLocaleString('ja-JP'):' ・ まだ記録はありません')};
@@ -2970,7 +2984,7 @@ async function renderAiInterestSettings(root){
  openControls.append(refreshOpen,resetOpen);openSection.append(openStatus,openControls);root.append(openSection);refreshOpen.click();
  // Model choice is explicit and isolated per profile. Model selection is NOT an automatic inference trigger.
  const llmSection=elt('section','ai-model-section');
- llmSection.append(elt('h3','','AIセレクトのローカルAI（E2）'),
+ llmSection.append(elt('h3','','AIセレクトのローカルAI'),
   elt('p','help','AIセレクトに使用するOllamaモデルを選択します。探索は「おすすめを更新」を押した場合だけ実行し、通常の閲覧中には自動実行しません。'));
  const modelSelect=elt('select');modelSelect.append(new Option('使用しない（キーワード候補のみ）',''));
  const modelStatus=elt('div','help','ローカルOllamaを確認中…');
@@ -3018,7 +3032,7 @@ async function renderAiInterestSettings(root){
 }
 
 function settingsError(message){const msg=$('settings-error');if(msg){msg.textContent=message;msg.hidden=false;msg.scrollIntoView({block:'nearest'});}else notify('エラー: '+message)}
-function settingsDialog(){state.feedIconsDraft=state.feedIcons;state.aiActionModeDraft=state.aiActionMode;state.settingsSlot='general';state.settingsSnapshot=clone(state.theme);state.placeholderSnapshot=clone(state.placeholders);renderSettings()}
+function settingsDialog(){state.feedIconsDraft=state.feedIcons;state.aiActionModeDraft=state.aiActionMode;state.showLeadTextDraft=state.showLeadText;state.showSidebarCountsDraft=state.showSidebarCounts;state.settingsSlot='general';state.settingsSnapshot=clone(state.theme);state.placeholderSnapshot=clone(state.placeholders);renderSettings()}
 function settingColor(title,target,key){
  const row=elt('div','color-field');row.style.flexWrap='wrap';
  const color=elt('input');color.type='color';color.value=target[key]||'#ffffff';color.setAttribute('aria-label',title+' カラー選択');
@@ -3192,6 +3206,16 @@ function renderRssHideRulesSettings(root){
 }
 
 function renderArticleSettings(root){
+ // CSS presentation toggle; the feed payload and AI evaluation evidence remain intact.
+ if(state.showLeadTextDraft===null)state.showLeadTextDraft=state.showLeadText;
+ const readingSection=elt('section','header-settings');
+ readingSection.append(elt('h3','','記事一覧の表示'));
+ const readingLabel=elt('label','checkbox-label'),readingBox=elt('input');readingBox.type='checkbox';
+ readingBox.checked=state.showLeadTextDraft;
+ readingBox.onchange=()=>{state.showLeadTextDraft=readingBox.checked};
+ readingLabel.append(readingBox,elt('span','','リード文を表示する（RSS・AIセレクト共通）'));
+ readingSection.append(readingLabel,elt('p','help','OFFでは記事一覧のリード文・抜粋を画面上で隠すだけです。取得・保存・AIの意味評価・履歴は変えません。'));
+ root.append(readingSection);
  renderRssHideRulesSettings(root);
  const theme=state.theme;root.append(elt('p','help','サイト名・記事タイトル・リード文の文字設定を個別に調整できます。インストール済みフォントを選択してください。候補の検索もできます。'));
  if(state.aiActionModeDraft===null)state.aiActionModeDraft=state.aiActionMode;
@@ -3430,6 +3454,12 @@ function renderSettings(){const root=elt('div');const tabs=elt('div','settings-t
   checkbox.onchange=()=>{state.feedIconsDraft=checkbox.checked};
   label.append(checkbox,elt('span','','各RSSのファビコンを表示'));
   section.append(label,elt('p','help','取得できない場合はNestrillの鳥アイコンを表示します。'));
+  if(state.showSidebarCountsDraft===null)state.showSidebarCountsDraft=state.showSidebarCounts;
+  const countsLabel=elt('label','checkbox-label'),countsBox=elt('input');countsBox.type='checkbox';
+  countsBox.checked=state.showSidebarCountsDraft;
+  countsBox.onchange=()=>{state.showSidebarCountsDraft=countsBox.checked};
+  countsLabel.append(countsBox,elt('span','','左ペインの件数を表示する'));
+  section.append(countsLabel,elt('p','help','すべての記事・未読の記事・カテゴリ・個別RSS・YouTubeの表示枠／グループの数字をまとめて切り替えます。右ペインの件数や未読管理は変えません。'));
   root.append(section);
  }
  if(slot==='shared'){
@@ -3466,7 +3496,13 @@ function renderSettings(){const root=elt('div');const tabs=elt('div','settings-t
    const ext=file.name.split('.').pop().toLowerCase();const type=file.type||{apng:'image/apng',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',mp4:'video/mp4',webm:'video/webm'}[ext];
    try{const response=await api('/api/background/'+slot,{method:'POST',body:file,headers:{'Content-Type':type}});b.image=response.image;applyTheme();updatePreview();notify('画像・動画を読み込みました。［設定を保存］で確定します。')}catch(e){err(e)}
   };
-  root.append(field('背景ファイルを選択',picker,`現在: ${b.image?b.image.split('?')[0].split('/').pop():'なし'}`));
+  const bgFileField=field('背景ファイルを選択',picker,`現在: ${b.image?b.image.split('?')[0].split('/').pop():'なし'}`);
+  const bgSaveHint=elt('div','help nestrill-bg-path-hint');
+  bgSaveHint.append(elt('div','','おすすめの保存先（通常インストール版の例）：'));
+  bgSaveHint.append(elt('code','',String.raw`C:\Users\ユーザー名\AppData\Local\Programs\Nestrill\data\backgrounds`));
+  bgSaveHint.append(elt('div','',String.raw`ポータブル版：Nestrillを展開したフォルダー内の data\backgrounds`));
+  bgFileField.append(bgSaveHint);
+  root.append(bgFileField);
   root.append(action('この背景ファイルを解除',()=>{b.image='';applyTheme();renderSettings()},false));
  }
  if(b.type==='folder'||b.type==='video'){
@@ -3537,6 +3573,15 @@ async function saveSettings(){
    state.aiActionMode=state.aiActionModeDraft==='icons'?'icons':'text';
    localStorage.setItem(AI_ACTION_MODE_KEY,state.aiActionMode);applyAiActionMode();
   }
+  if(state.showLeadTextDraft!==null){
+   state.showLeadText=!!state.showLeadTextDraft;
+   localStorage.setItem(LEAD_TEXT_PREF_KEY,state.showLeadText?'1':'0');
+  }
+  if(state.showSidebarCountsDraft!==null){
+   state.showSidebarCounts=!!state.showSidebarCountsDraft;
+   localStorage.setItem(SIDEBAR_COUNTS_PREF_KEY,state.showSidebarCounts?'1':'0');
+  }
+  applyDisplayPreferences();
   renderSidebar();
   state.settingsSnapshot=null;state.placeholderSnapshot=null;
   closeDialog();
@@ -3545,7 +3590,7 @@ async function saveSettings(){
  }catch(e){settingsError('設定を保存できませんでした: '+e.message)}
  finally{if(button){button.disabled=false;button.textContent='設定を保存'}}
 }
-async function init(){try{applyAiActionMode();setSidebarFolded(localStorage.getItem(SIDEBAR_COLLAPSE_KEY)==='1');const sidebarWidth=Number(localStorage.getItem('nestrill-sidebar-width'));if(sidebarWidth>=175&&sidebarWidth<=600)document.documentElement.style.setProperty('--sidebar-width',sidebarWidth+'px');state.theme=await api('/api/theme');state.placeholders=await api('/api/placeholders');applyTheme();
+async function init(){try{applyAiActionMode();applyDisplayPreferences();setSidebarFolded(localStorage.getItem(SIDEBAR_COLLAPSE_KEY)==='1');const sidebarWidth=Number(localStorage.getItem('nestrill-sidebar-width'));if(sidebarWidth>=175&&sidebarWidth<=600)document.documentElement.style.setProperty('--sidebar-width',sidebarWidth+'px');state.theme=await api('/api/theme');state.placeholders=await api('/api/placeholders');applyTheme();
  api('/api/fonts').then(data=>{state.installedFonts=Array.isArray(data.fonts)?data.fonts:[];state.fontDetected=!!data.detected;}).catch(e=>console.warn('フォント一覧の取得に失敗:',e));await loadProfiles();await loadSourceAccounts();await loadOverview();state.view=localStorage.getItem('nestrill-default-view')||'list';await loadArticles();if(state.overview.refreshing)setTimeout(checkRefresh,1600)}catch(e){err(e)}}
 // Fix103Y: replace the AI recommendation heading + child with one article discovery nav item.
 // Manipulate only the existing elements; no static index.html version assumptions.

@@ -10,6 +10,7 @@ async function test(variant, expected){
  CREATE TABLE ai_exclusion_lists(profile_id INTEGER PRIMARY KEY,terms_json TEXT,updated_at INTEGER);
  CREATE TABLE ai_model_config(profile_id INTEGER PRIMARY KEY,model TEXT NOT NULL,updated_at INTEGER);
  CREATE TABLE ai_item_feedback(profile_id INTEGER,kind TEXT,item_id TEXT,rating INTEGER,comment TEXT,updated_at INTEGER);
+ CREATE TABLE ai_external_feedback_meta(profile_id INTEGER,item_id TEXT,title TEXT,url TEXT,excerpt TEXT);
  CREATE TABLE articles(id INTEGER PRIMARY KEY,feed_id INTEGER,title TEXT,url TEXT,published INTEGER);
  CREATE TABLE profile_feeds(feed_id INTEGER,profile_id INTEGER);
  CREATE TABLE feeds(id INTEGER,url TEXT,site_url TEXT);
