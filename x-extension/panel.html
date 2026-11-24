@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nestrill X Extension</title><link rel="stylesheet" href="panel.css"></head>
+<body>
+  <div id="nx9-wallpaper" aria-hidden="true"><div id="nx9-wallpaper-media"></div><div id="nx9-wallpaper-tint"></div></div>
+  <header class="topbar">
+    <span class="pane-title">フィード</span>
+    <button id="manage" class="small-icon" type="button" title="Nestrillの既存の設定画面を開く" aria-label="Nestrillの既存の設定画面を開く">⚙</button>
+  </header>
+  <main id="scrollpane">
+    <div class="profile-box"><span class="profile-label">プロファイル</span><div class="profile-row"><span id="profile-name">確認中…</span><button type="button" id="manage-profiles" class="profile-manage-btn" title="Nestrill本体のプロファイル管理画面を開く">切替・管理</button></div></div>
+    <div id="compact-indicator" role="status" aria-live="polite">共通左ペイン：確認中…</div>
+    <button id="restore-native-pane" type="button" hidden>← 標準の左ペインに戻す</button>
+    <div id="enable-banner" class="onboard" hidden>
+      <p>1タブ方式です。共通メニューの表示を確認したら、元の左ペインを隠せます。</p>
+      <button id="enable-compact" type="button">左ペインを共通表示にする</button>
+    </div>
+    <div id="link-menu" hidden>
+      <nav class="main-links" aria-label="主な表示先">
+        <button type="button" class="nav-item" data-kind="group" data-value="all"><span class="nx-native-symbol" aria-hidden="true">▤</span>すべての記事</button>
+        <button type="button" class="nav-item" data-kind="group" data-value="unread"><span>◉</span>未読の記事</button>
+        <button type="button" class="nav-item" data-kind="group" data-value="starred"><span>☆</span>お気に入り</button>
+      </nav>
+      <div class="section-title">カテゴリ</div>
+      <div id="categories" class="groups" aria-label="カテゴリ"></div>
+      <div class="section-separator"></div>
+      <button type="button" class="nav-item nav-ai" data-kind="ai"><span class="nx-native-symbol" aria-hidden="true">▤</span>AIセレクト</button>
+      <div class="section-separator"></div>
+      <div class="section-title">追加情報源</div>
+      <div id="sources" class="groups"></div>
+      <div class="x-menu-row">
+        <button id="x-switch" type="button" class="nav-item"><span>𝕏</span>X（Twitter）</button>
+        <button id="close-x" type="button" class="close-x-action" title="背面のXを終了し、次回は再読み込みします" aria-label="背面のXを終了" hidden>終了</button>
+      </div>
+      <p id="x-cdp-result" class="x-cdp-note" role="status" hidden></p>
+      <div class="bottom-actions">
+        <button id="manage-bottom" type="button">⚙ 設定を開く</button>
+        <button id="add-feed" type="button">＋ RSSを登録</button>
+        <button id="reload" type="button">↻ 一覧を更新</button>
+      </div>
+    </div>
+    <p role="status" id="status" aria-live="polite"></p>
+    <button id="retry-init" type="button" hidden>↻ 再確認</button>
+    <p id="out-of-scope" hidden>このタブは連携対象外です。Nestrillを開いてください。</p>
+  </main>
+  <script src="appearance-panel.js"></script>
+  <script src="panel.js"></script>
+</body></html>

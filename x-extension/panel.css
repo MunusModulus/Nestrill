@@ -1,0 +1,254 @@
+:root{font-family:Meiryo,"Yu Gothic",system-ui,sans-serif;color:#273349;background:#ffffff;color-scheme:light}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-size:12px;display:flex;flex-direction:column}
+button{font:inherit;cursor:pointer;color:inherit}button:disabled{opacity:.55;cursor:wait}
+.topbar{min-height:53px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 17px 0 22px;background:#ffffff}
+.pane-title{font-weight:750;font-size:14px;letter-spacing:.04em}.small-icon{border:0;border-radius:6px;background:transparent;padding:5px 8px;font-size:17px;color:#75869b}
+.small-icon:hover{background:#dfe8f4}
+#scrollpane{flex:1;min-height:0;overflow:auto;padding:10px 12px 24px 15px;scrollbar-gutter:stable}
+.profile-box{background:#ffffff70;border:1px solid #cad4e1;border-radius:7px;padding:9px 10px;margin:0 0 16px;display:flex;flex-direction:column;gap:5px}
+.profile-label{font-size:10px;color:#627083;font-weight:700}#profile-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.profile-row{display:flex;align-items:center;gap:8px;min-width:0}
+.profile-manage-btn{flex:none;font-size:11px;border:1px solid #cbd7e4;border-radius:5px;min-height:27px;padding:4px 7px;background:#ffffffad;color:#3c628e}
+.profile-manage-btn:hover{background:#e5effb}
+.nav-item{border:0;border-radius:5px;background:transparent;width:100%;min-height:34px;display:flex;align-items:center;text-align:left;gap:8px;padding:6px 9px;font-size:12px;line-height:1.4}
+.nav-item>span:first-child{display:inline-flex;width:1.35em;min-width:1.35em;min-height:1.45em;flex:none;align-items:center;justify-content:center;text-align:center;color:#62718a;font-size:1em;line-height:1;overflow:visible}
+.nav-item:hover,.groups button:hover,.groups summary:hover{background:#8198ba20}
+.nav-item.selected,.groups button.selected,#x-switch.selected{background:#4c82c61d;color:#276cae;font-weight:700}
+.section-title{margin:20px 8px 8px;font-size:11px;font-weight:750;color:#6f7e90}
+.groups{display:block}.groups:empty{display:none}.groups details{margin:0}
+.groups summary{list-style:none;padding:7px 10px;min-height:32px;cursor:pointer;border-radius:5px;font-size:12px;line-height:1.4;display:flex;gap:8px;align-items:center;overflow-wrap:anywhere}
+.groups summary::-webkit-details-marker{display:none}.groups summary::before{content:'▸';flex:none;color:#607287;font-size:11px}
+.groups details[open]>summary::before{content:'▾'}
+.nested{padding-left:13px}.groups button{display:block;width:100%;text-align:left;border:0;border-radius:5px;background:transparent;min-height:28px;padding:5px 8px;font-size:11px;color:#45546b;white-space:normal;overflow-wrap:anywhere}
+.groups button.selected{background:#4c82c61d;color:#276cae;font-weight:700}
+.empty-note{margin:4px 4px 8px;color:#748398;font-size:10px;line-height:1.5}
+.section-separator{border-top:1px solid #d1d9e4;margin-top:16px}.nav-ai{margin-top:10px}
+.bottom-actions{display:flex;flex-direction:column;gap:7px;margin:31px 2px 0}
+.bottom-actions button{border:1px solid #d8e3ef;border-radius:7px;background:#ffffffb8;color:#44658b;min-height:34px;padding:7px 10px;text-align:left;font-weight:600}
+.bottom-actions button:first-child{background:#eaf2fd;color:#326da9}
+.bottom-actions button:hover{filter:brightness(.97)}
+.onboard{background:#ffffffba;border:1px solid #bfcbda;border-radius:7px;margin-bottom:16px;padding:12px;line-height:1.5}
+.onboard p{margin:0 0 10px}.onboard button{background:#416fb0;color:#fff;border:none;border-radius:6px;width:100%;padding:9px 8px;font-weight:650}
+#status{color:#ad3131;font-size:11px;line-height:1.55;overflow-wrap:anywhere;margin:10px 4px;min-height:0}
+#status:empty{display:none}#out-of-scope{color:#65768e;line-height:1.65;font-size:12px;margin:20px 6px}
+[hidden]{display:none!important}
+
+#compact-indicator{font-size:11px;color:#596a7d;margin:-8px 4px 11px;line-height:1.5}
+#compact-indicator.enabled{color:#276a3d;font-weight:700}
+#compact-indicator.warning{color:#a15a12;font-weight:700}
+/* R9M: the restore control belongs to the shared panel, near its mode status,
+   not to a floating button above RSS articles. */
+#restore-native-pane{display:block;width:100%;min-height:38px;margin:-3px 0 12px;
+  border:1px solid #9cb8db;border-radius:7px;padding:9px 10px;
+  background:#deecff;color:#245b9c;font-size:12px;font-weight:700;
+  text-align:left;line-height:1.4;cursor:pointer}
+#restore-native-pane:hover,#restore-native-pane:focus-visible{background:#cbdfff;outline-offset:2px}
+#restore-native-pane[hidden]{display:none!important}
+
+/* Proof08: read-only diagnostic note beneath X, no overlay on X itself. */
+.x-cdp-note{font-size:10px;line-height:1.5;color:#4f6176;margin:4px 9px 8px;
+ background:#ffffff86;border:1px solid #cad4e1;border-radius:5px;padding:7px 9px}
+
+/* Proof08 R1: accessible recovery action when the initial menu is not ready. */
+#retry-init{margin:8px 4px;background:#fff;border:1px solid #bfcddd;color:#375f88;
+ border-radius:6px;padding:8px 11px;min-height:32px}
+
+/* Proof08 R2: multi-line passive diagnostic only */
+.x-cdp-note{white-space:pre-line;overflow-wrap:anywhere;}
+
+/* Proof09 R5 — read-only Nestrill theme mirror; image/color only, no video player. */
+#nx9-wallpaper{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+#nx9-wallpaper-media{position:absolute;background-repeat:no-repeat;background-size:cover;
+  will-change:auto;pointer-events:none}
+#nx9-wallpaper-tint{position:absolute;inset:0;pointer-events:none}
+#nx9-wallpaper[hidden]{display:none!important}
+body.nx9-themed{background:var(--nx-base,#ffffff);font-family:var(--nx-left-font,Meiryo,sans-serif);
+ font-size:var(--nx-left-size,13px);font-weight:var(--nx-left-weight,400);color:var(--nx-left-color,#273349);
+ -webkit-text-stroke:var(--nx-left-stroke,0px) var(--nx-left-stroke-color,#000);
+ text-shadow:var(--nx-left-shadow,none)}
+body.nx9-themed .topbar,body.nx9-themed #scrollpane{z-index:1;position:relative;background:transparent}
+body.nx9-themed .topbar{background:var(--nx-header-bg,#ffffffbf);
+ backdrop-filter:blur(var(--nx-header-blur,10px));color:var(--nx-header-text,#263c59)}
+body.nx9-themed .pane-title{color:inherit}
+body.nx9-themed .nav-item,body.nx9-themed .groups summary,body.nx9-themed .groups button{
+ font-family:inherit;font-size:inherit;color:inherit}
+body.nx9-themed .groups button{font-size:.92em}
+body.nx9-themed .section-title,body.nx9-themed .profile-label,body.nx9-themed #compact-indicator{
+ color:inherit;opacity:.74}
+body.nx9-themed .nav-item>span:first-child{color:inherit;opacity:.8}
+body.nx9-themed .profile-box{background:#ffffff70;color:inherit}
+body.nx9-themed .bottom-actions button{color:inherit}
+
+/* R9F: icons follow the current menu font size, including theme overrides.
+   The icon glyph is drawn by SVG at 1em; its slot also scales in em.
+   No fixed px dimensions, no glyph-descender clipping at 14px or above. */
+.nav-item>span.nx-menu-svg svg{display:block;width:1em;height:1em;flex:none;overflow:visible}
+
+/* R9G — explicit, opt-in release of the retained X document. */
+.close-x-action{display:block;margin:2px 9px 7px 24px;padding:6px 8px;min-height:28px;
+  border:1px solid #cbd5e2;border-radius:5px;background:#ffffffa8;
+  color:#5a687a;text-align:left;font-size:.88em;line-height:1.35}
+.close-x-action:hover{background:#edf3fb;color:#274e79}
+
+/* R9I: same-row X close action; keep the opt-in confirmation unchanged. */
+.x-menu-row{display:flex;align-items:center;gap:5px;min-width:0}
+.x-menu-row #x-switch{flex:1;min-width:0;width:auto}
+.x-menu-row .close-x-action{flex:none;margin:0 5px 0 0;padding:4px 8px;min-height:26px;white-space:nowrap;font-size:.88em}
+/* Hide development-only Proof/CDP readouts; errors continue in #status. */
+#x-cdp-result{display:none!important}
+
+/* R9J: selection and bottom action labels follow Nestrill's left-pane weight.
+   Keep selected backgrounds/colors and heavier section headings unchanged. */
+.nav-item.selected,
+.groups button.selected,
+#x-switch.selected,
+.bottom-actions button {
+  font-weight: var(--nx-left-weight, 400);
+}
+
+
+/* R9K — native-style category actions: triangle toggles, name opens RSS.
+   Do not change YouTube accordion behavior or Nestrill's own sidebar. */
+.groups .category-entry { margin:0; }
+.groups .category-head { display:flex;align-items:center;min-height:32px;
+  border-radius:5px;gap:0;min-width:0; }
+.groups .category-head:hover { background:#8198ba20; }
+.groups .category-entry.active > .category-head { background:#4c82c61d; }
+.groups .category-head .category-toggle { display:flex;align-items:center;
+  justify-content:center;flex:0 0 23px;width:23px;min-width:23px;
+  min-height:32px;padding:0;border:0;border-radius:5px;
+  background:transparent;color:inherit;opacity:.75;font-size:.85em;
+  line-height:1;cursor:pointer; }
+.groups .category-head .category-toggle:hover { background:#8198ba35;opacity:1; }
+.groups .category-head .category-select { display:block;flex:1;min-width:0;
+  width:auto;min-height:32px;padding:7px 9px 7px 3px;border:0;
+  background:transparent;text-align:left;border-radius:5px;
+  font:inherit;font-size:inherit;font-weight:inherit;color:inherit;
+  overflow-wrap:anywhere; }
+.groups .category-head .category-select:hover { background:transparent; }
+.groups .category-head .category-select.selected { background:transparent;
+  color:inherit;font-weight:inherit; }
+.groups .category-feeds { padding-left:13px; }
+.groups .category-feeds[hidden] { display:none!important; }
+body.nx9-themed .groups .category-head .category-select { font-family:inherit;
+  font-size:inherit;color:inherit;font-weight:inherit; }
+
+
+/* R9L — third category action: native management dialog (⋯).
+   Keep disclosure and category navigation as independent targets. */
+.groups .category-head .category-manage {
+  flex:0 0 25px;width:25px;min-width:25px;min-height:30px;
+  padding:0;margin:0 2px 0 0;text-align:center;
+  border:0;border-radius:5px;background:transparent;
+  color:inherit;font:inherit;font-size:1.2em;font-weight:inherit;
+  line-height:1;opacity:.58;cursor:pointer;
+}
+.groups .category-head .category-manage:hover,
+.groups .category-head .category-manage:focus-visible{
+  background:#8198ba35;opacity:1;outline-offset:-2px;
+}
+body.nx9-themed .groups .category-head .category-manage {
+  font-family:inherit;color:inherit;font-weight:inherit;
+}
+
+
+/* R9P: standard Nestrill left-pane type and symbol parity.
+   Variables come from the existing read-only appearance snapshot (same browser,
+   same Nestrill profile). Do not add a second extension font settings screen. */
+body {
+  --nx-native-font: var(--nx-left-font, Meiryo, sans-serif);
+  --nx-native-menu-size: var(--nx-left-size, 13px);
+  --nx-native-menu-weight: var(--nx-left-weight, 400);
+  --nx-native-icon-size: 16px;
+  --nx-native-triangle-size: 16px;
+  --nx-native-feed-size: 12px;
+}
+body .nav-item,body .groups .category-head .category-select,
+body .groups summary,body.nx9-themed .nav-item,
+body.nx9-themed .groups summary,
+body.nx9-themed .groups .category-head .category-select {
+  font-family:var(--nx-native-font,Meiryo,sans-serif);
+  font-size:var(--nx-native-menu-size,13px);
+  font-weight:var(--nx-native-menu-weight,400);
+}
+body .nav-item {min-height:35px;gap:9px;padding:6px 10px;}
+body .main-links .nav-item > span:first-child,
+body .nav-ai > span:first-child,
+body .x-menu-row .nav-item > span:first-child {
+  flex:0 0 19px;width:19px;min-width:19px;min-height:1em;
+  font-family:var(--nx-native-font,Meiryo,sans-serif);
+  font-size:var(--nx-native-icon-size,16px);
+  line-height:1;opacity:.85;
+}
+body .groups .category-head .category-toggle {
+  font-family:var(--nx-native-font,Meiryo,sans-serif);
+  font-size:var(--nx-native-triangle-size,16px);
+  font-weight:var(--nx-native-menu-weight,400);
+  flex:0 0 23px;min-height:35px;
+}
+body .groups .category-head .category-select {min-height:35px;gap:6px;}
+body .groups .category-feeds button {font-size:var(--nx-native-feed-size,12px);}
+body .groups .category-entry.active .category-head .category-select,
+body.nx9-themed .groups .category-entry.active .category-head .category-select {
+  color:#276cae;font-weight:700;
+}
+body .main-links .nav-item.selected,body .nav-ai.selected,
+body .groups .category-feeds button.selected {font-weight:700;}
+body .nx-native-count {
+  display:inline-block;flex:none;margin-left:auto;background:#ffffff65;color:inherit;
+  font:500 11px/1.3 Meiryo,'Yu Gothic',sans-serif;
+  border-radius:10px;padding:1px 6px;text-align:center;
+}
+/* On X, the last valid snapshot is displayed; browser-local preference wins
+   on the next Nestrill snapshot. Never show stale counts when disabled. */
+body[data-nx-show-counts="0"] .nx-native-count {display:none!important;}
+
+
+/* R9Q — correct parity with Standard v0.2.3 RC02 (public/style.css).
+   R9P accidentally read #nav-all ACTIVE weight as the baseline. The bridge
+   now reads #sidebar instead; these selectors mirror Standard's active rows
+   without overriding the saved baseline font/weight on ordinary entries. */
+body.nx9-themed .main-links .nav-item:not(.selected),
+body.nx9-themed .nav-ai:not(.selected),
+body.nx9-themed .x-menu-row .nav-item:not(.selected),
+body.nx9-themed .groups .category-head .category-select:not(.selected) {
+  color:inherit;
+  font-weight:var(--nx-native-menu-weight,var(--nx-left-weight,400));
+}
+body.nx9-themed .main-links .nav-item.selected,
+body.nx9-themed .nav-ai.selected,
+body.nx9-themed .x-menu-row .nav-item.selected,
+body.nx9-themed .groups .category-head .category-select.selected,
+body.nx9-themed .groups .category-entry.active > .category-head .category-select,
+body.nx9-themed .groups button.selected {
+  background:#4c82c61d;
+  color:#276cae;
+  font-weight:700;
+}
+body.nx9-themed .groups .category-head .category-select.selected,
+body.nx9-themed .groups .category-entry.active > .category-head .category-select {
+  background:transparent;
+}
+/* The category row owns the active fill, matching Standard's .nav-item. */
+body.nx9-themed .groups .category-entry.active > .category-head {
+  background:#4c82c61d;
+}
+/* Standard uses a 16px ▸/▾ symbol in a 19px .nav-symbol slot,
+   not an independent tiny 11px disclosure glyph. */
+body .groups .category-head .category-toggle,
+body.nx9-themed .groups .category-head .category-toggle {
+  font-size:var(--nx-native-triangle-size,16px);
+  font-family:var(--nx-native-font,Meiryo,sans-serif);
+  font-weight:var(--nx-native-menu-weight,var(--nx-left-weight,400));
+  opacity:.85;
+}
+/* A standard source has a red YouTube brand mark, instead of plain text. */
+#sources .nx-source-youtube .nx-source-youtube-mark {
+  display:inline-block;flex:none;width:16px;height:12px;
+  border-radius:4px;background:#df4141;position:relative;
+}
+#sources .nx-source-youtube .nx-source-youtube-mark::after {
+  content:'';position:absolute;left:6px;top:3px;
+  border-top:3px solid transparent;border-bottom:3px solid transparent;
+  border-left:5px solid #fff;
+}

@@ -29,8 +29,8 @@ Node.js：[公式ダウンロードページ](https://nodejs.org/en/download/)
 
 ## インストールと起動
 
-1. [Releases](https://github.com/MunusModulus/Nestrill/releases/latest) から **`Nestrill-Setup-v0.2.3.zip`** を取得します。
-2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.3.exe`** を実行します。EXEを直接ダウンロードして実行することもできます。
+1. [Releases](https://github.com/MunusModulus/Nestrill/releases/tag/v0.2.3) から **`Nestrill-Setup-v0.2.3.zip`** を取得します。
+2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.3.exe`** を実行します。
 3. インストール後、Windowsの **スタート → すべてのアプリ → N → Nestrill** から起動します。ブラウザが自動で開きます。
 4. 終了するときは、同じN欄の **「Nestrill を終了」** を選びます。
 
@@ -50,7 +50,7 @@ Nestrill X Extensionは、Heliumブラウザ向けのオプション拡張機能
 
 - NestrillとX（旧Twitter）で共通の左サイドバーを使用
 - 左サイドバーを維持したまま、右側の画面をRSS・YouTube・AIセレクト・Xに切り替え
-- Xのタイムラインのスクロール位置を保持・復元
+- Xのページを背面に保持し、通常の切り替え時に閲覧位置を維持しやすくする
 - NestrillとXの背景・外観を統一
 - 使用していない背面のXを手動で終了可能
 
@@ -58,7 +58,9 @@ RSS登録、AIセレクト、設定などはNestrill本体と共通です。専�
 
 Nestrill X Extensionは任意の追加機能であり、通常版のインストーラーには含まれません。
 
-現在、一般配布に向けて準備中です。
+**[Nestrill X Extension v1.0.0の配布ページ](https://github.com/MunusModulus/Nestrill/releases/tag/x-extension-v1.0.0)** からZIPを取得し、Heliumにパッケージ化されていない拡張機能として読み込みます。
+
+詳しい導入・更新・削除手順と権限については [導入ガイド](x-extension/README_FIRST.md) をご覧ください。Nestrill v0.2.3とHeliumの組み合わせで実機確認済みです。
 
 ## スマートフォンで利用する（任意）
 

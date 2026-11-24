@@ -1,0 +1,37 @@
+/* Proof03: hide the original Nestrill sidebar before first paint while
+   the saved mode is checked; later use the explicit shared-menu class.
+   This never hides anything on X or other websites. */
+html.nx1-boot-guard #workspace > #sidebar,
+html.nx1-boot-guard #workspace > #splitter,
+html.nx4-hide-native-menu #workspace > #sidebar,
+html.nx4-hide-native-menu #workspace > #splitter{display:none!important}
+html.nx1-boot-guard #workspace > #main,
+html.nx4-hide-native-menu #workspace > #main{flex:1;min-width:0;width:100%}
+.nx4-x-group{min-width:0}
+.nx4-x-group #nx4-open-x{cursor:pointer;display:flex;align-items:center;
+ min-width:0;width:100%;padding:8px 10px;min-height:33px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nx4-x-status{display:block;clear:both;max-width:100%;margin:2px 10px 5px;
+ font-size:10px;color:#8b4f43;line-height:1.45;overflow-wrap:anywhere}
+#nx4-x-status:empty{display:none}
+
+/* Nestrill X Extension only: native settings explanatory note, with no DOM observer or
+   background work. Settings form comes from unmodified Nestrill app.js.
+   The selected native "単色" option is reflected via :checked. */
+html.nx4-hide-native-menu #dialog-body > div:has(> .settings-tabs > button:nth-child(2).active)
+ > .form-field:has(> select > option[value="color"]:checked)
+ + .settings-grid > .form-field:nth-child(2)::after,
+html.nx4-hide-native-menu #dialog-body > div:has(> .settings-tabs > button:nth-child(4).active)
+ > .form-field:has(> select > option[value="color"]:checked)
+ + .settings-grid > .form-field:nth-child(4)::after {
+  content:"※ Nestrill X Extensionの共通左ペインでは、背景色の不透明度を0%にしても下地の白（#FFFFFF）が残ります。完全な透明にはなりません。";
+  display:block;
+  margin-top:5px;
+  color:#778598;
+  font-size:11px;
+  line-height:1.65;
+}
+
+/* Nestrill X Extension only. The native Nestrill 's' secret-entry hotspot is disabled.
+   When a session was already secret, keep its exit hotspot functional. */
+html.nx4-nestrill-active:not(.secret-active) #brand-s { pointer-events:none !important; cursor:default !important; }
