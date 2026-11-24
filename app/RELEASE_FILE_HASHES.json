@@ -1,0 +1,300 @@
+{
+  "release": "Nestrill v0.2.3",
+  "kind": "release",
+  "releasedAt": "2026-11-24",
+  "builtFrom": "Verified Nestrill Standard v0.2.3 RC08 (settings groups) + InstallerFix01 source correction + release metadata",
+  "defaultArticleFonts": "source=Noto Sans JP Medium/400, title=Noto Sans JP Medium/500, excerpt=Noto Sans JP/400",
+  "defaultAiModel": "gemma4:e4b-it-qat (only if no stored model configuration)",
+  "exclusionPlaceholder": "none",
+  "privacy": "no data/, run/, logs/ or user session/credentials",
+  "files": [
+    {
+      "path": "Create-Nestrill-Shortcuts.cmd",
+      "sha256": "bb8144ab42cf4938d90d393c97c64bdceaf0fb937e6afa25072a4b921baf4f9c"
+    },
+    {
+      "path": "Disable-Nestrill-Autostart.cmd",
+      "sha256": "8795c636cb1a028a078282f28303505183e5ff685412f8ebf3b3fd999e004962"
+    },
+    {
+      "path": "Enable-Nestrill-Autostart.cmd",
+      "sha256": "2294b9b5003543fd65bc15273ddb7142ea2a08191495154e0e50486abbdd54cd"
+    },
+    {
+      "path": "GO_LICENSE.txt",
+      "sha256": "2d36597f7117c38b006835ae7f537487207d8ec407aa9d9980794b2030cbc067"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "7ad1db9d2604ed00e62fcbcbecdbb51e338f2947a24e212718e2c4cc8e7e25ba"
+    },
+    {
+      "path": "MOBILE_SETUP.md",
+      "sha256": "1fa09fc0402926476f23004b09c408eefa14ca02327152f83d6adab3b1196884"
+    },
+    {
+      "path": "Nestrill.exe",
+      "sha256": "7d5d224178cb1d5dfba7681cbd9528f646bd75be6ab3fe01e085fbec374af324"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f45081c91b23a160b6edff962cd11383ec05ece8a229cfc808ec566022663e82"
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "sha256": "04cb05110a15bfc3a2a03907808af14cfb29f6a78c2895bfd8518b8a7ae87c9b"
+    },
+    {
+      "path": "Remove-Nestrill-Shortcuts.cmd",
+      "sha256": "11da0bd052becc2277a6cf8dfceb23fa3f0dce8adeaa3d27d0aa919996a4cad2"
+    },
+    {
+      "path": "Revoke-Nestrill-Mobile-Logins.cmd",
+      "sha256": "7e685a228d279f81dcb80a1abb5af42d29f30c01cc89e99b56846d1c33e15ce0"
+    },
+    {
+      "path": "SETUP_WINDOWS.md",
+      "sha256": "99091ffc9094c8786faf62101b17cc2eac1f8cacda2ca852493b8995a805af09"
+    },
+    {
+      "path": "Show-Nestrill-Autostart-Status.cmd",
+      "sha256": "8764208cd8c0cff54806e538900b7ea37fa0cc179bab3f70352080314958212c"
+    },
+    {
+      "path": "Show-Nestrill-Status.cmd",
+      "sha256": "30208a11ec359f904e38a1370f422e5de511d1835b4b122d387e7c73892dec88"
+    },
+    {
+      "path": "Start-Nestrill-Mobile.cmd",
+      "sha256": "c7b5ad1922026259a562009ff9f99530a19573ae4c1eb47f901d8625e2bb9b21"
+    },
+    {
+      "path": "Start-Nestrill-Remote.cmd",
+      "sha256": "ed2514e6cdb099ce15124d33eaa318ee518f1a18a63b826f9d097b8ea9e1b463"
+    },
+    {
+      "path": "Start-Nestrill.cmd",
+      "sha256": "e9e3f31173efb6244c7987708bae90aad1c4ddc2c0651a4c59142ed5ac4f6fd5"
+    },
+    {
+      "path": "Status-Nestrill-Remote.cmd",
+      "sha256": "d3d7b47f52b9574e38352cdee07884c3c448216a9b355eba9d80615b99f259b2"
+    },
+    {
+      "path": "Status-Nestrill.cmd",
+      "sha256": "c3b12aba6623b2391bc3fefe9ae86399d188a4eee1bcaac1a8e0c8daa0ae70ae"
+    },
+    {
+      "path": "Stop-Nestrill-Mobile.cmd",
+      "sha256": "4b92bd2a04e56eede9987acd345003be0cc04d61587d3fc8573addf05f188ee3"
+    },
+    {
+      "path": "Stop-Nestrill-Remote.cmd",
+      "sha256": "f1a99f33520f48f4555e7bbcccb9d3ed12992a17bcaf6fec88086702b2f7e4f7"
+    },
+    {
+      "path": "Stop-Nestrill.cmd",
+      "sha256": "77da1022f9a279f5d3ec68f870c5d31e142c965ab05fdf7a3a9f815c0fb994bf"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "f8943400952584e5c251049395c42071ba2f43bffc6aa3df06e75134ed9a8194"
+    },
+    {
+      "path": "ai-audit-capture.js",
+      "sha256": "938d7b679c791d93c30789af391534cffe16fbda195cb7e139bf5dee1145b1f7"
+    },
+    {
+      "path": "ai-blend.js",
+      "sha256": "51636e68af39059f31915e7ee5a66a05db629d4a28b7f422d3a7a928e1ddeee7"
+    },
+    {
+      "path": "ai-condition-diversity.js",
+      "sha256": "3ed3bd7d9b318f8dc76197041650b53c58f17171d69ea50fa9bbcf9078ce63b4"
+    },
+    {
+      "path": "ai-conditional.js",
+      "sha256": "5770e8c2f4ed12b5ce9c8b27c2b2940373610a166c892acb419293acf59ed1e7"
+    },
+    {
+      "path": "ai-e2-history-repeat.js",
+      "sha256": "4eae28d5e3fc65df2e3ae9dba540a9e5088ce8481d940b2e4d615a5e4ab9682d"
+    },
+    {
+      "path": "ai-exclusion.js",
+      "sha256": "9e9d6cfa04f1e73f80037a6ed27c9e8313ac1119618504b91709101f10601174"
+    },
+    {
+      "path": "ai-external.js",
+      "sha256": "9918b4eb37c19091e94e6364d4770686d24645cefe68b544c9994d1f42d6d2fe"
+    },
+    {
+      "path": "ai-input-evidence.js",
+      "sha256": "442833c807f2307f72c9e451632e56f1ee5b55c6f3890e33c6ea14d3a4cf920c"
+    },
+    {
+      "path": "ai-latest.js",
+      "sha256": "5439c1a272de76c6a7c9b8a48d159b34aa27463aca150536c857b342172f5ed1"
+    },
+    {
+      "path": "ai-news-brief-enrichment.js",
+      "sha256": "bcadc02b328ce6394d5de71c79e609ab973e9eb85d02c20cb368562ad507dbb8"
+    },
+    {
+      "path": "ai-news-preview.js",
+      "sha256": "b698f067540d9a2651a9d1494953230396da021f314290e86ad1612c84d73434"
+    },
+    {
+      "path": "ai-open.js",
+      "sha256": "0bf46101b6a8efe331b302e3701eba062d89b0833a9e257b38413491fe5ee8c1"
+    },
+    {
+      "path": "ai-random.js",
+      "sha256": "81f11b4e367149e14aac307d9b4ab71940de621d82fd2e5e01f8ab8b2bc42cff"
+    },
+    {
+      "path": "ai-recommend.js",
+      "sha256": "5d4e1954b36bf8237bfeb8872e592e7334c7c6b3a86d4ce7bb1f94fb6da9ea13"
+    },
+    {
+      "path": "ai-semantic.js",
+      "sha256": "ad4efc985af3033d93a5ca2fa56b34f7a110af25a3586c359725f9b941fd4002"
+    },
+    {
+      "path": "ai-source-feedback.js",
+      "sha256": "00d5c2ff9f6adc0c040ea88bd5490f050efd121e3168a845bfa2a31e4582d1fe"
+    },
+    {
+      "path": "ai-source-quality.js",
+      "sha256": "dbaccb4c05fa39a2a63d8fd996838d37d0b3363e99fd3a7b0385ebb653e7be4a"
+    },
+    {
+      "path": "assets/Nestrill.ico",
+      "sha256": "a05c4b9b0f0ca6abd35120adf7362a8730f2d44b900e3c7a5fb135d9e9910f2c"
+    },
+    {
+      "path": "config-backup.js",
+      "sha256": "e83378f6ee27f4a9c6b25caccfeacae725719a444291c1beba5fb748fa7e18c3"
+    },
+    {
+      "path": "excerpt-improvement.js",
+      "sha256": "63e1551e4cb6b60977c64195cb187cb7cf8ad1b6c43531a1aef11b31063456a8"
+    },
+    {
+      "path": "feed-excerpt-refiner.js",
+      "sha256": "f790c20cbddf5449f2e64c4e23c3f9dd4ee9d1ec73f3e4d4dc43d67c9ef181dd"
+    },
+    {
+      "path": "feed.js",
+      "sha256": "0b79bd9d8246fd9eba262edc6b94aaacef997614b16ad0d2c215363cbe982cc4"
+    },
+    {
+      "path": "mobile/mobile-server.js",
+      "sha256": "e58df85f7902987783bfbaa726df51d5da86c167ba94e689545b3257b89789fa"
+    },
+    {
+      "path": "mobile/mobile-web/app.js",
+      "sha256": "914150b01bcc234e1fa62b445b87e23d82c2b5a794d647b5db43b569e2f90429"
+    },
+    {
+      "path": "mobile/mobile-web/index.html",
+      "sha256": "5f91a8bab03cfa8f99b906e6146e0c2acf33a3554f4d00a4e30a49ea0e13dc99"
+    },
+    {
+      "path": "mobile/mobile-web/style.css",
+      "sha256": "ec6c7901c1f47ea6b478ffdfe9cabef058a840e77a1601991781e5acc1bb400b"
+    },
+    {
+      "path": "mobile/remote-bridge.js",
+      "sha256": "0fdd775c1fbe4ecc6e34ee1934402afb6dbcec6137590098264af70d9709e561"
+    },
+    {
+      "path": "public/app.js",
+      "sha256": "2dc93a4de02da7a1d131ff4d36f7cddfc2554d857e0f29b16f355a7f31d08713"
+    },
+    {
+      "path": "public/bird.svg",
+      "sha256": "70c73b990b7a32a8d51fd7436205581c18e1153e0203e8f7f25ddf1a0179e801"
+    },
+    {
+      "path": "public/favicon.svg",
+      "sha256": "ec2a8e82f5842fb2ff44f673d0505a42849774ed35a191217fb8bf93acdf7f37"
+    },
+    {
+      "path": "public/index.html",
+      "sha256": "e9ddbfdfd471676262b6205179e8f28210e8ff357f42af24da6a2473e75a8402"
+    },
+    {
+      "path": "public/placeholder-failed.svg",
+      "sha256": "038616d34d59a694c56ba212fc3c5a8b531d0c596a85dfe96921240c41471fe7"
+    },
+    {
+      "path": "public/placeholder-missing.svg",
+      "sha256": "c315b7bc44d67575555a80002c3c586b7e270b9b2fdcded11abae9fa73ca29aa"
+    },
+    {
+      "path": "public/style.css",
+      "sha256": "e495b1f2ff01250f853ec19c04d2c52a945b94a30f4321abbadd074985abe87e"
+    },
+    {
+      "path": "public/uxclean-motion.js",
+      "sha256": "3ad124554b172d774fd658c04365c506ab04617887c02f9aa1afc632b54d295c"
+    },
+    {
+      "path": "rss-discovery.js",
+      "sha256": "fa67cffd4ce099cb3775adf3fd85b6f79d68eba03d6801cda62848e95847af0c"
+    },
+    {
+      "path": "rss-hide-rules.js",
+      "sha256": "3c58c6069824f6f9bf6c14a247d0385b10f18ad54f34639af9cc7b3b97451bc7"
+    },
+    {
+      "path": "scripts/List-Fonts.ps1",
+      "sha256": "f7ac158144c414f670ea232de249dc8a216a0dac7d250fffc1dc81a5668c7de3"
+    },
+    {
+      "path": "scripts/Nestrill-Autostart-Launcher.ps1",
+      "sha256": "524f6bd452302f6fe26cfe7618f5df224c68e3f9077be4f4a2d194c67c720242"
+    },
+    {
+      "path": "scripts/Nestrill-Autostart.ps1",
+      "sha256": "5fcb3e65afcd952b480c2ef0048363621c6d6f780ae5830a9c84781f6a110eb2"
+    },
+    {
+      "path": "scripts/Nestrill-Control.ps1",
+      "sha256": "3815bf24f1a9f67e9f7c6fc687f86c85facd24177cc0a62d664564970f55d36a"
+    },
+    {
+      "path": "scripts/Nestrill-Installer.ps1",
+      "sha256": "484ea4881a694d0c9cb4bce73e1ae75b04ad1cdfa3e2a4493c5d3e1abdbfe7ba"
+    },
+    {
+      "path": "scripts/Nestrill-Mobile-Revoke.ps1",
+      "sha256": "09df520302cb18904b45ea0afc834f48eb38e0fd77ce0b3e853292c7dfc86db9"
+    },
+    {
+      "path": "scripts/Nestrill-Mobile.ps1",
+      "sha256": "0872467ed99597e91f5b21b6c616832b765b7cbba70c556f6539593d226f59c8"
+    },
+    {
+      "path": "scripts/Nestrill-Remote.ps1",
+      "sha256": "06243cf3d36837a9a3d334a362c0976e84ed2ffff93f0f83b71a4fed8908f4e1"
+    },
+    {
+      "path": "scripts/Nestrill-Shortcuts.ps1",
+      "sha256": "f4061a858211eb66708e78f6cdc21baf0fc42b99fa79513ac4c9b5413d44a16d"
+    },
+    {
+      "path": "scripts/Pick-BackgroundFolder.ps1",
+      "sha256": "388f0baa9efb49e919fcfa19550538e880be6c018678d07924861b3dc6f627bf"
+    },
+    {
+      "path": "server.js",
+      "sha256": "b929c8f19098d195ed5a2831a0ed9cb67dfff849b81343906e97862e70797369"
+    },
+    {
+      "path": "youtube-source.js",
+      "sha256": "edbec410cdf1df810d035a9182986d4cca9dfaee9a9f91b05a03ac0535f6d68b"
+    }
+  ]
+}

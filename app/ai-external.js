@@ -1105,9 +1105,10 @@ function create({db,fetchXml=fetchNewsXml,semantic=require('./ai-semantic')}){
  return {status,start,updateSettings};
 }
 async function fetchNewsXml(url){
- // Hard-code provider hostname and path; never fetch a user-provided remote URL.
+ // Only the public Google News search RSS and Japan headline RSS paths are permitted.
+ // Never fetch a user-supplied publisher URL.
  const parsed=new URL(url);
- if(parsed.protocol!=='https:'||parsed.hostname!=='news.google.com'||parsed.pathname!=='/rss/search'||parsed.port||parsed.username||parsed.password)throw Error('許可されていない外部情報源です');
+ if(parsed.protocol!=='https:'||parsed.hostname!=='news.google.com'||!['/rss/search','/rss'].includes(parsed.pathname)||parsed.port||parsed.username||parsed.password)throw Error('許可されていない外部情報源です');
  const response=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(12000),headers:{'Accept':'application/rss+xml, application/xml;q=0.8','User-Agent':'Nestrill-Next/0.2 (personal RSS reader)'}});
  if(!response.ok)throw Error('外部RSS HTTP '+response.status);
  const declared=Number(response.headers.get('content-length')||0);

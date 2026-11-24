@@ -116,7 +116,7 @@ function create({db}){
   if(/\s+(?:\+|or)\s+/i.test(src)||/^(?:\+|or)\s+|\s+(?:\+|or)$/i.test(src))throw Error(example);
   return {titleText:src,titleText2:'',titleOperator:'and'};
  }
- function add(pid,x){
+ function parseRule(pid,x,ignoreId=null){
   if(!x||typeof x!=='object'||Array.isArray(x))throw Error('ルール形式が不正です');
   const domain=domainValue(x.domain),titleMode=String(x.titleMode||'');
   if(!['all','contains','exact'].includes(titleMode))throw Error('タイトル条件が不正です');
@@ -138,10 +138,27 @@ function create({db}){
   if(titleMode==='contains'&&titleText2&&norm(titleText2)===norm(titleText))throw Error('2つの語句は別の内容を指定してください');
   if(!domain&&titleMode==='all')throw Error('全サイトの全記事は非表示にできません');
   if(titleText.length>120||/[\x00-\x1f\x7f]/.test(titleText))throw Error('タイトル条件は120文字以内で入力してください');
-  const rows=getRows(pid);if(rows.length>=100)throw Error('非表示ルールは100件までです');
-  if(rows.some(r=>r.domain===domain&&r.titleMode===titleMode&&norm(r.titleText)===norm(titleText)&&normPhrase(r.titleText2)===normPhrase(titleText2)&&r.titleOperator===titleOperator))throw Error('同じルールが登録されています');
-  const result=db.prepare('INSERT INTO rss_article_hide_rules(profile_id,domain,title_mode,title_text,title_text2,title_operator,created_at) VALUES(?,?,?,?,?,?,?)').run(pid,domain,titleMode,titleText,titleText2,titleOperator,Date.now());
+  const rows=getRows(pid);if(ignoreId===null&&rows.length>=100)throw Error('非表示ルールは100件までです');
+  if(rows.some(r=>r.id!==ignoreId&&r.domain===domain&&r.titleMode===titleMode&&norm(r.titleText)===norm(titleText)&&normPhrase(r.titleText2)===normPhrase(titleText2)&&r.titleOperator===titleOperator))throw Error('同じルールが登録されています');
+  return {domain,titleMode,titleText,titleText2,titleOperator};
+ }
+ function add(pid,x){
+  const r=parseRule(pid,x);
+  const result=db.prepare('INSERT INTO rss_article_hide_rules(profile_id,domain,title_mode,title_text,title_text2,title_operator,created_at) VALUES(?,?,?,?,?,?,?)').run(pid,r.domain,r.titleMode,r.titleText,r.titleText2,r.titleOperator,Date.now());
   profiles.delete(pid);return {ok:true,id:Number(result.lastInsertRowid),...list(pid)};
+ }
+ // Edit in place: preserve ID and created_at. Validation and duplicate checks
+ // are identical to add, excluding only the edited rule itself.
+ function update(pid,x){
+  const id=x?.id;
+  if(!Number.isSafeInteger(id)||id<1)throw Error('ルールIDが不正です');
+  const old=db.prepare('SELECT id FROM rss_article_hide_rules WHERE profile_id=? AND id=?').get(pid,id);
+  if(!old)throw Error('このプロファイルにはルールがありません');
+  const r=parseRule(pid,x,id);
+  const result=db.prepare('UPDATE rss_article_hide_rules SET domain=?,title_mode=?,title_text=?,title_text2=?,title_operator=? WHERE profile_id=? AND id=?')
+    .run(r.domain,r.titleMode,r.titleText,r.titleText2,r.titleOperator,pid,id);
+  if(result.changes!==1)throw Error('ルールの更新に失敗しました');
+  profiles.delete(pid);return {ok:true,id,...list(pid)};
  }
  function remove(pid,id){
   if(!Number.isSafeInteger(id)||id<1)throw Error('ルールIDが不正です');
@@ -149,6 +166,6 @@ function create({db}){
   if(!r.changes)throw Error('このプロファイルにはルールがありません');
   profiles.delete(pid);return {ok:true,...list(pid)};
  }
- return {list,add,remove,filter,visible};
+ return {list,add,update,remove,filter,visible};
 }
 module.exports={create};

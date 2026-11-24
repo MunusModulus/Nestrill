@@ -153,13 +153,13 @@ function createNewsPrefetch(){
    newsResolveGoogleUrl(url).then(value=>{
     if(newsHostMatches(value,entry.publisherHost)){
      entry.status='ready';entry.destination=value;ok++;
-    }else{entry.status='failed';if(value){mismatched++;failure('SOURCE_MISMATCH')}else{failed++;failure('NO_URL')}}
+    }else{entry.status='failed';entry.reason=value?'SOURCE_MISMATCH':'GOOGLE_NO_URL';if(value){mismatched++;failure('SOURCE_MISMATCH')}else{failed++;failure('NO_URL')}}
    }).catch(err=>{
-    entry.status='failed';failed++;
-    failure(String(err?.message||'OTHER').slice(0,80));
+    entry.status='failed';entry.reason=String(err?.message||'OTHER').slice(0,80);failed++;
+    failure(entry.reason);
     if(err&&err.message==='NEWS_RATE_LIMIT'){
      pausedUntil=Date.now()+15*60*1000;
-     for(const waiting of queue){const x=cached.get(waiting);if(x)x.status='failed'}
+     for(const waiting of queue){const x=cached.get(waiting);if(x){x.status='failed';x.reason='GOOGLE_RATE_LIMIT'}}
      queue.length=0;
      console.log('[Nestrill E2 link prefetch] Google rate-limited; normal Google links retained.');
     }
@@ -192,7 +192,15 @@ function createNewsPrefetch(){
   const entry=cached.get(url);
   return entry?.status==='ready'&&newsHostMatches(entry.destination,host)?entry.destination:'';
  }
- return {warm,redirect};
+ function inspect(url,host){
+  const entry=cached.get(url);
+  if(!newsGoogleId(url)||!newsPublisherHost(host))return {status:'unsupported',reason:'INVALID_LINK_OR_PUBLISHER'};
+  if(entry?.status==='ready'&&newsHostMatches(entry.destination,host))return {status:'ready',destination:entry.destination};
+  if(entry?.status==='failed')return {status:'failed',reason:entry.reason||'GOOGLE_LOOKUP_FAILED'};
+  return {status:'pending',phase:entry?.status||'not_queued'};
+ }
+ function prioritize(url){const index=queue.indexOf(url);if(index>0){queue.splice(index,1);queue.unshift(url);}}
+ return {warm,redirect,inspect,prioritize};
 }
 
 function create({db,dataDir,secretId,secretSessions}){
@@ -278,6 +286,11 @@ function create({db,dataDir,secretId,secretSessions}){
   const result=db.prepare('DELETE FROM ai_article_open_signals WHERE profile_id=?').run(pid);
   return {...status(pid),deleted:Number(result.changes)};
  }
- return {href,handle,evidence,stamp,status,reset};
+ function newsLookup(url,publisherHost){
+  newsPrefetch.warm(url,publisherHost);
+  newsPrefetch.prioritize(url);
+  return newsPrefetch.inspect(url,publisherHost);
+ }
+ return {href,handle,evidence,stamp,status,reset,newsLookup};
 }
 module.exports={create};

@@ -44,15 +44,11 @@ if(!db.prepare('SELECT id FROM profiles LIMIT 1').get()){
 }
 // The hidden profile is a different view of the same database, never listed as a normal profile.
 if(!db.prepare('PRAGMA table_info(profiles)').all().some(c=>c.name==='is_secret')) db.exec('ALTER TABLE profiles ADD COLUMN is_secret INTEGER NOT NULL DEFAULT 0');
-let secretProfile=db.prepare('SELECT id FROM profiles WHERE is_secret=1').get();
-if(!secretProfile){
- const name='__Nestrill_Secret__';
- const r=db.prepare('INSERT INTO profiles(name,created,is_secret) VALUES(?,?,1)').run(name,Date.now());
- secretProfile={id:Number(r.lastInsertRowid)};
- const c=db.prepare("SELECT id FROM categories WHERE name='未分類'").get();
- db.prepare('INSERT OR IGNORE INTO profile_categories(profile_id,category_id) VALUES(?,?)').run(secretProfile.id,c.id);
-}
-const SECRET_ID=secretProfile.id;
+// RC04: secret/incognito mode is retired. Do NOT create a hidden profile on
+// fresh installs. Historical rows are preserved for rollback/audit only.
+// The sentinel is never a valid profile ID and must never be served.
+const legacySecretProfile=db.prepare('SELECT id FROM profiles WHERE is_secret=1').get();
+const SECRET_ID=legacySecretProfile?.id ?? -1;
 // Future-source account labels only. No OAuth tokens, cookies, passwords or API access.
 // A profile (including the secret profile) owns its own independent rows.
 db.exec(`CREATE TABLE IF NOT EXISTS source_accounts(
@@ -76,6 +72,8 @@ const youtubeSource=require('./youtube-source').create({db,fetchFeed:(...args)=>
 const configBackup=require('./config-backup').create({db,secretId:SECRET_ID,validHttpUrl});
 const aiRecommend=require('./ai-recommend').create({db});
 const aiExternal=require('./ai-external').create({db});
+const aiRandom=require('./ai-random').create();
+const aiConditional=require('./ai-conditional').create({db});
 const aiSourceFeedback=require('./ai-source-feedback').create({db});
 const rssHide=require('./rss-hide-rules').create({db});
 aiRecommend.attachSourceFilter((pid,items,opts)=>rssHide.filter(pid,aiSourceFeedback.filter(pid,items,opts)));
@@ -132,7 +130,8 @@ function separateSecretCategories(){
   db.exec('COMMIT');
  }catch(e){db.exec('ROLLBACK');throw e}
 }
-separateSecretCategories();
+// RC04: no longer migrate retired secret categories on startup.
+// Historical rows remain untouched; the old function is kept for rollback compatibility.
 // Per-profile category metadata: old global records continue to exist as stable
 // FKs, but visible labels and list/magazine preferences belong to each profile.
 db.exec(`CREATE TABLE IF NOT EXISTS profile_category_settings(
@@ -190,6 +189,8 @@ if(!db.prepare("SELECT 1 FROM settings WHERE key='profile_article_state_migrated
 }
 const secretSessions=new Map();
 const aiOpen=require('./ai-open').create({db,dataDir:DATA,secretId:SECRET_ID,secretSessions});
+// Preview requests are explicit: no publisher-page fetch while images are OFF.
+const aiNewsPreview=require('./ai-news-preview').create({newsLookup:aiOpen.newsLookup});
 aiRecommend.attachOpenSignals(aiOpen);
 function withOpenLinks(req,pid,kind,items,external=false){return items.map(item=>({...item,
  openUrl:aiOpen.href(pid,kind,{...item,id:external?'x:'+item.id:item.id},req)}))}
@@ -253,13 +254,14 @@ function ensureCategory(name,pid){
 }
 
 const defaultTheme={
+ genreIcons:{size:15,color:'#65738a'},
  baseColor:'#edf0f5',
  sharedLinked:true,
  header:{extend:true,color:'#ffffff',opacity:75,blur:10,textColor:'#263c59',borderEnabled:true,borderColor:'#dce3ee',borderOpacity:50},
  shared:{image:'',type:'color',folder:'',mobileFolder:'',folderKind:'all',interval:300,blur:0,speed:1,loop:true,color:'#edf0f5',colorOpacity:100,imageOpacity:100,position:'center'},
  left:{image:'',type:'color',folder:'',mobileFolder:'',folderKind:'all',interval:300,blur:0,speed:1,loop:true,color:'#ffffff',colorOpacity:95,imageOpacity:100,position:'center'},
  right:{image:'',type:'color',folder:'',mobileFolder:'',folderKind:'all',interval:300,blur:0,speed:1,loop:true,color:'#ffffff',colorOpacity:96,imageOpacity:100,position:'center'},
- text:{left:{font:'Meiryo, sans-serif',color:'#273349',size:13,stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3},right:{font:'Meiryo, sans-serif',color:'#223148',size:14,stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3}},
+ text:{left:{font:'Meiryo, sans-serif',weight:400,color:'#273349',size:13,stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3},right:{font:'Meiryo, sans-serif',weight:400,color:'#223148',size:14,stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3}},
  articleStyle:{source:{font:'Noto Sans JP Medium',weight:400,size:11,color:'#65758a',stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3},title:{font:'Noto Sans JP Medium',weight:500,size:14,color:'#223148',stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3},excerpt:{font:'Noto Sans JP',weight:400,size:12,color:'#64748b',stroke:0,strokeColor:'#000000',shadow:false,shadowColor:'#121a2d',shadowOpacity:60,shadowX:1,shadowY:2,shadowBlur:3}},
  stripe:{enabled:false,oddColor:'#ffffff',oddOpacity:0,evenColor:'#dfebf9',evenOpacity:50,hoverColor:'#d6e6fa',hoverOpacity:35},
  separators:{list:{enabled:true,color:'#8192a5',opacity:18,width:1,style:'solid',inset:0,spacing:0},magazine:{enabled:true,color:'#8192a5',opacity:18,width:1,style:'solid',inset:0,spacing:0}}
@@ -317,7 +319,7 @@ function getTheme(secret=false){
  try{
   const key=secret?'theme_secret':'theme';
   const saved=JSON.parse(db.prepare('SELECT value FROM settings WHERE key=?').get(key)?.value||'{}');
-  const merged={...defaultTheme,...saved,header:{...defaultTheme.header,...saved.header},text:{...defaultTheme.text,...saved.text},articleStyle:{...defaultTheme.articleStyle,...saved.articleStyle},separators:{...defaultTheme.separators,...saved.separators},stripe:{...defaultTheme.stripe,...saved.stripe}};
+  const merged={...defaultTheme,...saved,header:{...defaultTheme.header,...saved.header},text:{...defaultTheme.text,...saved.text},articleStyle:{...defaultTheme.articleStyle,...saved.articleStyle},separators:{...defaultTheme.separators,...saved.separators},stripe:{...defaultTheme.stripe,...saved.stripe},genreIcons:{...defaultTheme.genreIcons,...saved.genreIcons}};
   for(const k of ['left','right','shared']){merged[k]={...defaultTheme[k],...saved[k]};if(!saved[k]?.type&&merged[k].image)merged[k].type=/\.(mp4|webm)(?:\?|$)/i.test(merged[k].image)?'video':'image'}
   for(const k of ['left','right'])merged.text[k]={...defaultTheme.text[k],...saved.text?.[k]};
   for(const k of ['source','title','excerpt'])merged.articleStyle[k]={...defaultTheme.articleStyle[k],...saved.articleStyle?.[k]};
@@ -937,32 +939,13 @@ const server=http.createServer(async(req,res)=>{
   return fail(res,'操作が不正です',400);
  }
 
- // Secret is a view switch without PIN. An ephemeral token prevents normal-mode
- // requests (including guessed profile IDs) from accidentally accessing its APIs.
- if(route==='/api/secret/enter'&&req.method==='POST'){
-  const token=randomBytes(32).toString('hex');secretSessions.set(token,Date.now()+2*60*60*1000);
-  if(!db.prepare("SELECT 1 FROM settings WHERE key='theme_secret'").get())setTheme(getTheme(),true);
-  const def=secretDefault(),preset=def?db.prepare('SELECT theme FROM appearance_presets WHERE id=? AND is_secret=1').get(def):null;
-  if(preset){try{setTheme(JSON.parse(preset.theme),true)}catch{}}
-  return json(res,200,{token,profileId:SECRET_ID});
- }
- if(route==='/api/secret/exit'&&req.method==='POST'){
-  const token=String(req.headers['x-nestrill-secret']||'');secretSessions.delete(token);
-  return json(res,200,{ok:true});
- }
- if(route.startsWith('/api/')&&req.headers['x-nestrill-secret']&&!checkSecret(req))return fail(res,'シークレットの閲覧状態が失効しました',403);
- if(route.startsWith('/api/')&&!req._secret&&Number(req.headers['x-nestrill-profile-id'])===SECRET_ID)return fail(res,'シークレットは「s」から開いてください',403);
- if(route==='/api/secret/default-preset'&&req.method==='GET'){
-  if(!req._secret)return fail(res,'シークレット内のみ利用できます',403);
-  return json(res,200,{id:secretDefault()});
- }
- if(route==='/api/secret/default-preset'&&req.method==='POST'){
-  if(!req._secret)return fail(res,'シークレット内のみ利用できます',403);
-  const x=JSON.parse((await body(req)).toString()),id=int(x.id);
-  if(id&&!db.prepare('SELECT 1 FROM appearance_presets WHERE id=? AND is_secret=1').get(id))return fail(res,'シークレット専用プリセットのみ指定できます');
-  db.prepare("INSERT INTO settings(key,value) VALUES('secret_default_preset',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(String(id));
-  return json(res,200,{ok:true,id});
- }
+ // RC04: secret mode is retired in Standard and X Edition.
+ // No secret session can be issued; even old/stale tokens are rejected.
+ if(route.startsWith('/api/secret/'))return fail(res,'シークレット機能は廃止されました',410);
+ if(req.headers['x-nestrill-secret'])return fail(res,'シークレットセッションは利用できません',403);
+ // An archived secret profile must never become accessible by a guessed ID.
+ if(SECRET_ID>0 && Number(req.headers['x-nestrill-profile-id'])===SECRET_ID)
+  return fail(res,'このプロファイルは利用できません',403);
  // Appearance presets are global across profiles; applying one never changes RSS membership.
  if(route==='/api/presets'&&req.method==='GET')return json(res,200,{presets:db.prepare('SELECT id,name,created,updated,is_secret AS isSecret FROM appearance_presets WHERE is_secret=0 OR ? ORDER BY is_secret,name COLLATE NOCASE,id').all(req._secret?1:0)});
  if(route==='/api/presets'&&req.method==='POST'){
@@ -1134,6 +1117,11 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
    return json(res,200,rssHide.add(profileId(req),x));
   }catch(e){return fail(res,e.message||'非表示ルールを保存できません',400)}
  }
+ if(route==='/api/rss/hide-rules'&&req.method==='PATCH'){
+  try{const x=JSON.parse((await body(req,4096)).toString('utf8'));
+   return json(res,200,rssHide.update(profileId(req),x));
+  }catch(e){return fail(res,e.message||'非表示ルールを変更できません',400)}
+ }
  if(route==='/api/rss/hide-rules'&&req.method==='DELETE'){
   try{const x=JSON.parse((await body(req,512)).toString('utf8'));
    return json(res,200,rssHide.remove(profileId(req),x.id));
@@ -1170,6 +1158,54 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
  }
  // E2: external article discovery is an EXPLICIT manual action. Interests are
  // sent to Google News only when /refresh is invoked; no background poll sends them.
+ // GenreTrial01: opt-in branch. No access to user interests, feedback, opens or Gemma.
+ if(route==='/api/ai/random/catalog'&&req.method==='GET')return json(res,200,{groups:aiRandom.catalog(),maxQueries:12});
+ if(route==='/api/ai/random'&&req.method==='GET')return json(res,200,aiRandom.status(profileId(req)));
+ if(route==='/api/ai/random/refresh'&&req.method==='POST'){
+  try{
+   const options=JSON.parse((await body(req,4500)).toString('utf8'));
+   return json(res,200,aiRandom.start(profileId(req),options));
+  }catch(e){return fail(res,String(e.message||e),400)}
+ }
+ // ConditionTrial01: profile-scoped, isolated exploratory controls. Normal E2 is unchanged.
+ if(route==='/api/ai/conditional'&&req.method==='GET'){
+  const pid=profileId(req),data=aiConditional.status(pid);
+  // Apply the same profile-scoped display/source exclusions as ordinary E2.
+  // This only filters the response: do not alter the random result cache,
+  // rating evidence, history, or SQLite rows. A 40-item sample can show <40.
+  const filtered=rssHide.filter(pid,aiSourceFeedback.filter(pid,data.items||[],{externalPreview:true}));
+  const offset=Math.max(0,Math.min(1000,Math.floor(Number(u.searchParams.get('offset'))||0)));
+  const limit=Math.max(1,Math.min(40,Math.floor(Number(u.searchParams.get('limit'))||40)));
+  const page=filtered.slice(offset,offset+limit);
+  // Navigation-confirmed opens use the existing signed redirect. Do not prefetch
+  // Google URLs for this trial; opens remain weak evidence, never a like.
+  return json(res,200,{...data,sourceHidden:(data.items||[]).length-filtered.length,
+   totalVisible:filtered.length,hasMore:offset+page.length<filtered.length,offset,
+   items:page.map(item=>({...item,
+   openUrl:aiOpen.href(pid,'rss',{...item,id:'x:'+item.id,publisherHost:item.publisherHost},req)}))});
+ }
+ // Trial05: bounded, opt-in article-image metadata for the current profile's
+ // visible, non-excluded conditional results only. No remote URL input allowed.
+ if(route==='/api/ai/conditional/preview'&&req.method==='GET'){
+  // A custom request header prevents incidental cross-site image tags or
+  // navigation from triggering publisher metadata lookups.
+  if(req.headers['x-nestrill-preview']!=='enabled')return fail(res,'画像補完が有効ではありません',403);
+  const pid=profileId(req),id=String(u.searchParams.get('id')||'');
+  if(!/^[a-f0-9]{32}$/.test(id))return fail(res,'記事がありません',404);
+  const item=(aiConditional.status(pid).items||[]).find(x=>x.id===id);
+  if(!item||!rssHide.filter(pid,aiSourceFeedback.filter(pid,[item],{externalPreview:true})).length)return fail(res,'記事がありません',404);
+  return json(res,200,aiNewsPreview.request(item));
+ }
+ if(route==='/api/ai/conditional/refresh'&&req.method==='POST'){
+  try{const x=JSON.parse((await body(req,4500)).toString('utf8'));
+   return json(res,200,aiConditional.start(profileId(req),x));
+  }catch(e){return fail(res,String(e.message||e),400)}
+ }
+ if(route==='/api/ai/conditional/rating'&&req.method==='POST'){
+  try{const x=JSON.parse((await body(req,512)).toString('utf8'));
+   return json(res,200,aiConditional.rate(profileId(req),x));
+  }catch(e){return fail(res,String(e.message||e),400)}
+ }
  if(route==='/api/ai/external'&&req.method==='GET'){const pid=profileId(req);const data=aiExternal.status(pid);
   const filtered=rssHide.filter(pid,aiSourceFeedback.filter(pid,data.items||[],{externalPreview:true}));
   return json(res,200,{...data,sourceHidden:(data.items||[]).length-filtered.length,items:withOpenLinks(req,pid,'rss',filtered,true)});}
@@ -1311,6 +1347,21 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
    'Cache-Control':'private, max-age=3600','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});
   return res.end(result.bytes);
  }
+ // Conditional news publisher favicon (existing guarded cache, no arbitrary URLs).
+ const conditionalIconRoute=route.match(/^\/api\/ai\/conditional-icon\/(\d+)\/([a-f0-9]{32})$/);
+ if(conditionalIconRoute&&req.method==='GET'){
+  const pid=Number(conditionalIconRoute[1]),id=conditionalIconRoute[2];
+  if(!Number.isSafeInteger(pid)||pid<1||!db.prepare('SELECT 1 FROM profiles WHERE id=? AND is_secret=0').get(pid))return fail(res,'記事がありません',404);
+  const candidate=(aiConditional.status(pid).items||[]).find(x=>x.id===id);
+  if(!candidate||!rssHide.filter(pid,aiSourceFeedback.filter(pid,[candidate],{externalPreview:true})).length)return fail(res,'記事がありません',404);
+  const host=String(candidate.publisherHost||'').trim().toLowerCase(),labels=host.split('.');
+  if(host.length>253||labels.length<2||net.isIP(host)||host==='localhost'||host.endsWith('.localhost')||host.endsWith('.local')||host.endsWith('.internal')||labels.some(label=>!label||label.length>63||!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label)))return fail(res,'出典のホスト名がありません',404);
+  const site='https://'+host+'/';
+  const result=await faviconForFeed({site_url:site,url:site});
+  if(!result){res.writeHead(404,{'Cache-Control':'private, max-age=1800','X-Content-Type-Options':'nosniff'});return res.end()}
+  res.writeHead(200,{'Content-Type':result.type,'Content-Length':result.bytes.length,'Cache-Control':'private, max-age=3600','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});
+  return res.end(result.bytes);
+ }
  const iconRoute=route.match(/^\/api\/feed-icon\/(\d+)$/);
  if(iconRoute&&req.method==='GET'){
   // Images cannot send custom headers: validate an ephemeral query token for secret icons.
@@ -1329,6 +1380,10 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
   const previous=getTheme(!!req._secret),fixed=structuredClone(previous);
   fixed.baseColor=colorOk(input.baseColor)?input.baseColor:previous.baseColor;
   fixed.sharedLinked=input.sharedLinked!==false;
+  // RC07 genre icon size/color: validate input, preserving old preferences on absence.
+  const gi=input.genreIcons||{},pgi=previous.genreIcons||defaultTheme.genreIcons;
+  const rawSize=Number(gi.size);
+  fixed.genreIcons={size:Number.isInteger(rawSize)&&rawSize>=8&&rawSize<=48?rawSize:pgi.size,color:colorOk(gi.color)?gi.color:pgi.color};
   // Validate and persist header settings separately from the wallpaper layers.
   const incomingHeader=input.header||{},oldHeader=previous.header||defaultTheme.header;
   fixed.header={
@@ -1355,7 +1410,7 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
    s.blur=numeric(src.blur,0,40,0);
   }
   for(const slot of ['left','right']){
-   const t=input.text?.[slot]||{};fixed.text[slot]={font:fontOk(t.font)?t.font:'Meiryo, sans-serif',color:colorOk(t.color)?t.color:'#223148',size:numeric(t.size,11,24,14),stroke:numeric(t.stroke,0,3,0),strokeColor:colorOk(t.strokeColor)?t.strokeColor:'#000000',shadow:!!t.shadow,shadowColor:colorOk(t.shadowColor)?t.shadowColor:(previous.text[slot]?.shadowColor||'#121a2d'),shadowOpacity:numeric(t.shadowOpacity,0,100,previous.text[slot]?.shadowOpacity??60),shadowX:numeric(t.shadowX,-20,20,previous.text[slot]?.shadowX??1),shadowY:numeric(t.shadowY,-20,20,previous.text[slot]?.shadowY??2),shadowBlur:numeric(t.shadowBlur,0,20,previous.text[slot]?.shadowBlur??3)};
+   const t=input.text?.[slot]||{};fixed.text[slot]={font:fontOk(t.font)?t.font:'Meiryo, sans-serif',weight:numeric(t.weight,100,900,previous.text[slot]?.weight??400),color:colorOk(t.color)?t.color:'#223148',size:numeric(t.size,11,24,14),stroke:numeric(t.stroke,0,3,0),strokeColor:colorOk(t.strokeColor)?t.strokeColor:'#000000',shadow:!!t.shadow,shadowColor:colorOk(t.shadowColor)?t.shadowColor:(previous.text[slot]?.shadowColor||'#121a2d'),shadowOpacity:numeric(t.shadowOpacity,0,100,previous.text[slot]?.shadowOpacity??60),shadowX:numeric(t.shadowX,-20,20,previous.text[slot]?.shadowX??1),shadowY:numeric(t.shadowY,-20,20,previous.text[slot]?.shadowY??2),shadowBlur:numeric(t.shadowBlur,0,20,previous.text[slot]?.shadowBlur??3)};
   }
   for(const key of ['source','title','excerpt'])fixed.articleStyle[key]=sanitizeStyle(input.articleStyle?.[key],previous.articleStyle[key]);
   for(const key of ['list','magazine'])fixed.separators[key]=sanitizeSeparator(input.separators?.[key],previous.separators[key]);

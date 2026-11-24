@@ -1,57 +1,62 @@
 #!/usr/bin/env python3
-"""Build Nestrill v0.2.2 public distribution from this source archive (Python 3.9+, Go 1.23+)."""
+"""Build Nestrill Standard v0.2.3 Windows assets from this audited release snapshot.
+
+Requires Python 3.9+ and Go 1.23+. The included Nestrill.exe is the
+byte-verified RC08 launcher. Set NESTRILL_REBUILD_LAUNCHER=1 to recompile
+launcher.go (this changes its hash and therefore the package hashes).
+"""
 from pathlib import Path
 import os, shutil, tempfile, json, hashlib, zipfile, subprocess
 ROOT=Path(__file__).resolve().parent
 OUT=ROOT/'dist'
 OUT.mkdir(exist_ok=True)
 
-def archive(root, target):
-    with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED,compresslevel=8) as z:
-        for p in sorted(root.rglob('*')):
+def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def archive(source,target):
+    with zipfile.ZipFile(target,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=8) as z:
+        for p in sorted(source.rglob('*')):
             if p.is_file():
-                info=zipfile.ZipInfo(p.relative_to(root).as_posix(),date_time=(2026,11,16,0,0,0))
+                info=zipfile.ZipInfo(p.relative_to(source).as_posix(), date_time=(2026,11,24,0,0,0))
                 info.compress_type=zipfile.ZIP_DEFLATED
                 info.create_system=3
-                info.external_attr=(0o100644 << 16)
+                info.external_attr=(0o100644<<16)
                 z.writestr(info,p.read_bytes(),compress_type=zipfile.ZIP_DEFLATED,compresslevel=8)
-    with zipfile.ZipFile(target) as z: assert z.testzip() is None
+    with zipfile.ZipFile(target) as z:
+        assert z.testzip() is None
 
-def run_go(src,output,work):
+def run_go(filename,output,cwd):
     env=dict(os.environ,GOOS='windows',GOARCH='amd64',CGO_ENABLED='0')
-    subprocess.run(['go','build','-trimpath','-ldflags=-s -w -H windowsgui','-o',str(output),src],cwd=work,env=env,check=True)
+    subprocess.run(['go','build','-trimpath','-ldflags=-s -w -H windowsgui','-o',str(output),filename],cwd=cwd,env=env,check=True)
 
-with tempfile.TemporaryDirectory(prefix='nestrill-build-') as tmp:
-    stage=Path(tmp)
-    app=stage/'app'
+with tempfile.TemporaryDirectory(prefix='nestrill-v023-build-') as tmp:
+    temp=Path(tmp);app=temp/'app';setup=temp/'setup'
     shutil.copytree(ROOT/'app',app)
-    setup=stage/'setup'
-    shutil.copytree(ROOT/'setup',setup)
-    run_go('launcher.go',app/'Nestrill.exe',setup)
-    # Include the very same installer script in the portable payload and setup EXE.
-    shutil.copy2(setup/'installer.ps1',app/'scripts'/'Nestrill-Installer.ps1')
-    manifest_path=app/'RELEASE_FILE_HASHES.json'
-    files=sorted(p for p in app.rglob('*') if p.is_file() and p!=manifest_path)
-    manifest={'release':'Nestrill v0.2.2','kind':'release',
-      'releasedAt':'2026-11-19',
-      'builtFrom':'v0.2.1 public source + DisplayPrefs03 + E2 RatedRepeat + verified v0.2.2 installer changes',
-      'defaultArticleFonts':'source=Noto Sans JP Medium/400, title=Noto Sans JP Medium/500, excerpt=Noto Sans JP/400',
-      'defaultAiModel':'gemma4:e4b-it-qat (only if no stored model configuration)',
-      'exclusionPlaceholder':'none',
-      'privacy':'no data/, run/, logs/ or user session/credentials',
-      'files':[{'path':p.relative_to(app).as_posix(),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in files]}
-    manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    portable=OUT/'Nestrill-v0.2.2-Portable.zip'
+    shutil.copytree(ROOT/'setup',setup,ignore=shutil.ignore_patterns('payload.zip'))
+    if (setup/'installer.ps1').read_bytes()!=(app/'scripts'/'Nestrill-Installer.ps1').read_bytes():
+        raise SystemExit('Installer source and packaged script differ: refusing build')
+    if os.environ.get('NESTRILL_REBUILD_LAUNCHER')=='1':
+        run_go('launcher.go',app/'Nestrill.exe',setup)
+    manifest=app/'RELEASE_FILE_HASHES.json'
+    existing=json.loads(manifest.read_text(encoding='utf-8'))
+    assert existing['release']=='Nestrill v0.2.3' and existing['kind']=='release'
+    records=[{'path':p.relative_to(app).as_posix(),'sha256':digest(p)} for p in sorted(app.rglob('*')) if p.is_file() and p!=manifest]
+    if len(records)!=72:raise SystemExit('Unexpected managed file count')
+    if os.environ.get('NESTRILL_REBUILD_LAUNCHER')=='1':
+        existing['files']=records
+        manifest.write_text(json.dumps(existing,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    elif records!=existing['files']:
+        raise SystemExit('Release manifest mismatch: source was modified')
+    portable=OUT/'Nestrill-v0.2.3-Portable.zip'
     archive(app,portable)
     shutil.copy2(portable,setup/'payload.zip')
-    exe=OUT/'Nestrill-Setup-v0.2.2.exe'
+    exe=OUT/'Nestrill-Setup-v0.2.3.exe'
     run_go('setup.go',exe,setup)
-    with zipfile.ZipFile(OUT/'Nestrill-Setup-v0.2.2.zip','w',zipfile.ZIP_DEFLATED,compresslevel=8) as z:
-        info=zipfile.ZipInfo(exe.name,date_time=(2026,11,16,0,0,0))
+    zipname=OUT/'Nestrill-Setup-v0.2.3.zip'
+    with zipfile.ZipFile(zipname,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=8) as z:
+        info=zipfile.ZipInfo(exe.name,date_time=(2026,11,24,0,0,0))
         info.compress_type=zipfile.ZIP_DEFLATED
         info.create_system=3
-        info.external_attr=(0o100644 << 16)
+        info.external_attr=(0o100644<<16)
         z.writestr(info,exe.read_bytes(),compress_type=zipfile.ZIP_DEFLATED,compresslevel=8)
-    files_to_hash=[exe, portable,OUT/'Nestrill-Setup-v0.2.2.zip']
-    (OUT/'SHA256SUMS.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in files_to_hash),encoding='utf-8')
-    print('Created: '+str(OUT))
+    (OUT/'SHA256SUMS.txt').write_text(''.join(digest(p)+'  '+p.name+'\n' for p in [exe,portable,zipname]),encoding='utf-8')
+    print('Build complete:',OUT)

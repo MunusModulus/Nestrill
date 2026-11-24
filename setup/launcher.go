@@ -13,7 +13,6 @@ import (
     "unicode/utf8"
     "unsafe"
 )
-
 func message(title, body string, errorIcon bool) {
     dll := syscall.NewLazyDLL("user32.dll")
     proc := dll.NewProc("MessageBoxW")
@@ -23,7 +22,6 @@ func message(title, body string, errorIcon bool) {
     if errorIcon { flags = 0x10 } // MB_ICONERROR
     proc.Call(0, uintptr(unsafe.Pointer(b)), uintptr(unsafe.Pointer(t)), flags)
 }
-
 // Windows PowerShell 5.1 writes console/pipe output using the Windows console
 // code page, which on Japanese Windows is frequently CP932 rather than UTF-8.
 // Converting those raw bytes directly to a Go string produces broken Japanese.
@@ -32,7 +30,6 @@ func message(title, body string, errorIcon bool) {
 func decodePowerShellOutput(output []byte) string {
     if len(output) == 0 { return "" }
     if utf8.Valid(output) { return strings.TrimSpace(string(output)) }
-
     kernel := syscall.NewLazyDLL("kernel32.dll")
     getCP := kernel.NewProc("GetOEMCP")
     cp, _, _ := getCP.Call()
@@ -48,7 +45,6 @@ func decodePowerShellOutput(output []byte) string {
     if got == 0 { return "（PowerShellの出力を読み取れませんでした）" }
     return strings.TrimSpace(string(utf16.Decode(wide[:int(got)])))
 }
-
 func main() {
     exe, err := os.Executable()
     if err != nil { message("Nestrill", fmt.Sprintf("起動元を確認できません: %v", err), true); return }

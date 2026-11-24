@@ -60,7 +60,7 @@ function renderAiVisibilitySettings(root){
  section.append(field('非表示にする記事タイトルの一部（1行につき1語句）',titles));
  const domains=elt('textarea','ai-interests-textarea');domains.rows=2;domains.maxLength=9600;domains.placeholder='example.com\nyoutube.com';domains.value=cfg.domainTerms.join('\n');
  section.append(field('非表示にするドメイン（1行につき1ドメイン）',domains));
- const status=elt('p','help','このブラウザの現在のプロファイルに保存します。シークレットでは一時的な指定のみです。');
+ const status=elt('p','help','このブラウザの現在のプロファイルに保存します。');
  status.setAttribute('role','status');
  const save=action('表示ルールを保存',()=>{
   const lines=boxValue=>boxValue.split(/\r?\n/g).map(x=>x.trim()).filter(Boolean);
@@ -140,8 +140,7 @@ function fmtTime(time){let n=Date.now()-time;const mins=Math.max(0,Math.floor(n/
 function closeMobile(){$('sidebar').classList.remove('open');$('mobile-scrim').classList.add('hidden')}
 function currentCategory(){if(state.category)return state.overview?.categories.find(x=>x.id===state.category);if(state.feed)return state.overview?.categories.find(x=>x.id===state.overview?.feeds.find(f=>f.id===state.feed)?.categoryId);return null}
 function titleOf(){if(state.feed)return displayFeedTitle(state.overview?.feeds.find(f=>f.id===state.feed)?.title||'RSS');if(state.category)return currentCategory()?.name||'カテゴリ';return ({all:'すべての記事',unread:'未読の記事',starred:'お気に入り'})[state.group]}
-async function loadProfiles(){if(state.secretToken){$('profile-select').hidden=true;$('profile-manager-btn').hidden=true;$('secret-profile-label').hidden=false;return}
- $('profile-select').hidden=false;$('profile-manager-btn').hidden=false;$('secret-profile-label').hidden=true;
+async function loadProfiles(){
  const data=await api('/api/profiles');state.profiles=data.profiles||[];
  const stored=Number(localStorage.getItem('nestrill-profile-id')||1);
  if(!state.profiles.some(p=>p.id===state.profileId)){state.profileId=state.profiles.some(p=>p.id===stored)?stored:1}
@@ -152,34 +151,7 @@ async function switchProfile(id){if(state.secretToken||!state.profiles.some(p=>p
  state.profileId=id;localStorage.setItem('nestrill-profile-id',String(id));state.category=null;state.feed=null;state.group='all';state.filter='all';$('filter-select').value='all';state.q='';$('search').value='';state.view=localStorage.getItem('nestrill-default-view')||'list';renderViewButtons();
  closeMobile();++youtubeChannelSerial;++youtubeSidebarSerial;youtubeCollapsedAccounts.clear();await loadProfiles();await loadSourceAccounts();await loadOverview();await loadArticles();notify('プロファイルを切り替えました。外観プリセットは変わりません。');
 }
-// Explicit, local-only view switch. Never persist secret token/profile in localStorage.
-let secretSwitchBusy=false;
-async function toggleSecret(){
- if(secretSwitchBusy)return;secretSwitchBusy=true;const entering=!state.secretToken;
- try{
-  ++loadSerial;++youtubeChannelSerial;++youtubeSidebarSerial;youtubeCollapsedAccounts.clear();closeDialog();closeMobile();state.articles=[];state.total=0;state.overview=null;state.aiKind=null;state.sourceKind=null;state.sourceAccountId=0;state.sourceChannelId="";state.sourceAccounts=[];state.youtubeChannels={};state.youtubeChannelVideos=[];state.youtubeChannelLoading=false;state.youtubeData={accounts:[],videos:[],running:[]};setSourcePanelVisible(false);clearSourceAccountLists();$('view-title').textContent='すべての記事';$('article-count').textContent='0 件';
-  $('article-list').replaceChildren();$('category-list').replaceChildren();
-  if(entering){
-   state.regularProfileId=state.profileId||1;
-   // Enter without sending the previous profile ID as an authorization mechanism.
-   const data=await post('/api/secret/enter',{});
-   state.secretToken=data.token;state.secretProfileId=data.profileId;state.profileId=data.profileId;
-  }else{
-   await post('/api/secret/exit',{});
-   state.secretToken=null;state.secretProfileId=0;state.profileId=state.regularProfileId||1;
-  }
-  document.documentElement.classList.toggle('secret-active',!!state.secretToken);
-  state.category=null;state.feed=null;state.group='all';state.filter='all';state.q='';state.page=0;
-  $('search').value='';$('filter-select').value='all';state.lastThemeBeforePreset=null;
-  state.theme=await api('/api/theme');reloadAppearance();
-  await loadProfiles();await loadSourceAccounts();await loadOverview();await loadArticles();
- }catch(e){
-  // Fail closed: reset visual state, never leave secret content displayed after an error.
-  state.secretToken=null;state.secretProfileId=0;state.profileId=state.regularProfileId||1;
-  document.documentElement.classList.remove('secret-active');$('article-list').replaceChildren();
-  await loadProfiles().catch(()=>{});await loadSourceAccounts().catch(()=>{});await loadOverview().catch(()=>{});await loadArticles().catch(()=>{});err(e);
- }finally{secretSwitchBusy=false}
-}
+// RC04: secret-mode switch removed. Retained historical DB fields are never entered.
 function showProfileManager(){if(state.secretToken)return;const root=elt('div');root.append(elt('p','help','プロファイルによって表示するRSSソースとカテゴリを切り替えます。記事の取得データは共通です。外観プリセットは独立して切り替えられます。'));
  const list=elt('div','management-list');for(const p of state.profiles){const item=elt('div','management-row');const info=elt('div','management-name');info.append(elt('strong','',p.name),elt('small','',`${p.feedCount}ソース${p.id===state.profileId?' · 表示中':''}`));
  const actions=elt('div','management-actions');actions.append(action('選択',()=>{closeDialog();switchProfile(p.id).catch(err)},false));
@@ -1588,12 +1560,17 @@ function applyTheme(){const t=state.theme;if(!t)return;
   if(x.signature!==sig){x.signature=sig;refreshWallpaper(slot,b).catch(err)}
  }
  for(const [el,slot] of [[elements.left,'left'],[elements.right,'right']]){
-  const x=t.text[slot];el.style.setProperty(`--${slot}-font`,x.font);el.style.setProperty(`--${slot}-size`,x.size+'px');el.style.setProperty(`--${slot}-color`,x.color);el.style.setProperty(`--${slot}-stroke`,x.stroke+'px');el.style.setProperty(`--${slot}-stroke-color`,x.strokeColor);el.style.setProperty(`--${slot}-shadow`,textShadowValue(x));
+  const x=t.text[slot];el.style.setProperty(`--${slot}-font`,x.font);el.style.setProperty(`--${slot}-weight`,x.weight??400);el.style.setProperty(`--${slot}-size`,x.size+'px');el.style.setProperty(`--${slot}-color`,x.color);el.style.setProperty(`--${slot}-stroke`,x.stroke+'px');el.style.setProperty(`--${slot}-stroke-color`,x.strokeColor);el.style.setProperty(`--${slot}-shadow`,textShadowValue(x));
  }
  const main=elements.right;
  for(const key of ['source','title','excerpt']){const a=t.articleStyle[key];
   for(const [part,value] of Object.entries({font:a.font,weight:a.weight,size:a.size+'px',color:a.color,stroke:a.stroke+'px','stroke-color':a.strokeColor,shadow:textShadowValue(a)}))main.style.setProperty(`--article-${key}-${part}`,value);
  }
+ // RC07: icon options belong to the right-pane appearance theme.
+ const genre=t.genreIcons||{size:15,color:'#65738a'};
+ const genreSize=Number(genre.size);
+ main.style.setProperty('--genre-icon-size',(Number.isInteger(genreSize)&&genreSize>=8&&genreSize<=48?genreSize:15)+'px');
+ main.style.setProperty('--genre-icon-color',/^#[0-9a-f]{6}$/i.test(String(genre.color||''))?genre.color:'#65738a');
  const z=t.stripe;main.style.setProperty('--stripe-odd',rgba(z.oddColor,z.enabled?z.oddOpacity:0));main.style.setProperty('--stripe-even',rgba(z.evenColor,z.enabled?z.evenOpacity:0));main.style.setProperty('--stripe-hover',rgba(z.hoverColor,z.hoverOpacity));
  for(const key of ['list','magazine']){const d=t.separators[key];
   main.style.setProperty(`--sep-${key}-border`,d.enabled?`${d.style==='double'?Math.max(3,d.width):d.width}px ${d.style} ${rgba(d.color,d.opacity)}`:'0px solid transparent');
@@ -1604,14 +1581,460 @@ mobileScreen.addEventListener('change',()=>{for(const slot of ['shared','left','
 document.addEventListener('visibilitychange',()=>{for(const x of Object.values(wallpaperState)){if(document.hidden)x.video.pause();else{if(x.video.src&&x.video.style.display!=='none')x.video.play().catch(()=>{});else if(!x.timer&&x.list.length)x.timer=setTimeout(()=>nextWallpaper(x.slot),3000)}}});
 // Phase D3: optional local semantic scoring with D1 keyword fallback and D2 feedback.
 let aiViewSerial=0;
+// Optional exploratory mode: ordinary 7:2:1 AI recommendations remain unchanged.
+// When both preferences are OFF, genre sampling does not consult personal evidence or Ollama.
+let aiDiscoveryMode='ai';
+// Per-exploration switches; they do not delete or rewrite saved preference evidence.
+// GenreIcons RC07: all 49 accepted outline icons, no external assets.
+// GenreIcons01: presentation-only, all 8 parents + 41 child categories.
+// The SVG paths are embedded, offline and deliberately single-color.
+const GENRE_ICON_PATHS = Object.freeze({"自然・科学":"<path d=\"M9 3h6M11 3v7l-6 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-6-9V3\"/><path d=\"M8 16h8\"/>","歴史・文化":"<path d=\"M3 9 12 3l9 6M5 9h14M6 9v10M10 9v10M14 9v10M18 9v10M3 21h18M4 19h16\"/>","芸術":"<path d=\"M12 3C6 3 3 7 3 12s4 9 9 9c2 0 3-1 3-3 0-1-1-2-1-3s1-2 3-2h2c2 0 3-1 3-3 0-4-4-7-10-7Z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"10\" cy=\"7\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/><circle cx=\"18\" cy=\"11\" r=\"1\"/>","学問":"<path d=\"m2 9 10-5 10 5-10 5-10-5ZM6 12v5c3 3 9 3 12 0v-5M22 9v7\"/>","生活":"<path d=\"m3 11 9-8 9 8M5 10v11h14V10M10 21v-8h4v8\"/>","技術":"<rect x=\"6\" y=\"6\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M9 1v5M15 1v5M9 18v5M15 18v5M1 9h5M1 15h5M18 9h5M18 15h5M10 10h4v4h-4z\"/>","社会":"<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5\"/>","その他":"<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><circle cx=\"17.5\" cy=\"6.5\" r=\"3.5\"/><path d=\"m7 15 4 7H3l4-7ZM15 16h6v6h-6z\"/>","自然・生物":"<path d=\"M20 4C9 4 4 9 4 16a5 5 0 0 0 5 5c8 0 12-8 11-17ZM4 21c2-6 7-11 13-14\"/>","深海・海洋":"<path d=\"M2 8c2 0 2 3 5 3s3-3 5-3 3 3 5 3 3-3 5-3M2 15c2 0 2 3 5 3s3-3 5-3 3 3 5 3 3-3 5-3\"/>","宇宙・天文":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><ellipse cx=\"12\" cy=\"12\" rx=\"11\" ry=\"5\" transform=\"rotate(-26 12 12)\"/><path d=\"m18 2 1 2 2 1-2 1-1 2-1-2-2-1 2-1z\"/>","地学・火山":"<path d=\"m2 20 7-14 4 8 3-5 6 11H2ZM7 10l3 3 2-3M13 4l1-2M17 5l2-3\"/>","気象・気候":"<path d=\"M5 16a4 4 0 0 1 .8-7.8A6 6 0 0 1 17.5 10 3.5 3.5 0 1 1 18 17H6\"/><path d=\"m8 20-1 2m6-2-1 2m6-2-1 2\"/>","考古学":"<path d=\"m7 3 10 7M8 2l10 7M16 10l-5 9M8 18l6 4M8 21l-3-2M4 22h16\"/>","歴史・古文書":"<path d=\"M7 4h12v14H7a3 3 0 0 1 0-6h12M7 4a3 3 0 0 0 0 6h12M10 7h6M10 15h5M4 7v11a3 3 0 0 0 3 3h12\"/>","文化・風習":"<path d=\"M3 15c4-9 14-9 18 0-5 4-13 4-18 0ZM12 10v11M3 15l9 6 9-6M6 11l6 10 6-10\"/>","博物館・収集":"<path d=\"m2 9 10-6 10 6M3 9h18M5 10v8M9 10v8M15 10v8M19 10v8M3 19h18M2 22h20\"/><rect x=\"10\" y=\"11\" width=\"4\" height=\"6\" rx=\"1\"/>","建築・都市":"<rect x=\"3\" y=\"9\" width=\"8\" height=\"12\"/><path d=\"M11 21V3h10v18M6 12h2M6 16h2M14 7h2M18 7h.1M14 11h2M18 11h.1M14 15h2M18 15h.1M2 21h20\"/>","美術・造形":"<path d=\"M4 19 15 8l5 5-11 9-5-3ZM13 10l3-3 3 3-3 3M3 5h6M6 2v6\"/>","写真・映像":"<rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"/><circle cx=\"12\" cy=\"14\" r=\"4\"/><path d=\"m7 7 2-4h6l2 4M5 10h.1\"/>","演劇・舞踊":"<path d=\"M2 4c5-2 9-2 11 0v10c-2 5-8 7-11 0V4ZM12 8c4-2 7-2 10-1v10c-1 5-7 7-10 0\"/><path d=\"M5 8h1M9 8h1M5 12c1 1 3 1 4 0M15 12h1M19 12h1M15 17c1-1 3-1 4 0\"/>","音楽":"<path d=\"M9 18V5l12-2v13M9 7l12-2\"/><ellipse cx=\"6\" cy=\"19\" rx=\"3\" ry=\"2\"/><ellipse cx=\"18\" cy=\"17\" rx=\"3\" ry=\"2\"/>","文学・出版":"<path d=\"M12 6c-4-2-7-2-10-1v15c4-1 7-1 10 1 3-2 6-2 10-1V5c-3-1-6-1-10 1ZM12 6v15\"/>","言語・文字":"<path d=\"M3 21 10 3l7 18M5 16h10M16 7h6M19 7v12M16 12c2 3 4 5 7 6M22 12c-1 3-3 5-6 6\"/>","教育・学習":"<path d=\"m2 9 10-5 10 5-10 5-10-5ZM6 12v5c3 3 9 3 12 0v-5M22 9v7\"/><path d=\"M9 17h6\"/>","数学":"<path d=\"M18 4H6l7 8-7 8h12M8 8h8\"/>","物理":"<circle cx=\"12\" cy=\"12\" r=\"1.5\"/><ellipse cx=\"12\" cy=\"12\" rx=\"10\" ry=\"4\"/><ellipse cx=\"12\" cy=\"12\" rx=\"10\" ry=\"4\" transform=\"rotate(60 12 12)\"/><ellipse cx=\"12\" cy=\"12\" rx=\"10\" ry=\"4\" transform=\"rotate(120 12 12)\"/>","化学":"<path d=\"M9 3h6M10 3v8l-6 9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2l-6-9V3M7 16h10\"/><circle cx=\"11\" cy=\"18.5\" r=\".8\"/>","心理・行動":"<path d=\"M12 20V7a4 4 0 0 0-7-2 4 4 0 0 0-2 6 4 4 0 0 0 1 7 4 4 0 0 0 8 2ZM12 20V7a4 4 0 0 1 7-2 4 4 0 0 1 2 6 4 4 0 0 1-1 7 4 4 0 0 1-8 2ZM7 10l3 2M17 10l-3 2\"/>","医学・健康":"<path d=\"M12 21s-9-6-9-12a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 12-9 12ZM5 12h4l2-3 2 6 2-3h4\"/>","食文化":"<path d=\"M4 3v9a3 3 0 0 0 6 0V3M7 3v19M15 10c0-4 3-7 6-7v19M15 10v4h6\"/>","農業":"<path d=\"M12 21V11M12 13C5 13 4 8 4 6c6 0 8 2 8 7ZM12 16c0-7 3-9 8-9 0 5-2 9-8 9ZM4 21h16\"/>","漁業・水産":"<path d=\"M3 12c5-6 12-7 17 0-5 7-12 6-17 0ZM3 12l-2-4v8l2-4M17 10h.1M15 15l3 3\"/>","工芸・手仕事":"<path d=\"m3 20 7-7M7 9l8 8M13 5l6 6M4 6l6-3 10 10-3 3L7 6zM2 22l5-2-3-3-2 5Z\"/>","ファッション":"<path d=\"m8 3-6 5 4 5 2-2v10h8V11l2 2 4-5-6-5a4 4 0 0 1-8 0Z\"/>","園芸・植物":"<circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M12 10c-3-5-2-8 0-8 3 0 4 3 0 8ZM14 12c5-3 8-2 8 0 0 3-3 4-8 0ZM12 14c3 5 2 8 0 8-3 0-4-3 0-8ZM10 12c-5 3-8 2-8 0 0-3 3-4 8 0Z\"/>","交通・乗り物":"<rect x=\"5\" y=\"3\" width=\"14\" height=\"16\" rx=\"3\"/><path d=\"M5 10h14M7 15h2M15 15h2M7 19l-2 3M17 19l2 3M9 3v3h6V3\"/>","製造・工場":"<path d=\"M3 21V11l6 4v-4l6 4V6h6v15H3ZM17 6V3h3v3M6 18h2M11 18h2M17 18h2\"/>","ロボット":"<rect x=\"4\" y=\"7\" width=\"16\" height=\"14\" rx=\"3\"/><path d=\"M12 3v4M10 3h4M4 12H2M20 12h2\"/><circle cx=\"9\" cy=\"13\" r=\"1\"/><circle cx=\"15\" cy=\"13\" r=\"1\"/><path d=\"M9 17h6\"/>","情報技術":"<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"m9 8-4 4 4 4m6-8 4 4-4 4M13 7l-2 10\"/>","エネルギー":"<path d=\"m13 2-9 12h7l-1 8 10-13h-7l0-7Z\"/>","環境・リサイクル":"<path d=\"m10 3 3-1 4 6-3 2M17 8h4l-2-4M21 14l1 4-7 4-2-3M15 22l-1-4-3 2M6 19l-4-4 4-7 4 2M2 15l4 1-1-4\"/>","地域・暮らし":"<path d=\"m2 12 10-8 10 8M4 11v10h16V11M9 21v-7h6v7\"/><path d=\"M8 8h8\"/>","経済・産業":"<path d=\"M3 3v18h18M6 17l5-5 4 2 6-9M17 5h4v4\"/>","政治・制度":"<path d=\"M4 21h16M6 18V9h12v9M3 9l9-6 9 6M9 12v6M15 12v6M12 6v3\"/>","法律・社会":"<path d=\"M12 3v18M5 21h14M4 8h16M7 8l-4 7h8L7 8ZM17 8l-4 7h8l-4-7Z\"/>","スポーツ":"<circle cx=\"12\" cy=\"15\" r=\"6\"/><path d=\"m8 10-3-7 4 2 3-2 3 2 4-2-3 7M10 15l2-3 2 3-2 3-2-3\"/>","旅・地理":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m15 9-2 5-5 2 2-5 5-2ZM12 2v2M22 12h-2M12 22v-2M2 12h2\"/>","ゲーム・遊び":"<path d=\"M7 8h10a5 5 0 0 1 5 5l-1 5a3 3 0 0 1-5 1l-2-2h-4l-2 2a3 3 0 0 1-5-1l-1-5a5 5 0 0 1 5-5ZM8 12v6M5 15h6M17 13h.1M19 16h.1\"/>"});
+function genreIcon(name){
+ const markup=GENRE_ICON_PATHS[name];if(!markup)return elt('span','genre-trial-icon');
+ const node=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ node.setAttribute('class','genre-trial-icon');node.setAttribute('viewBox','0 0 24 24');
+ node.setAttribute('fill','none');node.setAttribute('stroke','currentColor');node.setAttribute('stroke-width','1.8');
+ node.setAttribute('stroke-linecap','round');node.setAttribute('stroke-linejoin','round');
+ node.setAttribute('aria-hidden','true');node.setAttribute('focusable','false');
+ node.innerHTML=markup;return node;
+}
+
+
+let randomGenreSelection=new Set(),randomGenreIdentity='',conditionUseInterests=true,conditionUseLikes=true;
+let conditionOrder='random',conditionDisplayMode='list',conditionFirstLatest=true,conditionImageFetchEnabled=false;
+function mountRandomDiscovery(root){
+ e2CompactStyles();
+ const pid=state.profileId,token=state.secretToken,serial=aiViewSerial;
+ const identity=String(pid)+'/'+String(token||'');
+ if(randomGenreIdentity!==identity){randomGenreSelection=new Set();randomGenreIdentity=identity;conditionUseInterests=conditionOrder!=='latest';conditionUseLikes=conditionOrder!=='latest'}
+ const panel=elt('section','ai-external-section random-discovery-section');
+ const active=()=>state.aiKind==='rss'&&state.profileId===pid&&state.secretToken===token&&aiViewSerial===serial&&panel.isConnected&&aiDiscoveryMode==='random';
+ panel.append(elt('h3','','記事の探し方'));
+ const orderRow=elt('div','condition-order-row');
+ const orderButtons=[];
+ for(const [value,label] of [['latest','新着順'],['random','ランダム']]){
+  const b=action(label,()=>{if(conditionOrder===value)return;conditionOrder=value;
+   if(value==='latest'&&conditionFirstLatest){conditionUseInterests=false;conditionUseLikes=false;conditionFirstLatest=false;interestToggle.querySelector('input').checked=false;likeToggle.querySelector('input').checked=false}
+   syncChecks();refresh();},false);
+  b.type='button';b.dataset.order=value;orderButtons.push(b);orderRow.append(b);
+ }
+ panel.append(orderRow,elt('p','help','新着順は公開RSSの日時で並べます。ジャンル未指定・好み情報OFFなら主要ニュース全般です。Googleニュースの取得範囲であり、全ニュースを網羅するものではありません。'));
+ panel.append(elt('h3','','今回の探索条件'));
+ panel.append(elt('p','help','今回の記事探しに使う情報を選びます。OFFにしても、保存済みの関心リストや「興味あり」は消えません。'));
+ const preference=elt('div','condition-trial-preferences');
+ const makeToggle=(caption,checked,onChange)=>{
+  const label=elt('label','condition-trial-toggle'),input=elt('input');input.type='checkbox';input.checked=checked;
+  input.onchange=()=>onChange(input.checked);
+  label.append(input,elt('span','',caption));return label;
+ };
+ const interestToggle=makeToggle('関心リストを使う',conditionUseInterests,value=>{conditionUseInterests=value;syncChecks()});
+ const likeToggle=makeToggle('「興味あり」を使う',conditionUseLikes,value=>{conditionUseLikes=value;syncChecks()});
+ preference.append(interestToggle,likeToggle);
+ preference.append(elt('p','help','クリック履歴は「興味あり」のAIテーマ生成時だけ、極めて弱い補助情報として使用します。両方OFFなら閲覧履歴もGemmaも使用しません。'));
+ const edit=elt('details','condition-trial-interests');
+ edit.append(elt('summary','','関心リストを編集'));
+ const editBody=elt('div','condition-trial-interests-body'),input=elt('textarea','ai-interests-textarea');
+ input.rows=3;input.maxLength=9600;input.placeholder='PC\nAI\nマウス';
+ const note=elt('p','help','このプロファイルの関心リストに保存します。');
+ const save=action('関心リストを保存',async()=>{
+  save.disabled=true;
+  try{const data=await post('/api/ai/interests',{scope:'rss',text:input.value});
+   if(active())notify(`関心リストを保存しました（${data.terms?.length||0}件）。`)}
+  catch(e){if(active())err(e)}finally{if(active())save.disabled=false}
+ },false);
+ editBody.append(input,note,save);edit.append(editBody);preference.append(edit);
+ panel.append(preference,elt('p','help','ジャンル選択：左の▶で小ジャンルを展開。チェックは探索範囲の指定です。未選択ならジャンル制限なしです。'));
+ const filter=elt('div','genre-trial-filters');
+ const selectedStatus=elt('p','help genre-trial-summary','ジャンル一覧を読み込み中…');selectedStatus.setAttribute('role','status');
+ const controls=elt('div','genre-trial-controls');
+ const reset=action('全チェック解除',()=>{randomGenreSelection.clear();syncChecks()},false);reset.disabled=true;
+ controls.append(reset,selectedStatus);panel.append(controls,filter);
+ const run=action('探索する',async()=>{
+  if(conditionOrder==='random'&&conditionUseInterests&&conditionUseLikes&&randomGenreSelection.size===0){
+   // Keep the unmodified standard E2 (7:2:1) as the only implementation for this exact choice.
+   aiDiscoveryMode='ai';await selectAiKind('rss');return;
+  }
+  run.disabled=true;
+  try{await post('/api/ai/conditional/refresh',{categories:[...randomGenreSelection],useInterests:conditionUseInterests,useLikes:conditionUseLikes,order:conditionOrder});
+   if(active())await refresh()}
+  catch(e){if(active()){err(e);run.disabled=false}}
+ },false);run.disabled=true;
+ const status=elt('p','help e2-search-brief','探索状態を確認中…');status.setAttribute('role','status');
+ const diagnostics=elt('details','condition-search-diagnostics'),diagSummary=elt('summary','','探索の詳細'),diagBody=elt('div','e2-search-log');
+ diagnostics.append(diagSummary,diagBody);
+ const displayRow=elt('div','condition-display-row');
+ const displayButtons=[];
+ for(const [value,label] of [['list','1行表示'],['cards','画像＋リード文']]){
+  const b=action(label,()=>{conditionDisplayMode=value;syncDisplay();refresh()},false);b.dataset.display=value;displayButtons.push(b);displayRow.append(b);
+ }
+ const imageSetting=elt('label','condition-image-setting');
+ const imageCheck=elt('input');imageCheck.type='checkbox';imageCheck.checked=conditionImageFetchEnabled;
+ imageCheck.onchange=()=>{conditionImageFetchEnabled=imageCheck.checked;syncDisplay();refresh()};
+ const imageHelp=elt('span','','記事画像を元サイトから取得（初期OFF）');
+ imageSetting.append(imageCheck,imageHelp);displayRow.append(imageSetting);
+ const previewStatsLine=elt('span','condition-image-progress');displayRow.append(previewStatsLine);
+ const previewDiagnostic=elt('details','condition-image-diagnostic');
+ const previewDiagnosticSummary=elt('summary','','画像診断（取得できない理由）');
+ const previewDiagnosticBody=elt('div','e2-search-log','画像取得ONで表示中の記事を確認すると結果が表示されます。');
+ previewDiagnostic.append(previewDiagnosticSummary,previewDiagnosticBody);
+ const results=elt('div','ai-external-results condition-results');
+ const more=action('取得済み候補の続きを表示',async()=>{more.disabled=true;await fetchMore();},false);more.hidden=true;
+ panel.append(run,status,diagnostics,displayRow,previewDiagnostic,results,more);root.append(panel);
+ let catalogGroups=[],topicControls=[],parentControls=[];
+ function syncChecks(){
+  for(const {name,input} of topicControls)input.checked=randomGenreSelection.has(name);
+  for(const {names,input,caption} of parentControls){
+   const count=names.filter(x=>randomGenreSelection.has(x)).length;
+   input.checked=count===names.length;input.indeterminate=count>0&&count<names.length;caption.textContent=`${count}/${names.length}`;
+  }
+  const preference=conditionUseInterests&&conditionUseLikes?'関心リスト＋興味あり':conditionUseInterests?'関心リストのみ':conditionUseLikes?'興味ありのみ':'好み情報なし';
+  selectedStatus.textContent=`${preference} ・ ${randomGenreSelection.size?`${randomGenreSelection.size}分野選択`:'ジャンル制限なし'}`;
+  for(const b of orderButtons){b.classList.toggle('active',b.dataset.order===conditionOrder);b.setAttribute('aria-pressed',String(b.dataset.order===conditionOrder))}
+  run.textContent=conditionOrder==='latest'?'新着ニュースを取得':conditionUseInterests&&conditionUseLikes&&!randomGenreSelection.size?'AIセレクトを開く':
+   !conditionUseInterests&&!conditionUseLikes?(randomGenreSelection.size?'指定ジャンルからランダム探索':'完全ランダムに探す'):'選択した条件で探す';
+ }
+ async function loadCatalog(){
+  try{const data=await api('/api/ai/random/catalog');if(!active())return;
+   if(!Array.isArray(data.groups)||!data.groups.length)throw Error('ジャンル一覧を取得できません');
+   catalogGroups=data.groups;filter.replaceChildren();const allowed=new Set(data.groups.flatMap(x=>x.categories||[]));
+   randomGenreSelection=new Set([...randomGenreSelection].filter(x=>allowed.has(x)));
+   for(const group of catalogGroups){
+    const names=group.categories||[];if(!names.length)continue;
+    const details=elt('details','genre-trial-group'),summary=elt('summary','genre-trial-heading');
+    const arrow=elt('span','genre-trial-arrow','▶'),checkbox=elt('input');checkbox.type='checkbox';checkbox.title='小ジャンルを一括選択・解除';
+    const count=elt('span','genre-trial-count','');
+    checkbox.onclick=e=>e.stopPropagation();
+    checkbox.onchange=()=>{for(const name of names){if(checkbox.checked)randomGenreSelection.add(name);else randomGenreSelection.delete(name)}syncChecks()};
+    summary.append(arrow,checkbox,genreIcon(group.name),elt('strong','',group.name),count);details.append(summary);
+    details.addEventListener('toggle',()=>{arrow.textContent=details.open?'▼':'▶'});
+    const children=elt('div','genre-trial-children');
+    for(const name of names){
+     const item=elt('label','genre-trial-child'),input=elt('input');input.type='checkbox';
+     input.onchange=()=>{if(input.checked)randomGenreSelection.add(name);else randomGenreSelection.delete(name);syncChecks()};
+     item.append(input,genreIcon(name),elt('span','',name));children.append(item);topicControls.push({name,input});
+    }
+    details.append(children);filter.append(details);parentControls.push({names,input:checkbox,caption:count});
+   }
+   reset.disabled=false;run.disabled=false;syncChecks();
+  }catch(e){if(active())selectedStatus.textContent='ジャンル一覧の取得に失敗しました：'+e.message}
+ }
+ async function loadInterests(){
+  try{const data=await api('/api/ai/interests?scope=rss');if(active())input.value=(data.terms||[]).join('\n')}
+  catch(e){if(active())note.textContent='関心リストの読み込みに失敗しました：'+e.message}
+ }
+ let pageOffset=0,lastGenerated=0,moreAvailable=false;
+ const PREVIEW_VIEW_MARGIN_PX=160,PREVIEW_SIMULTANEOUS=2;
+ // Link-resolution polling does not use either image/metadata fetch slot.
+ // Keep a bounded set of nearby pending links to avoid excessive Google News
+ // state checks. A single timer drives the waiting set (not one per article).
+ const PREVIEW_LINK_WAIT_LIMIT_MS=20000,PREVIEW_LINK_POLL_MS=1600;
+ const PREVIEW_LINK_PENDING_LIMIT=16,PREVIEW_LINK_POLL_SIMULTANEOUS=2;
+ let previewObserver=null,previewQueue=[],previewActive=0,previewEpoch=0,previewFallbackCleanup=null;
+ let previewLinkWaiting=new Map(),previewLinkTimer=null,previewLinkPolls=0;
+ let previewStats={attempted:0,loaded:0,linkFailed:0,pageFailed:0,noImage:0,imageFailed:0,timedOut:0,elapsed:0,checking:0,reasons:Object.create(null)};
+ function resetPreview(){++previewEpoch;if(previewObserver)previewObserver.disconnect();previewObserver=null;
+  if(previewFallbackCleanup){previewFallbackCleanup();previewFallbackCleanup=null}
+  if(previewLinkTimer!==null)clearTimeout(previewLinkTimer);previewLinkTimer=null;
+  previewLinkWaiting.clear();previewLinkPolls=0;previewQueue=[];previewActive=0;
+  previewStats={attempted:0,loaded:0,linkFailed:0,pageFailed:0,noImage:0,imageFailed:0,timedOut:0,elapsed:0,checking:0,reasons:Object.create(null)};
+  previewStatsLine.textContent='';previewDiagnosticBody.textContent='画像取得ONで表示中の記事を確認すると結果が表示されます。';}
+ function imageStatistics(){const s=previewStats;
+  const waiting=previewLinkWaiting.size;
+  previewStatsLine.textContent=`画像表示 ${s.loaded}件 / 確認 ${s.attempted}件`+(s.checking||previewQueue.length||waiting?`（画像処理中 ${s.checking}件・URL待ち ${waiting}件・待機 ${previewQueue.length}件）`:'');
+  const names={DNS_NOT_FOUND:'DNS：名前解決不可',DNS_TEMPORARY:'DNS：一時的な失敗',DNS_FAILURE:'DNS：その他',UNSAFE_DNS:'DNS：安全制限',
+   TLS_CERTIFICATE_ERROR:'TLS：証明書エラー',TLS_HANDSHAKE_ERROR:'TLS：接続交渉失敗',TLS_DISCONNECTED:'TLS：接続切断',
+   CONNECT_TIMEOUT:'接続タイムアウト',META_TIMEOUT:'読込タイムアウト',CONNECT_REFUSED:'接続拒否',CONNECTION_RESET:'接続切断',NETWORK_UNREACHABLE:'ネットワーク接続不可',
+   CONTENT_TYPE_NOT_HTML:'HTML以外の応答',CONTENT_ENCODING_UNSUPPORTED:'非対応の圧縮応答',HTML_TOO_LARGE:'HTMLサイズ超過',HTML_LIMIT:'HTMLサイズ超過',
+   PUBLISHER_REDIRECT_DENIED:'リダイレクト安全制限',CROSS_PUBLISHER_REDIRECT:'ドメイン不一致',RESPONSE_ABORTED:'応答途中で切断',
+   NO_IMAGE_TAG:'OGP画像なし',GOOGLE_RATE_LIMIT:'Google側の制限',NEWS_RATE_LIMIT:'Google側の制限',GOOGLE_NO_URL:'元URLを解決できない',
+   LINK_DEFER_TIMEOUT:'元URL解決待ち超過',DNS_LOOKUP_RESULT_INVALID:'DNS応答形式エラー',NETWORK_OTHER:'その他の通信失敗',PREVIEW_REQUEST_FAILED:'画像APIへの接続失敗',IMAGE_LOAD_FAILED:'ブラウザ画像読込失敗'};
+  const reasons=Object.entries(s.reasons).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,v])=>`${names[k]||(k.startsWith('HTTP_')?'HTTP '+k.slice(5):k)}（${k}）: ${v}件`).join(' / ');
+  previewDiagnosticBody.textContent=`元記事URL解決失敗 ${s.linkFailed}件 ・ 元ページ取得失敗 ${s.pageFailed}件 ・ OGP画像なし ${s.noImage}件 ・ 画像読込失敗 ${s.imageFailed}件 ・ 未完了 ${s.timedOut}件`+
+   ` ・ 実画像表示 ${s.loaded}件 ・ 平均確認時間 ${s.attempted?Math.round(s.elapsed/s.attempted/1000):0}秒（待機含む）`+
+   (reasons?'\n内訳: '+reasons:'');
+ }
+ function syncDisplay(){
+  for(const b of displayButtons){b.classList.toggle('active',b.dataset.display===conditionDisplayMode);b.setAttribute('aria-pressed',String(b.dataset.display===conditionDisplayMode))}
+  imageSetting.hidden=conditionDisplayMode!=='cards';previewStatsLine.hidden=conditionDisplayMode!=='cards'||!conditionImageFetchEnabled;
+  previewDiagnostic.hidden=conditionDisplayMode!=='cards'||!conditionImageFetchEnabled;
+ }
+ function previewIsNearby(row){
+  if(!row.isConnected)return false;
+  const rect=row.getBoundingClientRect();
+  return rect.bottom>=-PREVIEW_VIEW_MARGIN_PX&&rect.top<=(window.innerHeight||document.documentElement.clientHeight)+PREVIEW_VIEW_MARGIN_PX;
+ }
+ function previewEnabled(){return active()&&conditionImageFetchEnabled&&conditionDisplayMode==='cards'}
+ function reobservePreview(row){if(previewObserver&&row.isConnected&&previewEnabled())previewObserver.observe(row)}
+ function deferredLinkFinish(job,reason='LINK_DEFER_TIMEOUT'){
+  if(job.epoch!==previewEpoch||!previewEnabled())return;
+  const s=previewStats;s.attempted++;s.timedOut++;s.elapsed+=Date.now()-job.started;
+  s.reasons[reason]=(s.reasons[reason]||0)+1;imageStatistics();
+ }
+ function finishPreview(job,data){
+  if(job.epoch!==previewEpoch||!previewEnabled()||!job.row.isConnected)return;
+  const s=previewStats;s.attempted++;s.elapsed+=Date.now()-job.started;
+  const reason=String(data.reason||(data.status==='pending'?'WAIT_TIMEOUT':'UNKNOWN')).slice(0,48);
+  if(data.status==='pending'){s.timedOut++;s.reasons[(data.phase||'metadata')+'_WAIT_TIMEOUT']=(s.reasons[(data.phase||'metadata')+'_WAIT_TIMEOUT']||0)+1}
+  else if(data.status==='unavailable'){
+   if(data.phase==='link')s.linkFailed++;else s.pageFailed++;
+   s.reasons[reason]=(s.reasons[reason]||0)+1;
+  }else if(data.status==='ready'&&/^https:\/\//.test(String(data.thumbnail||''))){
+   const oldError=job.img.onerror;let finished=false;
+   const finish=ok=>{if(finished||job.epoch!==previewEpoch)return;finished=true;job.img.onload=null;job.img.onerror=oldError;
+    if(ok)s.loaded++;else{s.imageFailed++;s.reasons.IMAGE_LOAD_FAILED=(s.reasons.IMAGE_LOAD_FAILED||0)+1}
+    imageStatistics()};
+   job.img.onload=()=>finish(true);job.img.onerror=e=>{finish(false);if(oldError)oldError(e)};
+   job.img.classList.remove('favicon-thumb');job.img.src=data.thumbnail;
+  }else if(data.status==='ready'){
+   s.noImage++;s.reasons.NO_IMAGE_TAG=(s.reasons.NO_IMAGE_TAG||0)+1;
+  }else{s.pageFailed++;s.reasons[reason]=(s.reasons[reason]||0)+1}
+  if(data.status==='ready'&&data.excerpt&&job.excerptContainer&&job.excerptContainer.classList.contains('e2-compact-excerpt')&&!job.excerptContainer.textContent.trim())job.excerptContainer.textContent=data.excerpt;
+  imageStatistics();
+ }
+ function requestPreview(item,row,img,excerptContainer){
+  if(!previewEnabled()||!row.isConnected||!previewIsNearby(row))return false;
+  previewQueue.push({item,row,img,excerptContainer,epoch:previewEpoch,started:Date.now()});
+  drainPreview();return true;
+ }
+ function dropOutOfViewLinks(){
+  for(const [id,waiting] of previewLinkWaiting){
+   if(waiting.job.epoch!==previewEpoch||!previewEnabled()||!previewIsNearby(waiting.job.row)){
+    previewLinkWaiting.delete(id);
+    if(waiting.job.row.isConnected)reobservePreview(waiting.job.row);
+   }
+  }
+ }
+ function scheduleLinkPoll(){
+  if(previewLinkTimer!==null||!previewLinkWaiting.size||!previewEnabled()||previewLinkPolls>=PREVIEW_LINK_POLL_SIMULTANEOUS)return;
+  let next=Infinity;for(const entry of previewLinkWaiting.values())if(!entry.polling)next=Math.min(next,entry.next);
+  if(!Number.isFinite(next))return;
+  previewLinkTimer=setTimeout(()=>{previewLinkTimer=null;pollWaitingLinks()},Math.max(0,next-Date.now()));
+ }
+ function deferLink(job){
+  if(job.epoch!==previewEpoch||!previewEnabled()||!previewIsNearby(job.row))return;
+  if(previewLinkWaiting.has(job.item.id))return;
+  previewLinkWaiting.set(job.item.id,{job,next:Date.now()+PREVIEW_LINK_POLL_MS,polling:false});
+  imageStatistics();scheduleLinkPoll();
+ }
+ function pollWaitingLinks(){
+  dropOutOfViewLinks();
+  if(!previewEnabled())return;
+  const now=Date.now();
+  for(const [id,waiting] of previewLinkWaiting){
+   if(waiting.polling)continue;
+   if(now-waiting.job.started>=PREVIEW_LINK_WAIT_LIMIT_MS){
+    previewLinkWaiting.delete(id);deferredLinkFinish(waiting.job);continue;
+   }
+   if(now<waiting.next||previewLinkPolls>=PREVIEW_LINK_POLL_SIMULTANEOUS)continue;
+   waiting.polling=true;previewLinkPolls++;
+   (async()=>{
+    let data;
+    try{data=await api('/api/ai/conditional/preview?id='+encodeURIComponent(waiting.job.item.id),{headers:{'X-Nestrill-Preview':'enabled'}})}
+    catch{data={status:'unavailable',phase:'network',reason:'PREVIEW_REQUEST_FAILED'}}
+    if(waiting.job.epoch!==previewEpoch||previewLinkWaiting.get(id)!==waiting)return;
+    if(!previewEnabled()||!previewIsNearby(waiting.job.row)){
+     previewLinkWaiting.delete(id);reobservePreview(waiting.job.row);return;
+    }
+    if(data.status==='pending'&&data.phase==='link'){
+     waiting.next=Date.now()+PREVIEW_LINK_POLL_MS;
+    }else{
+     previewLinkWaiting.delete(id);
+     if(data.status==='pending'){
+      // The link is ready; its article metadata can now use the two regular
+      // fetch slots. Requeue ahead of lower-priority unresolved links.
+      previewQueue.unshift(waiting.job);
+     }else finishPreview(waiting.job,data);
+     drainPreview();
+    }
+   })().catch(()=>{if(waiting.job.epoch!==previewEpoch)return;
+    previewLinkWaiting.delete(id);finishPreview(waiting.job,{status:'unavailable',phase:'network',reason:'PREVIEW_REQUEST_FAILED'});
+   }).finally(()=>{
+    if(waiting.job.epoch!==previewEpoch)return;
+    waiting.polling=false;previewLinkPolls=Math.max(0,previewLinkPolls-1);
+    imageStatistics();drainPreview();scheduleLinkPoll();
+   });
+  }
+  imageStatistics();scheduleLinkPoll();
+ }
+ function drainPreview(){
+  if(!previewEnabled())return;
+  dropOutOfViewLinks();
+  while(previewActive<PREVIEW_SIMULTANEOUS&&previewQueue.length){
+   if(previewLinkWaiting.size>=PREVIEW_LINK_PENDING_LIMIT)break;
+   const job=previewQueue.shift();if(job.epoch!==previewEpoch)continue;
+   if(!previewIsNearby(job.row)){
+    if(previewObserver)reobservePreview(job.row);
+    else job.row.__newsPreview={item:job.item,img:job.img,excerptContainer:job.excerptContainer};
+    continue;
+   }
+   previewActive++;previewStats.checking++;imageStatistics();
+   (async()=>{
+    let data={status:'unavailable',phase:'network',reason:'PREVIEW_REQUEST_FAILED'};
+    // Metadata retrieval still uses the bounded two-slot pool. Link resolution
+    // returns its slot immediately rather than looping for 30+ seconds.
+    for(let attempt=0;attempt<9;attempt++){
+     if(job.epoch!==previewEpoch||!previewEnabled()||!job.row.isConnected)return;
+     try{data=await api('/api/ai/conditional/preview?id='+encodeURIComponent(job.item.id),{headers:{'X-Nestrill-Preview':'enabled'}})}
+     catch{data={status:'unavailable',phase:'network',reason:'PREVIEW_REQUEST_FAILED'}}
+     if(data.status==='pending'&&data.phase==='link'){
+      deferLink(job);return;
+     }
+     if(data.status!=='pending')break;
+     await new Promise(resolve=>setTimeout(resolve,Math.min(650+attempt*250,1800)));
+    }
+    if(job.epoch!==previewEpoch||!previewEnabled()||!job.row.isConnected)return;
+    finishPreview(job,data);
+   })().catch(()=>{
+    if(job.epoch!==previewEpoch)return;
+    finishPreview(job,{status:'unavailable',phase:'network',reason:'CLIENT_PREVIEW_ERROR'});
+   }).finally(()=>{
+    if(job.epoch!==previewEpoch)return;
+    previewStats.checking=Math.max(0,previewStats.checking-1);
+    previewActive=Math.max(0,previewActive-1);imageStatistics();drainPreview();
+   });
+  }
+ }
+ function observePreview(item,row,img,excerptContainer){
+  if(!previewEnabled()||item.thumbnail)return;
+  if(!previewObserver&&'IntersectionObserver' in window){
+   previewObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){
+    const target=entry.target,task=target.__newsPreview;
+    if(task&&requestPreview(task.item,target,task.img,task.excerptContainer))previewObserver.unobserve(target);
+   }},{rootMargin:PREVIEW_VIEW_MARGIN_PX+'px'});
+  }
+  if(previewObserver){row.__newsPreview={item,img,excerptContainer};previewObserver.observe(row)}
+  else{
+   row.__newsPreview={item,img,excerptContainer};
+   if(!previewFallbackCleanup){
+    let scheduled=false;
+    const scan=()=>{scheduled=false;if(!previewEnabled())return;
+     for(const candidate of results.querySelectorAll('.condition-visual-row')){
+      const task=candidate.__newsPreview;if(!task||!previewIsNearby(candidate))continue;
+      candidate.__newsPreview=null;requestPreview(task.item,candidate,task.img,task.excerptContainer);
+     }
+    };
+    const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(scan)}};
+    const scrolling=document.querySelector('.main-pane')||window;
+    scrolling.addEventListener('scroll',schedule,{passive:true});
+    window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);
+    previewFallbackCleanup=()=>{scrolling.removeEventListener('scroll',schedule);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule)};
+   }
+   requestAnimationFrame(()=>{if(row.__newsPreview&&previewIsNearby(row)){
+    row.__newsPreview=null;requestPreview(item,row,img,excerptContainer);
+   }});
+  }
+ }
+ function renderItem(item){
+  const row=elt('div','ai-preview-row e2-compact-row condition-visual-row'+(conditionDisplayMode==='list'?' condition-one-line':''));
+  let img=null,excerptContainer=null;
+  const favicon=(!state.secretToken&&Number.isSafeInteger(Number(state.profileId))&&/^[a-f0-9]{32}$/.test(String(item.id||'')))?
+    '/api/ai/conditional-icon/'+Number(state.profileId)+'/'+item.id:placeholderSrc('missing');
+  if(conditionDisplayMode==='cards'){
+   img=elt('img','thumb ai-preview-image');img.alt='';img.loading='lazy';img.referrerPolicy='no-referrer';
+   img.src=(conditionImageFetchEnabled&&item.thumbnail)||favicon;
+   if(!conditionImageFetchEnabled||!item.thumbnail)img.classList.add('favicon-thumb');
+   img.onerror=()=>{if(!img.dataset.fallback){img.dataset.fallback='1';img.classList.add('favicon-thumb');img.src=favicon}else{img.onerror=null;img.src=placeholderSrc('missing')}};row.append(img);
+  }
+  const content=elt('div','ai-preview-text e2-compact-copy'),link=elt('a','',String(item.title||''));
+  link.href=item.openUrl||item.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
+  const metadata=[item.source,item.published?fmtTime(item.published):'',item.category?'探索分野：'+item.category:''].filter(Boolean).join(' ・ ');
+  const meta=elt('div','e2-compact-meta-row'),line=elt('span','e2-compact-meta',metadata);line.title=metadata;
+  meta.append(line);content.append(meta);
+  if(conditionDisplayMode==='cards'&&state.showLeadText){excerptContainer=elt('div','e2-compact-excerpt',e2UniqueExcerpt(item)||'');content.append(excerptContainer)}
+  const liked=action(item.liked?'♥ 興味あり済':'♡ 興味あり',async()=>{
+   liked.disabled=true;
+   try{const next=liked.dataset.liked!=='1';await post('/api/ai/conditional/rating',{id:item.id,rating:next?1:0});
+    if(active()){liked.dataset.liked=next?'1':'0';liked.textContent=next?'♥ 興味あり済':'♡ 興味あり';notify(next?'興味ありを記録しました（次回の探索から使用可能）':'興味ありを解除しました')}}
+   catch(e){if(active())err(e)}finally{if(active())liked.disabled=false}
+  },false);liked.dataset.liked=item.liked?'1':'0';liked.classList.add('condition-trial-like');
+  row.append(content,liked);results.append(row);
+  if(img&&conditionImageFetchEnabled&&!item.thumbnail)observePreview(item,row,img,excerptContainer||content);
+ }
+ async function fetchMore(){
+  if(!active()||!moreAvailable)return;
+  try{const data=await api('/api/ai/conditional?offset='+pageOffset+'&limit=40');
+   if(!active()||data.running||data.generatedAt!==lastGenerated||data.order!==conditionOrder)return;
+   const shown=aiFilterShownItems(data.items,'rss');for(const item of shown)renderItem(item);
+   pageOffset+=data.items.length;moreAvailable=!!data.hasMore;more.hidden=!moreAvailable;
+   more.disabled=false;
+  }catch(e){if(active()){err(e);more.disabled=false}}
+ }
+ async function refresh(){
+  if(!active())return;
+  try{const data=await api('/api/ai/conditional?offset=0&limit=40');if(!active())return;
+   const matches=data.order===conditionOrder||(!data.generatedAt&&!data.running);
+   run.disabled=!!data.running||!catalogGroups.length;
+   if(!matches){status.textContent='この探し方ではまだ取得していません。';diagBody.textContent='';results.replaceChildren();more.hidden=true;$('article-count').textContent='—';return}
+   if(data.running){const progress=data.progress||{};
+    status.textContent=data.phase==='planning'?'検索テーマを準備中（好み情報ONの場合はローカルAIを使用することがあります）':
+     `公開RSSから取得中：${progress.completed||0}/${progress.total||0}検索`;
+   }else if(data.generatedAt){
+    status.textContent=`${data.order==='latest'?'新着順':'ランダム'}・${data.totalVisible??data.items.length}件 ・ ${new Date(data.generatedAt).toLocaleString('ja-JP')} 更新`;
+   }else status.textContent='まだ取得していません。条件を選び、記事を探してください。';
+   const source=data.sourceOptions||{};
+   const sources=!source.useInterests&&!source.useLikes?'好み情報OFF':`${source.useInterests?'関心ON':'関心OFF'}・${source.useLikes?'興味ありON':'興味ありOFF'}`;
+   diagBody.textContent=`${sources} ・ ${data.selectedCategories?.length?`${data.selectedCategories.length}分野指定`:'ジャンル指定なし'} ・ ${data.queryCount||0}検索`+
+    (data.sourceHidden?' ・ 非表示ルール等で'+data.sourceHidden+'件を除外':'')+
+    (data.error?' ・ '+data.error:'')+
+    (Array.isArray(data.notes)&&data.notes.length?' ・ '+data.notes.join('／'):'');
+   if(data.error&&!data.items?.length&&!data.running)status.textContent='取得できませんでした。探索の詳細をご確認ください。';
+   $('article-count').textContent=data.generatedAt?String(data.totalVisible??data.items.length)+' 件':'—';
+   resetPreview();results.replaceChildren();more.hidden=true;moreAvailable=false;pageOffset=0;
+   if(data.generatedAt){lastGenerated=data.generatedAt;
+    for(const item of aiFilterShownItems(data.items,'rss'))renderItem(item);
+    pageOffset=data.items.length;moreAvailable=!!data.hasMore;more.hidden=!moreAvailable;more.disabled=false;
+   }
+   if(!data.items.length&&!data.running)results.append(elt('p','help',data.generatedAt?'条件に合う記事を確保できませんでした。':'取得した記事はここに表示されます。'));
+   if(data.running)setTimeout(refresh,1200);
+  }catch(e){if(active()){status.textContent='取得状態を確認できません：'+e.message;run.disabled=false}}
+ }
+ syncDisplay();
+ loadCatalog();loadInterests();refresh();
+}
 async function selectAiKind(kind){
  if(kind!=='rss')return; // YouTube AI is frozen; normal channel viewer unaffected.
  ++loadSerial;++youtubeChannelSerial;++aiViewSerial;
  state.aiKind=kind;state.sourceKind=null;state.sourceAccountId=0;state.sourceChannelId='';
  state.category=null;state.feed=null;state.group='all';
  renderSidebar();closeMobile();setSourcePanelVisible(true);
- $('view-title').textContent='AIセレクト';$('article-count').textContent='—';
+ $('view-title').textContent=aiDiscoveryMode==='random'?'条件を指定して探す':'AIセレクト';$('article-count').textContent='—';
  const root=$('source-panel');root.replaceChildren();
+ const switcher=elt('div','ai-discovery-mode-switch');
+ switcher.setAttribute('role','group');switcher.setAttribute('aria-label','記事探索モード');
+ for(const [mode,label] of [['ai','AIセレクト'],['random','条件を指定して探す']]){
+  const button=elt('button','ai-discovery-mode-button'+(aiDiscoveryMode===mode?' active':''),label);
+  button.type='button';button.setAttribute('aria-pressed',String(aiDiscoveryMode===mode));
+  button.onclick=()=>{if(aiDiscoveryMode===mode)return;aiDiscoveryMode=mode;selectAiKind('rss').catch(err)};
+  switcher.append(button);
+ }
+ root.append(switcher);
+ if(!document.getElementById('nestrill-random-discovery-style')){
+  const style=document.createElement('style');style.id='nestrill-random-discovery-style';
+  style.textContent='.ai-discovery-mode-switch{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 13px}.ai-discovery-mode-button{padding:7px 14px;border:1px solid #91a2b37a;border-radius:7px;cursor:pointer;background:transparent;color:inherit;font:inherit}.ai-discovery-mode-button.active{background:var(--accent,#4c82c6);color:#fff;border-color:var(--accent,#4c82c6)}.ai-discovery-mode-button:focus-visible{outline:2px solid var(--accent,#4c82c6);outline-offset:2px}.genre-trial-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 10px}.genre-trial-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:7px;margin-bottom:14px}.genre-trial-group{border:1px solid #91a2b34d;border-radius:8px;padding:7px 10px;min-width:0}.genre-trial-heading{display:grid;grid-template-columns:12px 16px minmax(0,1fr) auto;align-items:center;gap:8px;cursor:pointer}.genre-trial-parent{display:flex;align-items:center;gap:7px;cursor:pointer}.genre-trial-parent input,.genre-trial-child input{accent-color:var(--accent,#4c82c6)}.genre-trial-count{font-size:12px;opacity:.72}.genre-trial-children{display:grid;gap:6px;padding:12px 0 4px 20px}.genre-trial-child{display:grid;grid-template-columns:16px minmax(0,1fr);align-items:center;gap:8px;cursor:pointer;font-size:.93em}.genre-trial-summary{margin:0}.random-discovery-section>.help{margin:6px 0}.genre-trial-heading{list-style:none}.genre-trial-heading::-webkit-details-marker{display:none}.genre-trial-arrow{font-size:11px;flex:none;color:var(--accent,#4c82c6)}.genre-trial-heading>strong{flex:1}.genre-trial-heading>input,.genre-trial-child>input{box-sizing:border-box;width:16px;height:16px;margin:0;accent-color:var(--accent,#4c82c6);cursor:pointer}.condition-trial-preferences{border:1px solid #91a2b34d;border-radius:8px;padding:10px 12px;margin:10px 0 15px}.condition-trial-toggle{display:inline-flex;align-items:center;gap:7px;margin-right:26px;font-weight:600;cursor:pointer}.condition-trial-preferences>.help{margin:8px 0}.condition-trial-interests{margin:6px 0}.condition-trial-interests summary{cursor:pointer;font-size:12px}.condition-trial-interests-body{padding:9px;max-width:520px}.condition-trial-interests-body textarea{width:100%;box-sizing:border-box}.condition-trial-like{flex:none;font-size:11px;padding:4px 7px;align-self:flex-start}';
+  style.textContent += "\n /* RC07: genre icons inherit persisted RIGHT-pane appearance; auto-height when large. */\n .genre-trial-heading{grid-template-columns:12px 16px var(--genre-icon-size,15px) minmax(0,1fr) auto;gap:7px;min-height:var(--genre-icon-size,15px)}\n .genre-trial-child{grid-template-columns:16px var(--genre-icon-size,15px) minmax(0,1fr);gap:7px;min-height:var(--genre-icon-size,15px)}\n .genre-trial-icon{width:var(--genre-icon-size,15px);height:var(--genre-icon-size,15px);display:block;flex:none;color:var(--genre-icon-color,#65738a);pointer-events:none}\n .genre-trial-heading>strong,.genre-trial-child>span{min-width:0;overflow-wrap:anywhere}\n";
+   document.head.appendChild(style);
+ }
+ if(!document.getElementById('nestrill-condition-latest-style')){const st=document.createElement('style');st.id='nestrill-condition-latest-style';st.textContent=`
+ .condition-order-row,.condition-display-row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 12px}
+ .condition-order-row>button,.condition-display-row>button{padding:6px 14px;border-radius:7px;border:1px solid #91a2b36a;background:transparent;color:inherit;font:inherit;cursor:pointer}
+ .condition-order-row>button.active,.condition-display-row>button.active{background:var(--accent,#4c82c6);color:white;border-color:var(--accent,#4c82c6)}
+ .condition-image-setting{display:inline-flex;align-items:center;gap:7px;padding:5px 8px;cursor:pointer;font-size:13px}
+ .condition-image-setting[hidden],.condition-image-progress[hidden]{display:none!important}
+ .condition-image-setting input{width:16px;height:16px;margin:0;accent-color:var(--accent,#4c82c6)}
+ .condition-image-progress{font-size:11px;opacity:.72;align-self:center}
+ .condition-image-diagnostic{font-size:12px;margin:2px 0 10px;opacity:.85;white-space:pre-wrap}
+ .condition-image-diagnostic[hidden]{display:none!important}
+ .condition-search-diagnostics{font-size:12px;margin:5px 0 9px}.condition-search-diagnostics summary{cursor:pointer;color:var(--accent,#4c82c6)}
+ .condition-search-diagnostics .e2-search-log{border-left:2px solid #9bb2d1;padding:7px 10px;margin-top:5px;line-height:1.55}
+ .condition-results .condition-visual-row.condition-one-line{align-items:center;padding:7px 4px}
+ .condition-results .condition-visual-row.condition-one-line .e2-compact-copy>a{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .condition-results .condition-visual-row:not(.condition-one-line) .e2-compact-excerpt{white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+ `;document.head.appendChild(st)}
+ if(aiDiscoveryMode==='random'){
+  root.append(elt('p','help','「AIセレクト」は普段のおすすめです。「条件を指定して探す」では、利用する好み情報やジャンルをその都度変更できます。'));
+  root.append(elt('p','help','記事は検索結果からランダムに選びます。ジャンルの指定はできますが、記事の内容をAIで厳密に分類するものではありません。'));
+  mountRandomDiscovery(root);return;
+ }
  // Fix103H: the stable workflow explanation is available on demand, not a permanent banner.
  const guide=elt('details','e2-top-guide');
  const guideSummary=elt('summary','','AIセレクトのしくみ・注意事項');
@@ -3157,7 +3580,7 @@ function renderRssHideRulesSettings(root){
  const pid=state.profileId,token=state.secretToken;
  // Shared list + AI E2 hidden-article rules (domain AND title terms; multiple rules OR).
  const hideSection=persistentSettingsAccordion('rss-hide-rules-section','記事の非表示ルール（RSS・AIセレクト共通）',false,'ai-managed-details ai-exclusions-section');
- hideSection.append(elt('p','help','RSS一覧とAIセレクトに共通適用します。対象はドメイン全体（example.com）またはその下位ディレクトリ（https://example.com/sub1/）で指定できます。空欄ならすべての掲載元が対象です。AIセレクトのGoogleニュース経由記事は、掲載元ドメインは照合できますが、元記事のURLパスが不明な場合はディレクトリ指定を適用できません。記事や履歴は削除されません。追加・削除はその場で保存されます。「タイトルに含む」で2語を指定する場合は、半角ダブルクォートで囲んで "A"+"B"（両方含む）、または "A"or"B"（どちらか含む）と入力してください。複数のルール同士は従来どおりOR条件です。'));
+ hideSection.append(elt('p','help','RSS一覧とAIセレクトに共通適用します。対象はドメイン全体（example.com）またはその下位ディレクトリ（https://example.com/sub1/）で指定できます。空欄ならすべての掲載元が対象です。AIセレクトのGoogleニュース経由記事は、掲載元ドメインは照合できますが、元記事のURLパスが不明な場合はディレクトリ指定を適用できません。記事や履歴は削除されません。追加・編集・削除はその場で保存されます。「タイトルに含む」で2語を指定する場合は、半角ダブルクォートで囲んで "A"+"B"（両方含む）、または "A"or"B"（どちらか含む）と入力してください。複数のルール同士は従来どおりOR条件です。'));
  const hideDomain=elt('input');hideDomain.placeholder='example.com または https://example.com/sub1/';hideDomain.maxLength=480;
  const hideMode=elt('select');[['contains','タイトルに含む'],['exact','タイトルと完全一致'],['all','このドメインの全記事']].forEach(([v,t])=>hideMode.append(new Option(t,v)));
  const hideTitle=elt('input');hideTitle.maxLength=255;
@@ -3165,6 +3588,22 @@ function renderRssHideRulesSettings(root){
  hideMode.addEventListener('change',syncHideMode);syncHideMode();
  const hideStatus=elt('p','help','非表示ルールを読み込み中…');hideStatus.setAttribute('role','status');
  const hideList=elt('div','rss-hide-rules-list');
+ let editingRuleId=null;
+ let saveHideButton=null,cancelEditButton=null;
+ function clearHideEdit(){
+  editingRuleId=null;hideDomain.value='';hideMode.value='contains';hideTitle.value='';syncHideMode();
+  if(saveHideButton)saveHideButton.textContent='非表示ルールを追加';
+  if(cancelEditButton)cancelEditButton.hidden=true;
+ }
+ function beginHideEdit(r){
+  if(!hideAlive())return;
+  editingRuleId=r.id;hideDomain.value=r.domain||'';hideMode.value=r.titleMode;syncHideMode();
+  hideTitle.value=r.titleMode==='all'?'':r.titleText2?JSON.stringify(r.titleText)+(r.titleOperator==='or'?'or':'+')+JSON.stringify(r.titleText2):r.titleText;
+  saveHideButton.textContent='変更を保存';cancelEditButton.hidden=false;
+  hideStatus.textContent='ルール #'+r.id+' を編集中です。変更後「変更を保存」を押してください。';
+  hideDomain.focus();hideDomain.scrollIntoView({block:'nearest'});
+ }
+
  const hideAlive=()=>pid===state.profileId&&token===state.secretToken&&state.settingsSlot==='articles'&&hideSection.isConnected;
  function paintHideRules(rules){
   hideList.replaceChildren();if(!rules.length){hideList.append(elt('p','help','登録されたルールはありません。'));return}
@@ -3173,33 +3612,41 @@ function renderRssHideRulesSettings(root){
    const titleLabel=r.titleMode==='all'?'全記事':r.titleMode==='exact'?'完全一致：「'+r.titleText+'」':r.titleText2?'含む：'+JSON.stringify(r.titleText)+(r.titleOperator==='or'?'or':'+')+JSON.stringify(r.titleText2):'含む：「'+r.titleText+'」';
    const label=(r.domain||'すべての掲載元')+' ／ '+titleLabel;
    const desc=elt('span','',label);desc.title=label;
+   const edit=action('編集',()=>beginHideEdit(r),false);
    const remove=action('削除',async()=>{
     if(!hideAlive()||!confirm('この非表示ルールを解除しますか？\n'+label))return;
     remove.disabled=true;
     try{
      const data=await api('/api/rss/hide-rules',{method:'DELETE',body:JSON.stringify({id:r.id})});
      if(!hideAlive())return;
-     paintHideRules(data.rules);hideStatus.textContent='解除しました。記事一覧の再表示で反映されます。';
+     paintHideRules(data.rules);if(editingRuleId===r.id)clearHideEdit();hideStatus.textContent='解除しました。記事一覧の再表示で反映されます。';
      await loadOverview();if(!state.sourceKind&&!state.aiKind)await loadArticles(false);
      if(state.aiKind==='rss')selectAiKind('rss').catch(err);
     }catch(e){if(hideAlive())hideStatus.textContent='解除に失敗しました：'+e.message}
     finally{remove.disabled=false}
-   },false);line.append(desc,remove);hideList.append(line);
+   },false);const buttons=elt('div','rss-hide-rule-actions');buttons.append(edit,remove);line.append(desc,buttons);hideList.append(line);
   }
  }
  const addHide=action('非表示ルールを追加',async()=>{
   if(!hideAlive())return;
-  addHide.disabled=true;
+  const wasEditing=editingRuleId!==null;
+  const payload={domain:hideDomain.value.trim(),titleMode:hideMode.value,titleExpression:hideMode.value==='all'?'':hideTitle.value};
+  if(wasEditing)payload.id=editingRuleId;
+  addHide.disabled=true;cancelEditButton.disabled=true;
   try{
-   const data=await post('/api/rss/hide-rules',{domain:hideDomain.value.trim(),titleMode:hideMode.value,titleExpression:hideMode.value==='all'?'':hideTitle.value});
+   const data=await api('/api/rss/hide-rules',{method:wasEditing?'PATCH':'POST',body:JSON.stringify(payload)});
    if(!hideAlive())return;
-   paintHideRules(data.rules);hideTitle.value='';hideStatus.textContent='保存しました。記事一覧とAIセレクトの表示に反映されます。';
+   paintHideRules(data.rules);clearHideEdit();hideStatus.textContent=(wasEditing?'変更':'追加')+'を保存しました。記事一覧とAIセレクトの表示に反映されます。';
    await loadOverview();if(!state.sourceKind&&!state.aiKind)await loadArticles(false);
    if(state.aiKind==='rss')selectAiKind('rss').catch(err);
-  }catch(e){if(hideAlive())hideStatus.textContent='保存に失敗しました：'+e.message}
-  finally{addHide.disabled=false}
+  }catch(e){if(hideAlive())hideStatus.textContent=(wasEditing?'変更':'追加')+'に失敗しました：'+e.message}
+  finally{addHide.disabled=false;cancelEditButton.disabled=false}
  },false);
- const hideInputs=elt('div','rss-hide-inputs');hideInputs.append(field('対象ドメイン・URLパス（任意）',hideDomain),field('タイトル条件',hideMode),field('語句・タイトル（2語は半角ダブルクォートで指定："A"+"B" ／ "A"or"B"）',hideTitle),addHide);
+ saveHideButton=addHide;
+ cancelEditButton=action('編集をキャンセル',()=>{clearHideEdit();hideStatus.textContent='編集をキャンセルしました。';},false);
+ cancelEditButton.hidden=true;
+ const hideActions=elt('div','rss-hide-edit-actions');hideActions.append(addHide,cancelEditButton);
+ const hideInputs=elt('div','rss-hide-inputs');hideInputs.append(field('対象ドメイン・URLパス（任意）',hideDomain),field('タイトル条件',hideMode),field('語句・タイトル（2語は半角ダブルクォートで指定："A"+"B" ／ "A"or"B"）',hideTitle),hideActions);
  hideSection.append(hideInputs,hideStatus,hideList);root.append(hideSection);
  api('/api/rss/hide-rules').then(data=>{if(hideAlive()){paintHideRules(data.rules);hideStatus.textContent='登録済み：'+data.rules.length+'件';}}).catch(e=>{if(hideAlive())hideStatus.textContent='読み込みエラー：'+e.message});
 
@@ -3290,7 +3737,7 @@ async function renderMobileBackgroundSettings(root){
   }catch(e){status.textContent='画像を読み込めませんでした: '+e.message}
   finally{bmp?.close();fileInput.disabled=false}
  });
- root.append(type,color,imageRow,elt('p','help','動画・APNG・ランダム切り替えは使用しません。スマホの画像は認証済み端末のブラウザ内に保持し、設定変更時・ログアウト後の再接続時に新しい画像を取得します。'));
+ root.append(appearanceSettingCard('スマホの背景',[type,color,imageRow,elt('p','help','動画・APNG・ランダム切り替えは使用しません。スマホの画像は認証済み端末のブラウザ内に保持し、設定変更時・ログアウト後の再接続時に新しい画像を取得します。')]));
  updateForm();
  // Fix100B: clear mode semantics; hex RGBA + opacity and live preview.
  const HEX6=/^#[0-9A-F]{6}$/i,HEX8=/^#[0-9A-F]{8}$/i;
@@ -3437,6 +3884,41 @@ async function renderGeneralSettings(root){
   }
  };
 }
+// Layout-only grouping for appearance settings. Nodes are MOVED, never cloned:
+// input state, event listeners, save/cancel behavior and DOM ids stay untouched.
+function appearanceSettingCard(title,nodes){
+ const card=elt('section','appearance-setting-card');
+ card.append(elt('h3','',title),...nodes);
+ return card;
+}
+function groupPaneAppearanceSettings(root,slot){
+ const children=[...root.children],tabs=children[0];
+ if(!tabs?.classList.contains('settings-tabs'))return;
+ const trailing=children.filter(e=>e.classList?.contains('settings-error')||e.classList?.contains('form-actions'));
+ const content=children.slice(1).filter(e=>!trailing.includes(e));
+ const backgroundStart=content.findIndex(e=>e.classList?.contains('form-field')&&e.firstElementChild?.tagName==='LABEL'&&e.firstElementChild.textContent.trim()==='背景タイプ');
+ if(backgroundStart<0)return;
+ const titleIndex=content.findIndex(e=>e.tagName==='H3'&&e.textContent.trim()==='ペインの基本文字設定');
+ const bgEnd=titleIndex<0?content.length:titleIndex-1;
+ if(titleIndex>=0&&content[titleIndex-1]?.tagName!=='HR')return;
+ const prior=content.slice(0,backgroundStart);
+ const background=[...prior.filter(e=>e.classList?.contains('linked-background-note')),...content.slice(backgroundStart,bgEnd)];
+ const beforeBackground=prior.filter(e=>!e.classList?.contains('linked-background-note'));
+ root.replaceChildren(tabs);
+ let pending=[];
+ function flush(){if(pending.length){root.append(appearanceSettingCard('共通背景の連動',pending));pending=[]}}
+ for(const element of beforeBackground){
+  if(element.classList?.contains('header-settings')){flush();element.classList.add('appearance-existing-card');root.append(element)}
+  else pending.push(element);
+ }
+ flush();
+ root.append(appearanceSettingCard('背景',background));
+ if(titleIndex>=0){
+  const textControls=content.slice(titleIndex+1);
+  root.append(appearanceSettingCard('ペインの基本文字設定',textControls));
+ }
+ root.append(...trailing);
+}
 function renderSettings(){const root=elt('div');const tabs=elt('div','settings-tabs');for(const [key,label] of [['general','一般'],['left','左ペイン'],['right','右ペイン'],['shared','共通背景'],['mobile','スマホ表示'],['articles','記事表示'],['thumbs','サムネイル'],['motion','画面遷移'],['ai','AIセレクト'],['about','About']]){const button=elt('button',key===state.settingsSlot?'active':'',label);button.onclick=()=>{state.settingsSlot=key;renderSettings()};tabs.append(button)}root.append(tabs);
  if(state.settingsSlot==='general'){openDialog('設定 → 一般',root);renderGeneralSettings(root);return}
  if(state.settingsSlot==='ai'){openDialog('設定 → AIセレクト',root);renderAiInterestSettings(root);return}
@@ -3460,6 +3942,21 @@ function renderSettings(){const root=elt('div');const tabs=elt('div','settings-t
   countsBox.onchange=()=>{state.showSidebarCountsDraft=countsBox.checked};
   countsLabel.append(countsBox,elt('span','','左ペインの件数を表示する'));
   section.append(countsLabel,elt('p','help','すべての記事・未読の記事・カテゴリ・個別RSS・YouTubeの表示枠／グループの数字をまとめて切り替えます。右ペインの件数や未読管理は変えません。'));
+  root.append(section);
+ }
+ if(slot==='right'){
+  const section=elt('section','header-settings');
+  section.append(elt('h3','','ジャンルアイコン'));
+  section.append(elt('p','help','「条件を指定して探す」の親・子49カテゴリに共通するアイコンの色とサイズを設定します。初期値：15px。'));
+  const prefs=state.theme.genreIcons||(state.theme.genreIcons={size:15,color:'#65738a'});
+  const sizeInput=elt('input');sizeInput.type='number';sizeInput.min='8';sizeInput.max='48';sizeInput.step='1';sizeInput.value=String(prefs.size);sizeInput.style.cssText='width:96px;max-width:100%';
+  const preview=elt('div','genre-icon-settings-preview');preview.style.cssText='display:flex;align-items:center;gap:8px;min-height:20px;';preview.append(genreIcon('宇宙・天文'),elt('span','','宇宙・天文'));const previewIcon=preview.querySelector('svg');const syncPreview=()=>{if(previewIcon){previewIcon.style.width=prefs.size+'px';previewIcon.style.height=prefs.size+'px';previewIcon.style.color=prefs.color;previewIcon.style.flex='none'}};syncPreview();
+  const setSize=()=>{const n=Number(sizeInput.value);if(Number.isInteger(n)&&n>=8&&n<=48){prefs.size=n;sizeInput.removeAttribute('aria-invalid');applyTheme();syncPreview()}else sizeInput.setAttribute('aria-invalid','true')};
+  sizeInput.oninput=setSize;
+  sizeInput.onchange=()=>{setSize();if(sizeInput.hasAttribute('aria-invalid')){sizeInput.value=String(prefs.size);sizeInput.removeAttribute('aria-invalid')}};
+  section.append(field('アイコンサイズ（8〜48px）',sizeInput,'1px単位の自由入力。大きくした場合、ジャンル一覧の行高も自動調整されます。'));
+  const colorField=settingColor('アイコンの色',prefs,'color');colorField.addEventListener('input',()=>queueMicrotask(syncPreview));section.append(colorField);
+  section.append(field('プレビュー',preview));
   root.append(section);
  }
  if(slot==='shared'){
@@ -3531,9 +4028,10 @@ function renderSettings(){const root=elt('div');const tabs=elt('div','settings-t
  root.append(elt('p','help','PC版の動画は常時ミュートです。スマホ専用閲覧版の背景は［スマホ表示］タブで別に設定します。'));
  if(slot!=='shared'){
   root.append(elt('hr'),elt('h3','','ペインの基本文字設定'));
-  const t=state.theme.text[slot],tg=elt('div','settings-grid');tg.append(field('フォントを選択',fontPicker(t)),settingColor('文字色',t,'color'),settingRange('文字サイズ',t,'size',11,24,1,'px'),settingColor('縁取り色',t,'strokeColor'),settingRange('縁取り幅',t,'stroke',0,3,.2,'px'));const shadowGrid=elt('div','settings-grid');shadowGrid.append(settingColor('影の色',t,'shadowColor'),settingRange('影の濃さ',t,'shadowOpacity',0,100,1,'%'),settingRange('影の横位置',t,'shadowX',-20,20,1,'px'),settingRange('影の縦位置',t,'shadowY',-20,20,1,'px'),settingRange('影のぼかし',t,'shadowBlur',0,20,1,'px'));root.append(tg,settingToggle('文字に影をつける',t,'shadow'),shadowGrid);
+  const t=state.theme.text[slot],tg=elt('div','settings-grid');tg.append(field('フォントを選択',fontPicker(t)),settingSelect('フォントウェイト',t,'weight',[100,200,300,400,500,600,700,800,900].map(x=>[String(x),String(x)])),settingColor('文字色',t,'color'),settingRange('文字サイズ',t,'size',11,24,1,'px'),settingColor('縁取り色',t,'strokeColor'),settingRange('縁取り幅',t,'stroke',0,3,.2,'px'));const shadowGrid=elt('div','settings-grid');shadowGrid.append(settingColor('影の色',t,'shadowColor'),settingRange('影の濃さ',t,'shadowOpacity',0,100,1,'%'),settingRange('影の横位置',t,'shadowX',-20,20,1,'px'),settingRange('影の縦位置',t,'shadowY',-20,20,1,'px'),settingRange('影のぼかし',t,'shadowBlur',0,20,1,'px'));root.append(tg,settingToggle('文字に影をつける',t,'shadow'),shadowGrid);
  }
  const message=elt('div','settings-error');message.id='settings-error';message.hidden=true;message.setAttribute('role','alert');root.append(message);const actions=elt('div','form-actions');actions.append(action('キャンセル',closeDialog,false),action('設定を保存',saveSettings));root.append(actions);
+ groupPaneAppearanceSettings(root,slot);
  openDialog('外観をカスタマイズ',root);
 }
 function updatePreview(){}
@@ -3627,7 +4125,7 @@ $('sidebar-collapse-btn').onclick=()=>setSidebarFolded(true);$('sidebar-expand-b
 for(const g of ['all','unread','starred'])$('rail-'+g).onclick=()=>selectGroup(g);
 for(const kind of ['youtube','mail']){$('source-'+kind).onclick=()=>selectSource(kind);$('rail-'+kind).onclick=()=>selectSource(kind);$('add-'+kind+'-account').onclick=()=>sourceAccountDialog(kind)}
 for(const g of ['all','unread','starred'])$('nav-'+g).onclick=()=>selectGroup(g);
-$('brand-s').onclick=()=>toggleSecret().catch(err);$('config-backup-btn').onclick=showConfigBackup;
+$('config-backup-btn').onclick=showConfigBackup;
 $('profile-select').onchange=e=>switchProfile(Number(e.target.value)).catch(err);$('profile-manager-btn').onclick=showProfileManager;$('presets-btn').onclick=showPresets;
 $('ai-rss').onclick=()=>selectAiKind('rss').catch(err);
 $('add-category-btn').onclick=addCategoryDialog;$('add-feed-btn').onclick=addFeedDialog;$('settings-btn').onclick=settingsDialog;$('refresh-btn').onclick=refresh;
@@ -3663,7 +4161,7 @@ function showConfigBackup(){
  const secret=!!state.secretToken,pid=state.profileId,token=state.secretToken;
  const pane=elt('div');pane.append(elt('p','help',secret?
   '現在のシークレット領域のRSS・YouTube登録構成だけを保存／復元します。通常プロファイルは含まれません。':
-  '通常プロファイル全体のRSS・YouTube登録構成を保存／復元します。シークレットは含まれません。'));
+  '通常プロファイル全体のRSS・YouTube登録構成を保存／復元します。'));
  pane.append(elt('p','help','※ 記事の本文・既読・お気に入り・外観・背景素材・AI学習情報は対象外です。構成ファイルは暗号化されていません。'));
  const actions=elt('div','form-actions');
  actions.append(action('構成を書き出す',async()=>{

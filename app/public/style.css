@@ -109,9 +109,6 @@
    No hover color, title tooltip, focus outline or active badge; pointer cursor only. */
 .brand-word{display:inline-flex;align-items:center;letter-spacing:inherit;gap:0;user-select:none;-webkit-user-select:none}
 #brand-s{display:inline;font:inherit;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-/* Secret-mode navigation is intentionally not advertised in the profile selector. */
-.secret-active .profile-bar{display:none!important}
-.secret-preset-default{margin-top:13px;border-top:1px solid #e8eaf0;padding-top:12px}
 
 /* Category-management errors are displayed INSIDE the dialog, not behind its overlay. */
 .category-delete-feedback:not([hidden]){display:block;margin:12px 0 4px;padding:11px 13px;border-radius:7px;border:1px solid #d99494;background:#fff0f0;color:#8b2431;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
@@ -775,3 +772,41 @@
 .nestrill-bg-path-hint { margin-top:6px; line-height:1.55; }
 .nestrill-bg-path-hint code { display:block; font:inherit; font-family:Consolas,'Courier New',monospace; white-space:normal; overflow-wrap:anywhere; user-select:text; }
 .nestrill-bg-path-hint > div:last-child { margin-top:3px; }
+
+/* UITrial01: per-pane base text weight; established emphasis retains explicit weights. */
+.sidebar{font-weight:var(--left-weight,400)}
+.main-pane{font-weight:var(--right-weight,400)}
+.rss-hide-rule-actions,.rss-hide-edit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rss-hide-rule-actions{flex:none}
+/* Existing two-column settings grid: keep editor actions aligned with fields. */
+#dialog.settings-dialog .rss-hide-edit-actions{grid-column:1/-1;justify-content:flex-end;align-self:center}
+#dialog.settings-dialog .rss-hide-edit-actions button{width:auto;min-width:140px}
+@media(max-width:550px){#dialog.settings-dialog .rss-hide-edit-actions{justify-content:stretch}#dialog.settings-dialog .rss-hide-edit-actions button{flex:1}}
+
+/* Settings Sections Trial01: lightweight visual grouping, no accordions/tabs added. */
+#dialog.settings-dialog .appearance-setting-card,
+#dialog.settings-dialog .header-settings,
+#dialog.settings-dialog .placeholder-setting{
+ border:1px solid #dce5ed;
+ border-radius:9px;
+ background:#f8fafc;
+ padding:13px 14px 15px;
+ margin:12px 0 16px;
+ min-width:0;
+}
+#dialog.settings-dialog .appearance-setting-card > h3,
+#dialog.settings-dialog .header-settings > h3{
+ font-size:13px;font-weight:700;line-height:1.5;
+ margin:0 0 11px;color:#243650;
+}
+#dialog.settings-dialog .appearance-setting-card > .form-field:first-of-type{margin-top:0}
+#dialog.settings-dialog .appearance-setting-card > .settings-grid{min-width:0}
+#dialog.settings-dialog .appearance-setting-card > .help:last-child{margin-bottom:0}
+#dialog.settings-dialog .appearance-setting-card > .linked-background-note{margin-top:0}
+#dialog.settings-dialog .appearance-setting-card > .form-field,
+#dialog.settings-dialog .appearance-setting-card > .settings-grid{max-width:100%}
+@media(max-width:700px){
+ #dialog.settings-dialog .appearance-setting-card,
+ #dialog.settings-dialog .header-settings,
+ #dialog.settings-dialog .placeholder-setting{padding:11px 10px 13px;margin:10px 0 13px}
+}

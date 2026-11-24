@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $script:AppId = 'MunusModulus.Nestrill.Setup.v1'
-$script:Release = '0.2.2'
+$script:Release = '0.2.3'
 $script:ManifestName = '.nestrill-install-manifest.json'
 $script:RegPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\MunusModulus.Nestrill'
 $script:PsExe = Join-Path $PSHOME 'powershell.exe'
@@ -301,6 +301,48 @@ function PreviousHash($existing,[string]$rel) {
   if ($found.Count -ne 1) { return '' }
   return ([string]$found[0].sha256).ToLowerInvariant()
 }
+# Permit exactly the four-file UITrial01 state atop the official v0.2.2 manifest.
+# This state was verified read-only on the user's installed Standard (68 managed files).
+# Unknown, partial, or mixed source modifications MUST remain rejected.
+function GetV022KnownUITrial01Hashes([string]$root,$existing) {
+  $allow=@{}
+  if ($null -eq $existing -or ([string]$existing.version -ne '0.2.2')) { return $allow }
+  if (@($existing.files).Count -ne 68) { throw 'v0.2.2 managed file count was unexpected; update refused' }
+  $base=@{
+    'server.js'='2aca474f10d9fc6dfd528ddcfd58ca8d49974b2bf8f46b92592b8f19e6c7cc90';
+    'rss-hide-rules.js'='479e54ce4aa68f58e9876ed92fced56bc013a8065420f5a7d0bfd759006434b1';
+    'public/app.js'='43b2fdf47295c7c16f6c242eab0006ef817244c9daeb4131ceb75b896c439ff7';
+    'public/style.css'='a07d2b96b33d9b29ae26d4106335c16ecd7e746ae073106846f117801c84c3f3';
+  }
+  $trial=@{
+    'server.js'='1806fdcc84f6bb4217f8ec307da5359b4453b956093c8bc4205a295d7e26633d';
+    'rss-hide-rules.js'='3c58c6069824f6f9bf6c14a247d0385b10f18ad54f34639af9cc7b3b97451bc7';
+    'public/app.js'='cf15a36111ffdce309e2890309b8c3ef50724ef1c6952422d7460b6e837e03e5';
+    'public/style.css'='379f5067fb018ae58aaa354bbed671e9cda2b34c9b1c6c9094348e946255faee';
+  }
+  foreach($rel in $base.Keys) {
+    if ((PreviousHash $existing $rel) -ne $base[$rel]) { throw "Unknown v0.2.2 managed baseline: $rel" }
+  }
+  # Every other v0.2.2 managed file must match its recorded hash, too.
+  foreach($entry in @($existing.files)) {
+    $rel=[string]$entry.path
+    if($base.ContainsKey($rel)){continue}
+    $actual=ShaIfFile (CheckedRelative $rel $root)
+    $previous=PreviousHash $existing $rel
+    if($previous -eq '' -or $actual -ne $previous) { throw "Unexpected v0.2.2 managed file state: $rel" }
+  }
+  $trialCount=0;$baseCount=0
+  foreach($rel in $trial.Keys) {
+    $actual=ShaIfFile (CheckedRelative $rel $root)
+    if ($actual -eq $trial[$rel]) {$trialCount++}
+    elseif ($actual -eq $base[$rel]) {$baseCount++}
+    else { throw "Unknown UITrial01 file contents: $rel" }
+  }
+  if ($trialCount -eq 4) { return $trial }
+  if ($baseCount -eq 4) { return $allow }
+  throw 'Mixed/partial UITrial01 state detected; update refused'
+}
+
 # Only a fully matched, named patch state qualifies. No approximate matches.
 function GetV021KnownPatchHashes([string]$root,$existing) {
   $allow=@{}
@@ -395,7 +437,7 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
       throw '導入先が空ではなく、Nestrillインストーラーによる管理対象でもありません。別の空フォルダを指定してください。'
     }
     if ($existing -and ($existing.state -ne 'installed' -or
-        ([string]$existing.version -notin @('0.2.0','0.2.1','0.2.2')))) {
+        ([string]$existing.version -notin @('0.2.0','0.2.1','0.2.2','0.2.3-rc01','0.2.3-rc02','0.2.3-rc03','0.2.3-rc04','0.2.3-rc05','0.2.3-rc06','0.2.3-rc07','0.2.3-rc08','0.2.3')))) {
       throw 'インストール記録の状態または版が想定外です。更新しません。'
     }
   }
@@ -430,6 +472,8 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
     }
     # First validation occurs while the app may still be running. No service stopped.
     $known=GetV021KnownPatchHashes $root $existing
+    $uiKnown=GetV022KnownUITrial01Hashes $root $existing
+    foreach($key in $uiKnown.Keys){$known[$key]=$uiKnown[$key]}
     AssertUpgradeFileState $root $existing $files $known
     # Only the authenticated server owned by this exact installation may stop.
     if ($existing) {
@@ -439,6 +483,8 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
     }
     # Revalidate after stopping to protect against changed files/races.
     $known=GetV021KnownPatchHashes $root $existing
+    $uiKnown=GetV022KnownUITrial01Hashes $root $existing
+    foreach($key in $uiKnown.Keys){$known[$key]=$uiKnown[$key]}
     AssertUpgradeFileState $root $existing $files $known
     # Prepare byte-for-byte recovery copies BEFORE the first destination write.
     $backupDir=Join-Path $env:TEMP ('Nestrill-upgrade-restore-'+[Guid]::NewGuid().ToString('N'))
@@ -705,7 +751,7 @@ function DoUninstall {
 try {
   if ($Mode -eq 'Uninstall') { DoUninstall; exit 0 }
   $form = New-Object System.Windows.Forms.Form
-  $form.Text = 'Nestrill セットアップ — v0.2.2'
+  $form.Text = ('Nestrill セットアップ — v{0}' -f $script:Release)
   $form.Size = New-Object System.Drawing.Size(640,360)
   $form.StartPosition = 'CenterScreen'
   $form.FormBorderStyle = 'FixedDialog'
