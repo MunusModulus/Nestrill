@@ -810,3 +810,36 @@
  #dialog.settings-dialog .header-settings,
  #dialog.settings-dialog .placeholder-setting{padding:11px 10px 13px;margin:10px 0 13px}
 }
+
+/* v0.2.4 UI01: preserve theme and hit area, distinguish only search execution. */
+button.secondary-button.discovery-run {
+ background:#fff; border:4px double #8296b6; padding:6px 11px;
+}
+button.secondary-button.discovery-run:focus-visible{outline:2px solid var(--accent,#4c82c6);outline-offset:2px}
+/* Existing text remains in DOM for X Extension's native pane bridge. */
+#sidebar .nav-symbol,#sidebar .source-account-toggle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 19px;width:19px;min-width:19px;line-height:1;position:relative}
+#sidebar .rss-disclosure,#sidebar .source-account-toggle{font-size:0;opacity:.85}
+#sidebar .rss-disclosure::before,#sidebar .source-account-toggle::before{content:'';display:block;width:6px;height:8px;background:currentColor;clip-path:polygon(0 0,100% 50%,0 100%);flex:none}
+#sidebar .rss-disclosure[data-expanded="true"]::before,#sidebar .source-account-toggle[aria-expanded="true"]::before{transform:rotate(90deg)}
+#sidebar .rss-disclosure{height:19px}
+#sidebar .source-account-toggle{height:26px}
+#sidebar #nav-all .nav-symbol,#sidebar #nav-unread .nav-symbol,#sidebar #nav-starred .nav-symbol,#sidebar #ai-rss .nav-symbol{font-size:0;height:19px}
+#sidebar #nav-all .nav-symbol::before,#sidebar #nav-unread .nav-symbol::before,#sidebar #nav-starred .nav-symbol::before,#sidebar #ai-rss .nav-symbol::before{content:'';width:16px;height:16px;flex:none;background:currentColor;mask:var(--ui01-icon) center/contain no-repeat}
+#sidebar #ai-rss{display:flex;align-items:center;gap:5px}
+.condition-trial-preferences .condition-trial-toggle{align-items:center;line-height:1.4}
+.condition-trial-preferences .condition-trial-toggle>input[type=checkbox],.condition-image-setting>input[type=checkbox],.checkbox-label>input[type=checkbox]{margin:0;flex:none;width:13px;height:13px;align-self:center}
+#sidebar #nav-all .nav-symbol{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2216%22%20height%3D%2218%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%207h10M7%2010h10M7%2013h10M7%2016h10%22%2F%3E%3C%2Fsvg%3E")}
+#sidebar #nav-unread .nav-symbol{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%226%22%20fill%3D%22black%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}
+#sidebar #nav-starred .nav-symbol{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%203%206%207%201-5%205%201%207-6-3-6%203%201-7-5-5%207-1z%22%2F%3E%3C%2Fsvg%3E")}
+#sidebar #ai-rss .nav-symbol{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2216%22%20height%3D%2218%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%207h10M7%2010h10M7%2013h10M7%2016h10%22%2F%3E%3C%2Fsvg%3E")}
+
+
+/* Preserve the native DOM style tokens used by the existing X Extension. */
+#sidebar .rss-disclosure,#sidebar .source-account-toggle,#sidebar #nav-all .nav-symbol,#sidebar #nav-unread .nav-symbol,#sidebar #nav-starred .nav-symbol,#sidebar #ai-rss .nav-symbol{font-size:16px;text-indent:-9999px;overflow:hidden}
+#sidebar .rss-disclosure::before,#sidebar .source-account-toggle::before,#sidebar #nav-all .nav-symbol::before,#sidebar #nav-unread .nav-symbol::before,#sidebar #nav-starred .nav-symbol::before,#sidebar #ai-rss .nav-symbol::before{position:absolute;left:50%;top:50%;translate:-50% -50%;text-indent:0}
+
+/* v0.2.4 RC03: optical alignment based on RC02 Windows screenshot. */
+#sidebar #nav-all .nav-symbol::before,
+#sidebar #nav-unread .nav-symbol::before,
+#sidebar #nav-starred .nav-symbol::before{top:calc(50% - 1px)}
+#sidebar #ai-rss .nav-symbol::before{top:50%}

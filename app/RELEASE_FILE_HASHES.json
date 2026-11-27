@@ -1,13 +1,17 @@
 {
-  "release": "Nestrill v0.2.3",
+  "release": "Nestrill v0.2.4",
   "kind": "release",
-  "releasedAt": "2026-11-24",
-  "builtFrom": "Verified Nestrill Standard v0.2.3 RC08 (settings groups) + InstallerFix01 source correction + release metadata",
+  "releasedAt": "2026-11-27",
+  "builtFrom": "v0.2.4-rc03 + release metadata and installer upgrade eligibility",
   "defaultArticleFonts": "source=Noto Sans JP Medium/400, title=Noto Sans JP Medium/500, excerpt=Noto Sans JP/400",
   "defaultAiModel": "gemma4:e4b-it-qat (only if no stored model configuration)",
   "exclusionPlaceholder": "none",
   "privacy": "no data/, run/, logs/ or user session/credentials",
   "files": [
+    {
+      "path": "Create-Nestrill-Mobile-DesktopShortcuts.cmd",
+      "sha256": "872bd70c344dab96ce7c7fb3d32171b31f6903573a57854c986d00d952ed1f68"
+    },
     {
       "path": "Create-Nestrill-Shortcuts.cmd",
       "sha256": "bb8144ab42cf4938d90d393c97c64bdceaf0fb937e6afa25072a4b921baf4f9c"
@@ -30,7 +34,7 @@
     },
     {
       "path": "MOBILE_SETUP.md",
-      "sha256": "1fa09fc0402926476f23004b09c408eefa14ca02327152f83d6adab3b1196884"
+      "sha256": "1fea984ccf5dfaf76e5e7c0faa404aa689d03fe7304ef89d20f6aef0e5760fe3"
     },
     {
       "path": "Nestrill.exe",
@@ -38,11 +42,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "f45081c91b23a160b6edff962cd11383ec05ece8a229cfc808ec566022663e82"
+      "sha256": "8ca4e36f745fbaf80ee377c81e0b2439e8dbf78c03dfc6d934ecb4dc7c8b2f45"
     },
     {
       "path": "RELEASE_NOTES.md",
-      "sha256": "04cb05110a15bfc3a2a03907808af14cfb29f6a78c2895bfd8518b8a7ae87c9b"
+      "sha256": "ab23fbaea95780dcbbf94c9c4ce988a3dc0459153b744dedfc64811c66eb1555"
     },
     {
       "path": "Remove-Nestrill-Shortcuts.cmd",
@@ -54,7 +58,7 @@
     },
     {
       "path": "SETUP_WINDOWS.md",
-      "sha256": "99091ffc9094c8786faf62101b17cc2eac1f8cacda2ca852493b8995a805af09"
+      "sha256": "f261d4c2bfd9ff4b5acd20934ba7f1e8773f735e71d0fdc3b09c13ea5dfc841a"
     },
     {
       "path": "Show-Nestrill-Autostart-Status.cmd",
@@ -63,6 +67,10 @@
     {
       "path": "Show-Nestrill-Status.cmd",
       "sha256": "30208a11ec359f904e38a1370f422e5de511d1835b4b122d387e7c73892dec88"
+    },
+    {
+      "path": "Start-Nestrill-Mobile-All.cmd",
+      "sha256": "df26abfe9112ac8d3eb30312197d58f99de48fd111ad10050fc190ac1b68186e"
     },
     {
       "path": "Start-Nestrill-Mobile.cmd",
@@ -83,6 +91,10 @@
     {
       "path": "Status-Nestrill.cmd",
       "sha256": "c3b12aba6623b2391bc3fefe9ae86399d188a4eee1bcaac1a8e0c8daa0ae70ae"
+    },
+    {
+      "path": "Stop-Nestrill-Mobile-All.cmd",
+      "sha256": "8038cd7dae1cde764fcff0b57d5455db5c4470ecd8a1b76c25fe80d8a57986cd"
     },
     {
       "path": "Stop-Nestrill-Mobile.cmd",
@@ -190,19 +202,19 @@
     },
     {
       "path": "mobile/mobile-server.js",
-      "sha256": "e58df85f7902987783bfbaa726df51d5da86c167ba94e689545b3257b89789fa"
+      "sha256": "d4afade52ded501ffa5b83848688a0911f584784a2b50fe18db6c6720311d26c"
     },
     {
       "path": "mobile/mobile-web/app.js",
-      "sha256": "914150b01bcc234e1fa62b445b87e23d82c2b5a794d647b5db43b569e2f90429"
+      "sha256": "32aa838e9b6f1d5e061c847e96d69bb01c8b4db67d54df01b681d8534dd0eb06"
     },
     {
       "path": "mobile/mobile-web/index.html",
-      "sha256": "5f91a8bab03cfa8f99b906e6146e0c2acf33a3554f4d00a4e30a49ea0e13dc99"
+      "sha256": "08580c63b2c7d9c016d0b921badcf20db1ef6fceeafe8e90386b5a0014b7d0e1"
     },
     {
       "path": "mobile/mobile-web/style.css",
-      "sha256": "ec6c7901c1f47ea6b478ffdfe9cabef058a840e77a1601991781e5acc1bb400b"
+      "sha256": "9b71f3ffea62686fc67823a8033b65bae5a9cf3e622b19a746d1ee64601f6a9f"
     },
     {
       "path": "mobile/remote-bridge.js",
@@ -210,7 +222,7 @@
     },
     {
       "path": "public/app.js",
-      "sha256": "2dc93a4de02da7a1d131ff4d36f7cddfc2554d857e0f29b16f355a7f31d08713"
+      "sha256": "80703fe6003c0e833cbab9e420f03016ea12e26a2d13f955977ef91e97ef074c"
     },
     {
       "path": "public/bird.svg",
@@ -234,7 +246,7 @@
     },
     {
       "path": "public/style.css",
-      "sha256": "e495b1f2ff01250f853ec19c04d2c52a945b94a30f4321abbadd074985abe87e"
+      "sha256": "fb70fe143f23a3a079a6a52208229ddea0e279cb6683a634681e7c09e55a055c"
     },
     {
       "path": "public/uxclean-motion.js",
@@ -266,7 +278,15 @@
     },
     {
       "path": "scripts/Nestrill-Installer.ps1",
-      "sha256": "484ea4881a694d0c9cb4bce73e1ae75b04ad1cdfa3e2a4493c5d3e1abdbfe7ba"
+      "sha256": "49e9c42627e28b8055f2e3a920bc0b9bc4065a9f8d8201eb15c6f0cc4676b2b5"
+    },
+    {
+      "path": "scripts/Nestrill-Mobile-All.ps1",
+      "sha256": "e74cf5f36ba0804daff8467fe1b51ad25054d52edf50cae61b381ac6063a035e"
+    },
+    {
+      "path": "scripts/Nestrill-Mobile-DesktopShortcuts.ps1",
+      "sha256": "a6cb1e02446487cc82b68ecef3fc34e23cc4aa41f100890c2fd2a9a19fdcca88"
     },
     {
       "path": "scripts/Nestrill-Mobile-Revoke.ps1",
@@ -290,7 +310,7 @@
     },
     {
       "path": "server.js",
-      "sha256": "b929c8f19098d195ed5a2831a0ed9cb67dfff849b81343906e97862e70797369"
+      "sha256": "5f3e097f042cb417dd1911952dfc120ea0498c878d3ad024aca800832c9134c4"
     },
     {
       "path": "youtube-source.js",

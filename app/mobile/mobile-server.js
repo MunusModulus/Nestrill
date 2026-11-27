@@ -90,11 +90,12 @@ function writeSessions(sessions) {
   }
 }
 
-function create({db,profileList,overview,selectArticles,aiRecommend,aiSourceFeedback,startMobileRssRefresh,mobileRefreshStatus,readMobileBackground,mobileBackgroundBytes,readMobilePalette,mobileE2}) {
+function create({db,profileList,overview,selectArticles,aiRecommend,aiSourceFeedback,startMobileRssRefresh,mobileRefreshStatus,readMobileBackground,mobileBackgroundBytes,readMobilePalette,mobileE2,mobileConditional}) {
   let listener=null, activeHost='', pin='';
   const attempts=new Map();
   // Authenticated mobile clients may start E2, but may not continuously re-trigger Ollama.
   const lastE2Start=new Map();
+  const lastConditionalStart=new Map();
   function stop(){
     const old=listener;listener=null;activeHost='';pin='';attempts.clear();
     if(old) old.close();
@@ -225,6 +226,40 @@ function create({db,profileList,overview,selectArticles,aiRecommend,aiSourceFeed
         return writeJson(res,429,{error:'直前に探索を開始しました。少し時間を空けてください'});
       const result=mobileE2.start(profile.id);
       if(result.started)lastE2Start.set(profile.id,now);
+      return writeJson(res,200,result);
+    }
+    // v0.2.4: explicit, authenticated, normal-profile-only condition exploration.
+    // Never forward arbitrary URLs or generic PC API calls.
+    if(req.method==='GET'&&route==='/mobile/api/conditional/catalog'){
+      const profile=normalProfile(url.searchParams.get('profile'));
+      if(!profile)return writeJson(res,404,{error:'プロファイルがありません'});
+      return writeJson(res,200,{groups:mobileConditional.catalog()});
+    }
+    if(req.method==='GET'&&route==='/mobile/api/conditional'){
+      const profile=normalProfile(url.searchParams.get('profile'));
+      if(!profile)return writeJson(res,404,{error:'プロファイルがありません'});
+      const result=mobileConditional.status(profile.id);
+      const offset=Number(url.searchParams.get('offset')||0);
+      if(!Number.isSafeInteger(offset)||offset<0||offset>1000)return writeJson(res,400,{error:'表示位置が不正です'});
+      const items=result.items||[],page=items.slice(offset,offset+40);
+      return writeJson(res,200,{items:page.map(sanitizeExternal),totalVisible:items.length,hasMore:offset+page.length<items.length,
+        generatedAt:Number(result.generatedAt)||0,running:!!result.running,error:String(result.error||'').slice(0,180),
+        order:result.order==='latest'?'latest':'random',progress:result.progress?{completed:Number(result.progress.completed)||0,total:Number(result.progress.total)||0}:null});
+    }
+    if(req.method==='POST'&&route==='/mobile/api/conditional/refresh'){
+      const input=await getBody(req);
+      if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['profileId','categories','useInterests','useLikes','order'].includes(k)))return writeJson(res,400,{error:'探索条件が不正です'});
+      const profile=normalProfile(input.profileId);
+      if(!profile)return writeJson(res,404,{error:'プロファイルがありません'});
+      const {categories,useInterests,useLikes,order}=input;
+      if(!Array.isArray(categories)||typeof useInterests!=='boolean'||typeof useLikes!=='boolean'||!['latest','random'].includes(order))return writeJson(res,400,{error:'探索条件が不正です'});
+      const valid=new Set(mobileConditional.catalog().flatMap(group=>group.categories));
+      if(categories.length>valid.size||new Set(categories).size!==categories.length||categories.some(x=>typeof x!=='string'||!valid.has(x)))return writeJson(res,400,{error:'ジャンルが不正です'});
+      if(mobileConditional.status(profile.id).running)return writeJson(res,200,{started:false,running:true});
+      const now=Date.now();
+      if(now-(lastConditionalStart.get(profile.id)||0)<30000)return writeJson(res,429,{error:'直前に探索を開始しました。少し時間を空けてください'});
+      const result=mobileConditional.start(profile.id,{categories,useInterests,useLikes,order});
+      if(result.started)lastConditionalStart.set(profile.id,now);
       return writeJson(res,200,result);
     }
     if(req.method==='GET'&&route==='/mobile/api/recommendations')

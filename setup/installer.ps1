@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $script:AppId = 'MunusModulus.Nestrill.Setup.v1'
-$script:Release = '0.2.3'
+$script:Release = '0.2.4'
 $script:ManifestName = '.nestrill-install-manifest.json'
 $script:RegPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\MunusModulus.Nestrill'
 $script:PsExe = Join-Path $PSHOME 'powershell.exe'
@@ -151,6 +151,7 @@ function GetLinks([string]$root, [bool]$desktopEnabled) {
     [PSCustomObject]@{ File=(Join-Path $programs 'Nestrill を終了.lnk'); Target=$launcher; Args='--stop' }
   )
   if ($desktopEnabled) { $result += [PSCustomObject]@{ File=(Join-Path $desktop 'Nestrill.lnk'); Target=$launcher; Args='' } }
+  $result += [PSCustomObject]@{ File=(Join-Path $programs 'Nestrill スマホ接続ガイド.lnk'); Target=(Join-Path $env:SystemRoot 'System32\notepad.exe'); Args=('"'+(Join-Path $root 'MOBILE_SETUP.md')+'"') }
   # Uninstall lives in Windows Settings > Apps > Installed apps, not Recommended.
   return @($result)
 }
@@ -239,6 +240,11 @@ function CleanupLegacyLinks([string]$root,$shell) {
 function RemoveOwnedLinks([string]$root,$shell) {
   # Never delete a shortcut unless its target AND arguments match this installation.
   $items = @(GetLinks $root $true)
+  $desktop = [Environment]::GetFolderPath('DesktopDirectory')
+  if ($desktop) {
+    $items += [PSCustomObject]@{File=(Join-Path $desktop 'Nestrill スマホ接続 ON.lnk');Target=(Join-Path $root 'Start-Nestrill-Mobile-All.cmd');Args=''}
+    $items += [PSCustomObject]@{File=(Join-Path $desktop 'Nestrill スマホ接続 OFF.lnk');Target=(Join-Path $root 'Stop-Nestrill-Mobile-All.cmd');Args=''}
+  }
   foreach ($item in $items) {
     if (LinkOwned $item $shell) { Remove-Item -LiteralPath $item.File -ErrorAction Stop }
   }
@@ -437,7 +443,7 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
       throw '導入先が空ではなく、Nestrillインストーラーによる管理対象でもありません。別の空フォルダを指定してください。'
     }
     if ($existing -and ($existing.state -ne 'installed' -or
-        ([string]$existing.version -notin @('0.2.0','0.2.1','0.2.2','0.2.3-rc01','0.2.3-rc02','0.2.3-rc03','0.2.3-rc04','0.2.3-rc05','0.2.3-rc06','0.2.3-rc07','0.2.3-rc08','0.2.3')))) {
+        ([string]$existing.version -notin @('0.2.0','0.2.1','0.2.2','0.2.3-rc01','0.2.3-rc02','0.2.3-rc03','0.2.3-rc04','0.2.3-rc05','0.2.3-rc06','0.2.3-rc07','0.2.3-rc08','0.2.3','0.2.4-rc01','0.2.4-rc02','0.2.4-rc03','0.2.4')))) {
       throw 'インストール記録の状態または版が想定外です。更新しません。'
     }
   }
@@ -524,6 +530,7 @@ function DoInstall([string]$root, [bool]$desktopEnabled) {
       WriteShortcuts $links $root $shell
       $primary=(GetLinks $root $false)[0]
       if (-not (LinkOwned $primary $shell)) { throw '起動ショートカットを検証できませんでした。' }
+      foreach ($link in $links) { if (-not (LinkOwned $link $shell)) { throw "ショートカットを検証できませんでした: $($link.File)" } }
       CleanupLegacyLinks $root $shell
       if (-not $desktopEnabled) {
         $oldDesktop=[PSCustomObject]@{File=(Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'Nestrill.lnk');Target=(Join-Path $root 'Nestrill.exe');Args=''}

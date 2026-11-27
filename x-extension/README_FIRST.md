@@ -1,11 +1,11 @@
-# Nestrill X Extension v1.0.0
+# Nestrill X Extension v1.0.1
 
 Helium用の追加拡張機能です。NestrillとX（旧Twitter）を共通サイドバーから切り替えられます。Nestrill本体は同梱していません。
 
 ## 必要な環境
 
 - Windows 11 x64、Helium（左側にサイドパネルを表示する設定を推奨）
-- [Nestrill v0.2.3](https://github.com/MunusModulus/Nestrill/releases/tag/v0.2.3) を導入し、PC上で起動していること（http://127.0.0.1:8767/）
+- [Nestrill v0.2.4](https://github.com/MunusModulus/Nestrill/releases/tag/v0.2.4) を導入し、PC上で起動していること（http://127.0.0.1:8767/）
 - Xを閲覧するためのインターネット接続と、必要に応じてXへの通常のログイン
 
 他のブラウザ・Heliumの全バージョンでの動作は保証しません。Heliumの分割表示との併用は非対応です。
@@ -18,6 +18,10 @@ Helium用の追加拡張機能です。NestrillとX（旧Twitter）を共通サ�
 4. Nestrillを起動し、通常のPC用URLをHeliumで開きます。既に開いている場合は `Ctrl+F5` で更新します。
 5. 左ペインの「X（共通ペインを開く）」を押します。ブラウザの共通サイドパネルが開いたら、「左ペインを共通表示にする」を押します。
 6. 共通ペインの「X（Twitter）」でXに切り替えます。「すべての記事」などのNestrill側の項目で戻れます。
+
+## v1.0.1の変更
+
+共通左ペインのアイコンと文字の整列を改善し、RSS・YouTubeの展開三角のサイズ・描画位置・濃さを統一しました。
 
 ## 操作と制限
 

@@ -2,9 +2,9 @@
 
 Nestrill（ネストリル）は、RSSとYouTubeの新着をまとめて閲覧できる、Windows向けのローカルリーダーです。ブラウザで利用でき、表示や背景を好みに合わせてカスタマイズできます。必要に応じて、ローカルAIによる記事探索「AIセレクト」も利用できます。
 
-**最新版：v0.2.3（Standard版）**
+**最新版：v0.2.4（Standard版）**
 
-Windows 11 x64でRC08からの上書き更新・起動・既存データ保持・主要機能の動作を実機確認済みです。正式版の新規インストールは実機未検証です。
+Windows 11 x64でRC03の上書き更新・起動・既存データ保持・主要機能の動作を実機確認済みです。正式版の新規インストールは実機未検証です。
 
 ## 主な機能
 
@@ -29,8 +29,8 @@ Node.js：[公式ダウンロードページ](https://nodejs.org/en/download/)
 
 ## インストールと起動
 
-1. [Releases](https://github.com/MunusModulus/Nestrill/releases/tag/v0.2.3) から **`Nestrill-Setup-v0.2.3.zip`** を取得します。
-2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.3.exe`** を実行します。
+1. [Releases](https://github.com/MunusModulus/Nestrill/releases/tag/v0.2.4) から **`Nestrill-Setup-v0.2.4.zip`** を取得します。
+2. ZIPを展開し、中の **`Nestrill-Setup-v0.2.4.exe`** を実行します。
 3. インストール後、Windowsの **スタート → すべてのアプリ → N → Nestrill** から起動します。ブラウザが自動で開きます。
 4. 終了するときは、同じN欄の **「Nestrill を終了」** を選びます。
 
@@ -38,7 +38,7 @@ Nestrillが起動中なら、PCのブラウザで **`http://127.0.0.1:8767/`** �
 
 Windowsサインイン時の自動起動は、**設定 → 一般** からON/OFFできます（初期OFF）。
 
-インストール不要の **`Nestrill-v0.2.3-Portable.zip`** も公開しています。専用フォルダに展開後、`Start-Nestrill.cmd` で起動できます。インストール版とポータブル版は同時に起動しないでください。
+インストール不要の **`Nestrill-v0.2.4-Portable.zip`** も公開しています。専用フォルダに展開後、`Start-Nestrill.cmd` で起動できます。インストール版とポータブル版は同時に起動しないでください。
 
 **旧版から更新するときは先にアンインストールしないでください。** 事前に利用データをバックアップし、Nestrillを終了して、同じインストール先を選んで上書き更新します。保護機能が想定外のファイル変更を検出すると更新を中断します。その場合、古いファイルやデータを強制削除しないでください。
 
@@ -59,9 +59,9 @@ RSS登録、AIセレクト、設定などはNestrill本体と共通です。専�
 
 Nestrill X Extensionは任意の追加機能であり、通常版のインストーラーには含まれません。
 
-**[Nestrill X Extension v1.0.0の配布ページ](https://github.com/MunusModulus/Nestrill/releases/tag/x-extension-v1.0.0)** からZIPを取得し、Heliumにパッケージ化されていない拡張機能として読み込みます。
+**[Nestrill X Extension v1.0.1の配布ページ](https://github.com/MunusModulus/Nestrill/releases/tag/x-extension-v1.0.1)** からZIPを取得し、Heliumにパッケージ化されていない拡張機能として読み込みます。
 
-詳しい導入・更新・削除手順と権限については [導入ガイド](x-extension/README_FIRST.md) をご覧ください。Nestrill v0.2.3とHeliumの組み合わせで実機確認済みです。
+詳しい導入・更新・削除手順と権限については [導入ガイド](x-extension/README_FIRST.md) をご覧ください。Nestrill v0.2.4 RC03とHeliumの組み合わせでUI03を実機確認済みです。v1.0.1では共通左ペインのアイコンと展開三角の整列を改善しました。
 
 ## スマートフォンで利用する（任意）
 
@@ -99,7 +99,11 @@ TailscaleはNestrillおよび開発者とは独立した第三者サービスで
 
 **詳細な接続・停止・認証解除手順、セキュリティ上の注意については、[スマートフォン接続ガイド](app/MOBILE_SETUP.md) を必ずご確認ください。**
 
-ガイドはインストール先の `MOBILE_SETUP.md` にも同梱されています。
+ガイドはインストール先の `MOBILE_SETUP.md` にも同梱されています。スタート → すべてのアプリ → N →「Nestrill スマホ接続ガイド」からも開けます。
+
+外出先接続の設定が済んでいる場合は、`Start-Nestrill-Mobile-All.cmd` と `Stop-Nestrill-Mobile-All.cmd` で一括ON／OFFできます。`Create-Nestrill-Mobile-DesktopShortcuts.cmd` で任意のデスクトップショートカットを作成できます。
+
+スマホ版のAIセレクトでも条件指定探索（新着順／ランダム、関心情報、ジャンル指定）が利用できます。記事タイトルはPC側のスマホ表示設定から10～19pxで変更できます。
 
 ## データとアンインストールについて
 
@@ -122,4 +126,4 @@ Nestrillは [MIT License](LICENSE) で公開しています。Copyright (c) 2026
 
 第三者のアイコン等については [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) をご覧ください。RSS記事や外部サイトのコンテンツには、それぞれの権利者の条件が適用されます。
 
-開発者向けビルド手順：[BUILDING.md](BUILDING.md) ／ 更新内容：[v0.2.3リリースノート](app/RELEASE_NOTES.md)
+開発者向けビルド手順：[BUILDING.md](BUILDING.md) ／ 更新内容：[v0.2.4リリースノート](app/RELEASE_NOTES.md)

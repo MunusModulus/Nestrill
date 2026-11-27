@@ -96,41 +96,87 @@ function renderExternal(item){
  else{link.removeAttribute('href');link.title='記事のURLが不正なため開けません';}
  row.append(link);return row;
 }
+let aiSearchMode='normal',conditionOrder='random',conditionFirstLatest=true,conditionGenres=new Set(),conditionCatalog=[],catalogProfile=0,conditionOffset=0;
 let e2PollTimer=null;
+function conditionOptions(){return {order:conditionOrder,useInterests:$('condition-interests').checked,useLikes:$('condition-likes').checked,categories:[...conditionGenres]}}
+function conditionFallback(){const x=conditionOptions();return x.order==='random'&&x.useInterests&&x.useLikes&&!x.categories.length}
+function syncCondition(){
+ const conditional=aiSearchMode==='conditional',options=conditionOptions();
+ $('ai-condition-controls').classList.toggle('hide',!conditional);
+ for(const [id,active] of [['ai-normal',!conditional],['ai-condition',conditional],['condition-latest',conditionOrder==='latest'],['condition-random',conditionOrder==='random']]){const b=$(id);b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))}
+ for(const group of $('condition-genres').querySelectorAll('details')){
+  const children=[...group.querySelectorAll('.condition-topic input')];let n=0;
+  for(const c of children){c.checked=conditionGenres.has(c.value);if(c.checked)n++}
+  const parent=group.querySelector('.condition-parent input');parent.checked=n===children.length;parent.indeterminate=n>0&&n<children.length;group.querySelector('.condition-group-count').textContent=n+'/'+children.length;
+ }
+ $('condition-count').textContent=conditionGenres.size?conditionGenres.size+'分野選択':'ジャンル制限なし';
+ $('e2-refresh').textContent=!conditional?'おすすめを更新':conditionOrder==='latest'?'新着ニュースを取得':conditionFallback()?'AIセレクトを開く':!options.useInterests&&!options.useLikes?(conditionGenres.size?'指定ジャンルからランダム探索':'完全ランダムに探す'):'選択した条件で探す';
+}
+async function loadConditionCatalog(){
+ const profile=state.profile;if(catalogProfile===profile)return;
+ const data=await api('conditional/catalog?profile='+profile);
+ if(profile!==state.profile||aiSearchMode!=='conditional'||state.mode!=='ai')return;
+ if(!Array.isArray(data.groups)||!data.groups.length)throw Error('ジャンル一覧を読み込めませんでした');
+ conditionCatalog=data.groups;catalogProfile=profile;
+ const root=$('condition-genres');clear(root);
+ for(const g of conditionCatalog){
+  const group=element('details','condition-group'),summary=element('summary','condition-group-heading');
+  const parentLabel=element('label','condition-parent'),parent=element('input');parent.type='checkbox';parent.setAttribute('aria-label',g.name+'の全小ジャンルを選択');
+  parentLabel.append(parent,element('span','',g.name));const count=element('span','condition-group-count');summary.append(parentLabel,count);group.append(summary);
+  // Checkboxes do not expand the group; tapping the rest of the summary does.
+  parentLabel.addEventListener('click',e=>e.stopPropagation());
+  parent.addEventListener('change',()=>{for(const name of g.categories){if(parent.checked)conditionGenres.add(name);else conditionGenres.delete(name)}syncCondition()});
+  const children=element('div','condition-topics');
+  for(const name of g.categories){const label=element('label','condition-topic'),input=element('input');input.type='checkbox';input.value=name;label.append(input,element('span','',name));children.append(label);input.addEventListener('change',()=>{if(input.checked)conditionGenres.add(name);else conditionGenres.delete(name);syncCondition()})}
+  group.append(children);root.append(group);
+ }
+ syncCondition();
+}
+async function setAiSearchMode(mode){
+ if(aiSearchMode===mode)return;
+ clearE2Polling();state.request++;aiSearchMode=mode;conditionOffset=0;syncCondition();
+ clear($('ai-items'));$('condition-more').classList.add('hide');
+ await loadExternal();
+}
+function resetConditionProfile(){catalogProfile=0;conditionGenres.clear();conditionOffset=0;clear($('condition-genres'));conditionOrder='random';conditionFirstLatest=true;$('condition-interests').checked=true;$('condition-likes').checked=true;syncCondition()}
+function setConditionOrder(order){if(conditionOrder===order)return;conditionOrder=order;if(order==='latest'&&conditionFirstLatest){$('condition-interests').checked=false;$('condition-likes').checked=false;conditionFirstLatest=false}syncCondition()}
+
 function clearE2Polling(){if(e2PollTimer!==null){clearTimeout(e2PollTimer);e2PollTimer=null;}}
-async function loadExternal(){
+async function loadExternal(appendMore=false){
  clearE2Polling();
- const request=++state.request,profile=state.profile,target=$('ai-items'),button=$('e2-refresh');
- // Preserve the previous list while checking status; do not flash 90 items on every poll.
+ const request=++state.request,profile=state.profile,mode=aiSearchMode,target=$('ai-items'),button=$('e2-refresh'),conditional=mode==='conditional';
+ const current=()=>request===state.request&&state.mode==='ai'&&profile===state.profile&&mode===aiSearchMode;
  try{
-  const result=await api('external?profile='+getProfile());
-  if(request!==state.request||state.mode!=='ai'||profile!==state.profile)return;
-  button.disabled=!!result.running;
+  if(conditional){await loadConditionCatalog();if(!current())return;}
+  if(!appendMore)conditionOffset=0;
+  const result=await api((conditional?'conditional':'external')+'?profile='+profile+(conditional?'&offset='+conditionOffset:''));
+  if(!current())return;
+  button.disabled=!!result.running;syncCondition();
   $('ai-status').textContent=result.running
    ?'PCで記事を探索中…'+(result.progress&&result.progress.total?'（'+result.progress.completed+'/'+result.progress.total+'）':'')
    :result.error?'前回の探索でエラー：'+result.error
-   :result.generatedAt?'最終探索：'+new Date(result.generatedAt).toLocaleString('ja-JP')+' ・ '+result.items.length+'件'
+   :result.generatedAt?(conditional?(result.order==='latest'?'新着順':'ランダム')+' ・ ':'')+'最終探索：'+new Date(result.generatedAt).toLocaleString('ja-JP')+' ・ '+(conditional?result.totalVisible:result.items.length)+'件'
    :'まだ探索結果がありません';
-  clear(target);
-  if(!result.items.length)target.append(element('div','empty',result.running?'探索結果を取得中です':'PCまたはスマホから「おすすめを更新」を実行してください'));
+  if(!appendMore)clear(target);
+  if(!result.items.length&&!appendMore)target.append(element('div','empty',result.running?'探索結果を取得中です':'PCまたはスマホから探索を開始してください'));
   else for(const item of result.items)target.append(renderExternal(item));
-  if(result.running)e2PollTimer=setTimeout(()=>{if(state.mode==='ai'&&request===state.request&&profile===state.profile)loadExternal()},2500);
- }catch(e){
-  if(request===state.request&&state.mode==='ai'){
-   button.disabled=false;clear(target);target.append(element('div','empty','記事一覧を読み込めませんでした'));
-   notify(e.message);
-  }
- }
+  if(conditional)conditionOffset+=result.items.length;
+  const more=$('condition-more');more.classList.toggle('hide',!conditional||!result.hasMore||result.running);more.disabled=false;
+  if(result.running)e2PollTimer=setTimeout(()=>{if(current())loadExternal()},2500);
+ }catch(e){if(current()){button.disabled=false;$('condition-more').classList.add('hide');if(!appendMore){clear(target);target.append(element('div','empty','記事一覧を読み込めませんでした'))}notify(e.message)}}
 }
 async function startExternal(){
  const button=$('e2-refresh');if(button.disabled)return;
- button.disabled=true;notify('PCでおすすめ記事の更新を開始しています…');
+ const profile=state.profile,mode=aiSearchMode,conditional=mode==='conditional';
+ if(conditional&&conditionFallback()){await setAiSearchMode('normal');return}
+ button.disabled=true;notify('PCで記事探索を開始しています…');
  try{
-  const result=await post('external/refresh',{profileId:state.profile});
+  const result=await post(conditional?'conditional/refresh':'external/refresh',{profileId:profile,...(conditional?conditionOptions():{})});
+  if(profile!==state.profile||mode!==aiSearchMode||state.mode!=='ai')return;
   if(result.started)notify('PCで探索を実行中です。完了すると一覧が更新されます');
   else if(result.running)notify('PCで探索が進行中です');
   await loadExternal();
- }catch(e){button.disabled=false;notify(e.message||'探索を開始できませんでした');}
+ }catch(e){if(profile===state.profile&&mode===aiSearchMode&&state.mode==='ai'){button.disabled=false;notify(e.message||'探索を開始できませんでした')}}
 }
 async function refreshView(){if(state.mode==='ai')return loadExternal();clearE2Polling();return loadArticles()}
 async function setMode(mode){clearE2Polling();state.mode=mode;state.request++;$('rss-view').classList.toggle('hide',mode!=='rss');$('ai-view').classList.toggle('hide',mode!=='ai');$('tab-rss').classList.toggle('active',mode==='rss');$('tab-ai').classList.toggle('active',mode==='ai');await refreshView()}
@@ -148,7 +194,7 @@ function clearMobilePalette(){
 function applyMobilePalette(saved){
  clearMobilePalette();
  const html=document.documentElement;
- html.style.setProperty('--mobile-title-size',String(Number.isInteger(saved?.titleSize)&&saved.titleSize>=14&&saved.titleSize<=19?saved.titleSize:15)+'px');
+ html.style.setProperty('--mobile-title-size',String(Number.isInteger(saved?.titleSize)&&saved.titleSize>=10&&saved.titleSize<=19?saved.titleSize:15)+'px');
  const mode=saved?.mode;
  if(!['light','dark','custom'].includes(mode))return; // system: retain the original OS-following CSS
  const palette=mode==='custom'?saved.colors:MOBILE_PRESETS[mode];
@@ -289,9 +335,18 @@ function setupCompactPickers(){
 
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-error').textContent='';try{await post('login',{code:$('pairing').value.trim()});$('pairing').value='';await init()}catch(err){$('login-error').textContent=err.message}});
 $('logout').addEventListener('click',async()=>{try{await post('logout',{})}catch{}showLogin();});
-$('profile').addEventListener('change',async()=>{clearE2Polling();state.profile=Number($('profile').value);localStorage.setItem('nestrill-mobile-last-profile',String(state.profile));state.page=0;state.category='';state.feed='';await loadOverview();await refreshView()});
+$('profile').addEventListener('change',async()=>{clearE2Polling();state.profile=Number($('profile').value);resetConditionProfile();localStorage.setItem('nestrill-mobile-last-profile',String(state.profile));state.page=0;state.category='';state.feed='';await loadOverview();await refreshView()});
 $('tab-rss').addEventListener('click',()=>setMode('rss'));$('tab-ai').addEventListener('click',()=>setMode('ai'));
 $('e2-refresh').addEventListener('click',startExternal);
+$('ai-normal').addEventListener('click',()=>setAiSearchMode('normal'));
+$('ai-condition').addEventListener('click',()=>setAiSearchMode('conditional'));
+$('condition-latest').addEventListener('click',()=>setConditionOrder('latest'));
+$('condition-random').addEventListener('click',()=>setConditionOrder('random'));
+$('condition-interests').addEventListener('change',syncCondition);
+$('condition-likes').addEventListener('change',syncCondition);
+$('condition-reset').addEventListener('click',()=>{conditionGenres.clear();syncCondition()});
+$('condition-more').addEventListener('click',()=>{$('condition-more').disabled=true;loadExternal(true)});
+
 $('category').addEventListener('change',()=>{state.category=$('category').value;state.feed='';populateFeeds();refreshPickerButtons();state.page=0;loadArticles()});
 $('feed').addEventListener('change',()=>{state.feed=$('feed').value;refreshPickerButtons();state.page=0;loadArticles()});
 $('search-btn').addEventListener('click',()=>{state.q=$('search').value.trim();state.page=0;loadArticles()});

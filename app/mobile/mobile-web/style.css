@@ -86,3 +86,29 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:auto;height:1
 #ai-status{margin:4px 2px 12px;min-height:1.2em;overflow-wrap:anywhere}
 .statusbar{justify-content:flex-start}
 .statusbar select{max-width:100%}
+
+/* v0.2.4 UI01: shared geometric chevron, no font-baseline dependency. */
+.profile-picker-wrap{position:relative;display:inline-flex;max-width:100%;align-items:center;color:var(--text)}
+.profile-picker-wrap select{appearance:none;padding-right:30px;max-width:100%;width:100%}
+.profile-picker-wrap::after,.compact-select-arrow::before{content:'';display:block;flex:none;width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.profile-picker-wrap::after{position:absolute;right:12px;top:50%;transform:translateY(-65%) rotate(45deg);pointer-events:none;opacity:.8}
+.compact-select-arrow{width:14px;height:14px;font-size:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ai-controls #e2-refresh{background:var(--paper);border:4px double var(--muted);padding:6px 9px}
+
+
+/* Mobile conditional search uses the existing palette and compact controls. */
+.discovery-switch{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+.discovery-switch button{font-size:12px;padding:7px 10px;min-height:36px;background:transparent;border:1px solid var(--line);color:var(--text)}
+.discovery-switch button.active{background:var(--accent);color:var(--paper);font-weight:650;border-color:var(--accent)}
+.condition-controls{margin-bottom:12px}.condition-controls h3{font-size:13px;margin:10px 0 5px}
+.condition-controls p{margin:6px 0}.condition-preferences{display:flex;flex-wrap:wrap;gap:4px 12px}
+.condition-preferences label,.condition-parent,.condition-topic{display:flex;align-items:center;gap:7px;min-height:36px;font-size:12px}
+.condition-controls input[type=checkbox]{width:15px;height:15px;margin:0;padding:0;flex:none;accent-color:var(--accent)}
+.condition-reset-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}.condition-reset-row button{font-size:12px;min-height:36px;padding:6px 10px;background:var(--paper)}
+.condition-genres{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:5px;align-items:start}
+.condition-group{border:1px solid var(--line);border-radius:7px;background:var(--paper);padding:0 7px;min-width:0}
+.condition-group-heading{display:flex;align-items:center;gap:6px;list-style:none;cursor:pointer;min-height:38px}
+.condition-group-heading::-webkit-details-marker{display:none}.condition-group-heading::before{content:'';width:6px;height:8px;flex:none;background:var(--muted);clip-path:polygon(0 0,100% 50%,0 100%)}
+.condition-group[open]>.condition-group-heading::before{transform:rotate(90deg)}
+.condition-parent{flex:1;min-width:0;font-weight:650}.condition-group-count{font-size:10px;color:var(--muted);flex:none}.condition-topics{padding-left:10px}.condition-topic{overflow-wrap:anywhere}
+#condition-more{margin-top:10px;font-size:12px;min-height:36px}

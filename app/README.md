@@ -1,13 +1,15 @@
-# Nestrill v0.2.3 — Standard版
+# Nestrill v0.2.4 — Standard版
 
 Windows 11 x64向け、PC内で動作するRSS・YouTube・AIセレクト対応のローカルリーダーです。PC版は `http://127.0.0.1:8767/` から利用できます。
 
-- インストーラー版: `Nestrill-Setup-v0.2.3.exe` を起動します。
-- ポータブル版: `Nestrill-v0.2.3-Portable.zip` を任意の独立したフォルダへ展開し、`Start-Nestrill.cmd` を実行します。インストール版のフォルダへ直接展開しないでください。
+- インストーラー版: `Nestrill-Setup-v0.2.4.exe` を起動します。
+- ポータブル版: `Nestrill-v0.2.4-Portable.zip` を任意の独立したフォルダへ展開し、`Start-Nestrill.cmd` を実行します。インストール版のフォルダへ直接展開しないでください。
 - 動作要件: Windows 11 x64、Node.js 22.16以上。AIセレクト利用時のみ、別途Ollamaと対応モデルが必要です。モデル本体は同梱しません。
 - 初期のAIセレクトモデル: `gemma4:e4b-it-qat`（既存の設定は上書きしません）。
 - RSS・設定・評価履歴などはインストール先の `data/` に保存されます。配布物にはユーザーデータを含みません。
 
 **旧版から更新する際は先にアンインストールしないでください。** アンインストールは、そのインストール先のアプリデータも削除します。既存版は同じインストール先へ上書き更新します。詳細は `SETUP_WINDOWS.md` を参照してください。
 
-X EditionはHelium用の別パッケージです。Standardのインストール本体と混合しません。
+Nestrill X ExtensionはHelium用の別パッケージです。Standardのインストール本体と混合しません。
+
+スマホ接続：`MOBILE_SETUP.md` を参照してください。外出先接続の一括ON／OFFと任意のデスクトップショートカット作成が可能です。

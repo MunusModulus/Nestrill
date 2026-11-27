@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Nestrill Standard v0.2.3 Windows assets from this audited release snapshot.
+"""Build Nestrill Standard v0.2.4 Windows assets from this release source snapshot.
 
 Requires Python 3.9+ and Go 1.23+. The included Nestrill.exe is the
 byte-verified RC08 launcher. Set NESTRILL_REBUILD_LAUNCHER=1 to recompile
@@ -38,20 +38,20 @@ with tempfile.TemporaryDirectory(prefix='nestrill-v023-build-') as tmp:
         run_go('launcher.go',app/'Nestrill.exe',setup)
     manifest=app/'RELEASE_FILE_HASHES.json'
     existing=json.loads(manifest.read_text(encoding='utf-8'))
-    assert existing['release']=='Nestrill v0.2.3' and existing['kind']=='release'
+    assert existing['release']=='Nestrill v0.2.4' and existing['kind']=='release'
     records=[{'path':p.relative_to(app).as_posix(),'sha256':digest(p)} for p in sorted(app.rglob('*')) if p.is_file() and p!=manifest]
-    if len(records)!=72:raise SystemExit('Unexpected managed file count')
+    if len(records)!=77:raise SystemExit('Unexpected managed file count')
     if os.environ.get('NESTRILL_REBUILD_LAUNCHER')=='1':
         existing['files']=records
         manifest.write_text(json.dumps(existing,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     elif records!=existing['files']:
         raise SystemExit('Release manifest mismatch: source was modified')
-    portable=OUT/'Nestrill-v0.2.3-Portable.zip'
+    portable=OUT/'Nestrill-v0.2.4-Portable.zip'
     archive(app,portable)
     shutil.copy2(portable,setup/'payload.zip')
-    exe=OUT/'Nestrill-Setup-v0.2.3.exe'
+    exe=OUT/'Nestrill-Setup-v0.2.4.exe'
     run_go('setup.go',exe,setup)
-    zipname=OUT/'Nestrill-Setup-v0.2.3.zip'
+    zipname=OUT/'Nestrill-Setup-v0.2.4.zip'
     with zipfile.ZipFile(zipname,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=8) as z:
         info=zipfile.ZipInfo(exe.name,date_time=(2026,11,24,0,0,0))
         info.compress_type=zipfile.ZIP_DEFLATED

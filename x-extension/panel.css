@@ -252,3 +252,24 @@ body.nx9-themed .groups .category-head .category-toggle {
   border-top:3px solid transparent;border-bottom:3px solid transparent;
   border-left:5px solid #fff;
 }
+
+/* UI01: align shared sidebar disclosure and navigation glyph geometry. */
+/* UI03: use the RSS triangle's size, effective opacity and center for both.
+   Keep existing click targets, label positions and nesting. */
+body .groups .category-head .category-toggle,body.nx9-themed .groups .category-head .category-toggle{font-size:0;position:relative;display:flex;align-items:center;justify-content:center;opacity:1}
+#sources summary{position:relative;padding-left:24px}
+body .groups .category-head .category-toggle::before,#sources summary::before{content:'';display:block;position:absolute;left:8.5px;top:50%;width:6px;height:8px;background:currentColor;clip-path:polygon(0 0,100% 50%,0 100%);font-size:0;color:inherit;opacity:.7225;transform:translateY(-50%);pointer-events:none}
+body .groups .category-head .category-toggle[aria-expanded="true"]::before,#sources details[open]>summary::before{content:'';transform:translateY(-50%) rotate(90deg)}
+body .groups .category-head .category-toggle:hover::before,#sources summary:hover::before{opacity:.85}
+body .main-links .nav-item>span:first-child,body .nav-ai>span:first-child{font-size:0;height:19px;min-height:19px;display:inline-flex;align-items:center;justify-content:center}
+body .main-links .nav-item>span:first-child::before,body .nav-ai>span:first-child::before{content:'';width:16px;height:16px;flex:none;background:currentColor;mask:var(--ui01-icon) center/contain no-repeat}
+body .main-links [data-value="all"]>span:first-child{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2216%22%20height%3D%2218%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%207h10M7%2010h10M7%2013h10M7%2016h10%22%2F%3E%3C%2Fsvg%3E")}
+body .main-links [data-value="unread"]>span:first-child{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%226%22%20fill%3D%22black%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}
+body .main-links [data-value="starred"]>span:first-child{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%203%206%207%201-5%205%201%207-6-3-6%203%201-7-5-5%207-1z%22%2F%3E%3C%2Fsvg%3E")}
+body .nav-ai>span:first-child{--ui01-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2216%22%20height%3D%2218%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%207h10M7%2010h10M7%2013h10M7%2016h10%22%2F%3E%3C%2Fsvg%3E")}
+
+
+/* UI02 trial: same nominal optical offset as standard RSS items; confirm in Helium. */
+body .main-links [data-value="all"]>span:first-child::before,
+body .main-links [data-value="unread"]>span:first-child::before,
+body .main-links [data-value="starred"]>span:first-child::before{transform:translateY(-1px)}

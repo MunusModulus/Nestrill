@@ -302,7 +302,7 @@ function readMobilePalette(){
  let val={};try{val=JSON.parse(db.prepare("SELECT value FROM settings WHERE key='mobile_palette_v1'").get()?.value||'{}')}catch{}
  if(!val||typeof val!=='object')val={};
  const mode=['system','light','dark','custom'].includes(val.mode)?val.mode:'system';
- const titleSize=Number.isInteger(val.titleSize)&&val.titleSize>=14&&val.titleSize<=19?val.titleSize:15;
+ const titleSize=Number.isInteger(val.titleSize)&&val.titleSize>=10&&val.titleSize<=19?val.titleSize:15;
  const colors={};for(const [key,fallback] of Object.entries(MOBILE_PALETTE_DEFAULT.colors))colors[key]=mobilePaletteColorOk(val.colors?.[key])?val.colors[key]:fallback;
  return {mode,titleSize,colors};
 }
@@ -867,7 +867,12 @@ const mobileE2={
  },
  start(pid){return aiExternal.start(pid)}
 };
-const mobileReader=require('./mobile/mobile-server').create({db,profileList,overview,selectArticles,aiRecommend,aiSourceFeedback,startMobileRssRefresh,mobileRefreshStatus,readMobileBackground,mobileBackgroundBytes,readMobilePalette,mobileE2});
+const mobileConditional={
+ catalog(){return aiRandom.catalog()},
+ status(pid){const data=aiConditional.status(pid);return {...data,items:rssHide.filter(pid,aiSourceFeedback.filter(pid,data.items||[],{externalPreview:true}))}},
+ start(pid,options){return aiConditional.start(pid,options)}
+};
+const mobileReader=require('./mobile/mobile-server').create({db,profileList,overview,selectArticles,aiRecommend,aiSourceFeedback,startMobileRssRefresh,mobileRefreshStatus,readMobileBackground,mobileBackgroundBytes,readMobilePalette,mobileE2,mobileConditional});
 const server=http.createServer(async(req,res)=>{
  try{
  const rawHost=(req.headers.host||'').split(':')[0].toLowerCase();
@@ -1288,7 +1293,7 @@ if(route==='/api/source-accounts'&&req.method==='POST'){
   const v=JSON.parse((await body(req,2048)).toString('utf8'));
   const keys=Object.keys(MOBILE_PALETTE_DEFAULT.colors);
   if(!v||typeof v!=='object'||!['system','light','dark','custom'].includes(v.mode)||
-    !Number.isInteger(v.titleSize)||v.titleSize<14||v.titleSize>19||
+    !Number.isInteger(v.titleSize)||v.titleSize<10||v.titleSize>19||
     !v.colors||typeof v.colors!=='object'||!keys.every(k=>mobilePaletteColorOk(v.colors[k])))return fail(res,'スマホ配色設定が不正です');
   const colors={};for(const k of keys)colors[k]=v.colors[k];
   const cfg={mode:v.mode,titleSize:v.titleSize,colors};writeMobilePalette(cfg);

@@ -230,7 +230,7 @@ function renderSidebar(){const ov=state.overview;if(!ov)return;
  for(const old of list.children)old._youtubeScrollbarCleanup?.();
  list.replaceChildren();list._rssProfileId=state.profileId;list._rssSecretToken=state.secretToken;
  for(const c of ov.categories){if(!categoryVisibleInSidebar(c,ov))continue;const wrap=elt('section','category-block');const head=elt('div','cat-head');const row=elt('div','nav-item'+(state.category===c.id?' active':''));row.title=c.name;
- const toggle=elt('span','nav-symbol',collapsed.has(c.id)?'▸':'▾');toggle.title=collapsed.has(c.id)?'展開':'折りたたむ';toggle.onclick=e=>{e.stopPropagation();collapsed.has(c.id)?collapsed.delete(c.id):collapsed.add(c.id);localStorage.setItem('nestrill-collapsed',JSON.stringify([...collapsed]));renderSidebar()};row.append(toggle);row.append(elt('span','cat-name',c.name));row.lastChild.style.flex='1';if(c.unread)row.append(elt('b','count',String(c.unread)));
+ const toggle=elt('span','nav-symbol rss-disclosure',collapsed.has(c.id)?'▸':'▾');toggle.dataset.expanded=String(!collapsed.has(c.id));toggle.title=collapsed.has(c.id)?'展開':'折りたたむ';toggle.onclick=e=>{e.stopPropagation();collapsed.has(c.id)?collapsed.delete(c.id):collapsed.add(c.id);localStorage.setItem('nestrill-collapsed',JSON.stringify([...collapsed]));renderSidebar()};row.append(toggle);row.append(elt('span','cat-name',c.name));row.lastChild.style.flex='1';if(c.unread)row.append(elt('b','count',String(c.unread)));
  row.onclick=()=>selectGroup('category',c.id);
  const more=elt('button','cat-more','⋯');more.title=c.name==='未分類'?'未分類について':'カテゴリの管理';more.onclick=()=>manageCategory(c);
  head.append(row,more);wrap.append(head);wrap._rssCategoryId=String(c.id);
@@ -1658,7 +1658,7 @@ function mountRandomDiscovery(root){
   try{await post('/api/ai/conditional/refresh',{categories:[...randomGenreSelection],useInterests:conditionUseInterests,useLikes:conditionUseLikes,order:conditionOrder});
    if(active())await refresh()}
   catch(e){if(active()){err(e);run.disabled=false}}
- },false);run.disabled=true;
+ },false);run.classList.add('discovery-run');run.disabled=true;
  const status=elt('p','help e2-search-brief','探索状態を確認中…');status.setAttribute('role','status');
  const diagnostics=elt('details','condition-search-diagnostics'),diagSummary=elt('summary','','探索の詳細'),diagBody=elt('div','e2-search-log');
  diagnostics.append(diagSummary,diagBody);
@@ -2921,7 +2921,7 @@ function mountAiExternalSection(root){
   catch(e){if(active())err(e)}
   finally{if(active())run.disabled=false}
  },false);
- controls.append(run);section.append(controls);
+ run.classList.add('discovery-run');controls.append(run);section.append(controls);
  const info=elt('div','help e2-search-log','外部候補を読み込み中…');
  const brief=elt('div','e2-search-brief','外部候補を読み込み中…');
  const diagnostics=elt('details','e2-search-diagnostics');
@@ -3824,7 +3824,7 @@ async function renderMobileBackgroundSettings(root){
  }
  paletteSelect.onchange=()=>{palette.mode=paletteSelect.value;paintPalette();markMobileUnsaved()};
  systemSimSelect.onchange=paintPalette;
- const titleSize=elt('select');for(const px of [14,15,16,17,18,19])titleSize.append(new Option(px+'px'+(px===15?'（標準）':''),String(px)));
+ const titleSize=elt('select');for(const px of [10,11,12,13,14,15,16,17,18,19])titleSize.append(new Option(px+'px'+(px===15?'（標準）':''),String(px)));
  titleSize.value=String(palette.titleSize);titleSize.onchange=()=>{palette.titleSize=Number(titleSize.value);paintPalette();markMobileUnsaved()};
  paletteSection.append(field('配色モード',paletteSelect),field('記事タイトルの文字サイズ',titleSize),modeNote,paletteColors,systemSimWrap,elt('h3','','保存前のスマホ表示プレビュー'),palettePreview,
   elt('p','help','プレビューの色・文字サイズはすぐ変わります。スマホ画面は「スマホ表示を保存」後に再読み込みしてください。画像背景の実物はプレビューに表示されません。'));
